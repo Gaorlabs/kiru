@@ -1,0 +1,57 @@
+import React from 'react';
+import type { DentalTreatment } from './types';
+import { CariesIcon, CrownIcon, EndodonticsIcon, FillingIcon, HealthyIcon, ImplantIcon, MissingIcon, UneruptedIcon, ExtractionIcon } from './components/icons';
+
+export const DENTAL_TREATMENTS: DentalTreatment[] = [
+    { id: 'caries', label: 'Caries', category: 'Patología', price: 80, appliesTo: 'surface', icon: <CariesIcon /> },
+    { id: 'extraction', label: 'Extracción', category: 'Cirugía', price: 150, appliesTo: 'whole_tooth', icon: <ExtractionIcon /> },
+    { id: 'filling', label: 'Obturación', category: 'Operatoria', price: 120, appliesTo: 'surface', icon: <FillingIcon /> },
+    { id: 'endodontics', label: 'Endodoncia', category: 'Endodoncia', price: 450, appliesTo: 'root', icon: <EndodonticsIcon /> },
+    { id: 'crown', label: 'Corona', category: 'Rehabilitación', price: 1000, appliesTo: 'surface', icon: <CrownIcon /> },
+    { id: 'implant', label: 'Implante', category: 'Rehabilitación', price: 3000, appliesTo: 'root', icon: <ImplantIcon /> },
+    { id: 'missing', label: 'Ausente', category: 'Otros', price: 0, appliesTo: 'whole_tooth', icon: <MissingIcon /> },
+    { id: 'unerupted', label: 'No Erupcionado', category: 'Otros', price: 0, appliesTo: 'whole_tooth', icon: <UneruptedIcon /> },
+];
+
+export const TREATMENT_CATEGORIES = [
+    'Patología',
+    'Operatoria',
+    'Endodoncia',
+    'Rehabilitación',
+    'Cirugía',
+    'Otros',
+];
+
+export const TREATMENTS_MAP = DENTAL_TREATMENTS.reduce((acc, treatment) => {
+    acc[treatment.id] = treatment;
+    return acc;
+}, {} as Record<string, DentalTreatment>);
+
+
+export const QUADRANTS_PERMANENT = {
+    UPPER_RIGHT: [18, 17, 16, 15, 14, 13, 12, 11],
+    UPPER_LEFT: [21, 22, 23, 24, 25, 26, 27, 28],
+    LOWER_RIGHT: [48, 47, 46, 45, 44, 43, 42, 41],
+    LOWER_LEFT: [31, 32, 33, 34, 35, 36, 37, 38],
+};
+
+export const ALL_TEETH_PERMANENT = [
+    ...QUADRANTS_PERMANENT.UPPER_RIGHT,
+    ...QUADRANTS_PERMANENT.UPPER_LEFT,
+    ...QUADRANTS_PERMANENT.LOWER_RIGHT.slice().reverse(),
+    ...QUADRANTS_PERMANENT.LOWER_LEFT.slice().reverse(),
+];
+
+export const QUADRANTS_DECIDUOUS = {
+    UPPER_RIGHT: [55, 54, 53, 52, 51],
+    UPPER_LEFT: [61, 62, 63, 64, 65],
+    LOWER_RIGHT: [85, 84, 83, 82, 81],
+    LOWER_LEFT: [71, 72, 73, 74, 75],
+};
+
+export const ALL_TEETH_DECIDUOUS = [
+    ...QUADRANTS_DECIDUOUS.UPPER_RIGHT,
+    ...QUADRANTS_DECIDUOUS.UPPER_LEFT,
+    ...QUADRANTS_DECIDUOUS.LOWER_RIGHT.slice().reverse(),
+    ...QUADRANTS_DECIDUOUS.LOWER_LEFT.slice().reverse(),
+];
