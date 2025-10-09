@@ -3,7 +3,7 @@ import { OdontogramApp } from './components/OdontogramApp';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
-import type { Appointment, AppSettings } from './types';
+import type { Appointment, AppSettings, Promotion } from './types';
 
 // Mock Data
 const initialAppointments: Appointment[] = [
@@ -11,17 +11,26 @@ const initialAppointments: Appointment[] = [
     { id: '2', name: 'Maria Rodriguez', phone: '912345678', email: 'maria.r@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), service: 'orthodontics', status: 'confirmed' },
 ];
 
-const initialSettings: AppSettings = {
+const initialSettings: Omit<AppSettings, 'promoImageUrl' | 'promoTitle' | 'promoSubtitle'> = {
     clinicName: "Kiru",
     clinicAddress: "Av. Sonrisas 123, Lima, Perú",
     clinicPhone: "(+51) 123 456 78",
     clinicEmail: "info@kiru.com",
     heroImageUrl: 'https://images.unsplash.com/photo-1588776814546-1ff208a3def7?q=80&w=1974&auto=format&fit=crop',
-    promoImageUrl: 'https://images.unsplash.com/photo-1629904853716-f0bc54eea481?q=80&w=2070&auto=format&fit=crop',
     loginImageUrl: 'https://images.unsplash.com/photo-1606236930335-b27b3b3a7a4e?q=80&w=1964&auto=format&fit=crop',
-    promoTitle: "Tu Diagnóstico Digital ¡GRATIS!",
-    promoSubtitle: "Incluye revisión completa y plan de tratamiento personalizado.",
 };
+
+const initialPromotions: Promotion[] = [
+    {
+        id: 'promo1',
+        title: "Tu Diagnóstico Digital ¡GRATIS!",
+        subtitle: "Incluye revisión completa y plan de tratamiento personalizado.",
+        imageUrl: 'https://images.unsplash.com/photo-1629904853716-f0bc54eea481?q=80&w=2070&auto=format&fit=crop',
+        ctaText: 'Agendar mi Diagnóstico Gratis',
+        isActive: true,
+        details: "Revisión completa con cámara intraoral.\nPlan de tratamiento digital 100% personalizado.\nAsesoramiento experto sin compromiso."
+    }
+];
 
 type Page = 'landing' | 'login' | 'odontogram' | 'admin';
 
@@ -29,7 +38,8 @@ const App: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<Page>('landing');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
-    const [settings, setSettings] = useState<AppSettings>(initialSettings);
+    const [settings, setSettings] = useState<AppSettings>(initialSettings as AppSettings);
+    const [promotions, setPromotions] = useState<Promotion[]>(initialPromotions);
     const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
 
     const handleBookAppointment = (appointmentData: Omit<Appointment, 'id' | 'status'>) => {
@@ -51,10 +61,8 @@ const App: React.FC = () => {
     
     const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id' | 'status'> & { id?: string; status?: 'confirmed' | 'completed' | 'canceled' }) => {
         if (appointmentData.id) {
-            // Update
             setAppointments(prev => prev.map(app => app.id === appointmentData.id ? { ...app, ...appointmentData } as Appointment : app));
         } else {
-            // Create
             const newAppointment: Appointment = {
                 id: crypto.randomUUID(),
                 name: appointmentData.name,
@@ -83,10 +91,45 @@ const App: React.FC = () => {
         setCurrentPage('odontogram');
     };
 
+    const handleSavePromotion = (promotionData: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
+        if (promotionData.id) {
+            setPromotions(prev => prev.map(p => p.id === promotionData.id ? { ...p, ...promotionData } : p));
+        } else {
+            const newPromotion: Promotion = {
+                ...promotionData,
+                id: crypto.randomUUID(),
+                isActive: false, // New promotions are inactive by default
+            };
+            setPromotions(prev => [...prev, newPromotion]);
+        }
+    };
+
+    const handleDeletePromotion = (promotionId: string) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar esta promoción?')) {
+            setPromotions(prev => prev.filter(p => p.id !== promotionId));
+        }
+    };
+
+    const handleTogglePromotionActive = (promotionId: string) => {
+        setPromotions(prev =>
+            prev.map(p => ({
+                ...p,
+                isActive: p.id === promotionId ? !p.isActive : false,
+            }))
+        );
+    };
+
+    const activePromotion = promotions.find(p => p.isActive) || null;
+
     const renderPage = () => {
         switch (currentPage) {
             case 'landing':
-                return <LandingPage onBookAppointment={handleBookAppointment} settings={settings} onNavigateToLogin={() => setCurrentPage('login')} />;
+                return <LandingPage 
+                            onBookAppointment={handleBookAppointment} 
+                            settings={settings} 
+                            onNavigateToLogin={() => setCurrentPage('login')} 
+                            activePromotion={activePromotion}
+                        />;
             case 'login':
                 return <LoginPage onLogin={handleLogin} onNavigateToLanding={() => setCurrentPage('landing')} settings={settings} />;
             case 'admin':
@@ -96,7 +139,11 @@ const App: React.FC = () => {
                             onDeleteAppointment={handleDeleteAppointment}
                             settings={settings} 
                             onUpdateSettings={handleUpdateSettings} 
-                            onNavigateToOdontogram={handleNavigateToOdontogram} 
+                            onNavigateToOdontogram={handleNavigateToOdontogram}
+                            promotions={promotions}
+                            onSavePromotion={handleSavePromotion}
+                            onDeletePromotion={handleDeletePromotion}
+                            onTogglePromotionActive={handleTogglePromotionActive}
                         />;
             case 'odontogram':
                  return <OdontogramApp 
@@ -106,7 +153,7 @@ const App: React.FC = () => {
                             patient={selectedPatient} 
                         />;
             default:
-                return <LandingPage onBookAppointment={handleBookAppointment} settings={settings} onNavigateToLogin={() => setCurrentPage('login')} />;
+                return <LandingPage onBookAppointment={handleBookAppointment} settings={settings} onNavigateToLogin={() => setCurrentPage('login')} activePromotion={activePromotion} />;
         }
     };
 

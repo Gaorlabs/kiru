@@ -63,14 +63,27 @@ export interface AppSettings {
     clinicPhone: string;
     clinicEmail: string;
     heroImageUrl: string;
-    promoImageUrl: string;
     loginImageUrl: string;
-    promoTitle: string;
-    promoSubtitle: string;
 }
 
 export interface AdminAppointmentModalProps {
     appointment: Appointment | Partial<Appointment> | null;
     onClose: () => void;
     onSave: (appointment: Omit<Appointment, 'id' | 'status'> & { id?: string; status?: 'confirmed' | 'completed' | 'canceled' }) => void;
+}
+
+export interface Promotion {
+    id: string;
+    title: string;
+    subtitle: string;
+    imageUrl: string;
+    ctaText: string;
+    isActive: boolean;
+    details: string; // Newlines will be used for list items
+}
+
+export interface AdminPromotionModalProps {
+    promotion: Promotion | Partial<Promotion> | null;
+    onClose: () => void;
+    onSave: (promotion: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => void;
 }

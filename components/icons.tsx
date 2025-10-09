@@ -11,7 +11,7 @@ export const CrownIcon: React.FC = () => <Icon><path d="M12 2l3.09 6.26L22 9.27l
 export const EndodonticsIcon: React.FC = () => <Icon><path d="M12 20.9l-4.95-4.95a7 7 0 1 1 9.9 0L12 20.9z" /><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" /></Icon>;
 export const FillingIcon: React.FC = () => <Icon><path d="M21.174 6.812a1 1 0 0 0-1.141-1.356L12 12.5l-8.033-7.044a1 1 0 0 0-1.141 1.356l9 7.923a1 1 0 0 0 1.141 0l9-7.923z" /><path d="M12 22v-9" /></Icon>;
 export const HealthyIcon: React.FC = () => <Icon><path d="M20 6L9 17l-5-5" /></Icon>;
-export const ImplantIcon: React.FC = () => <Icon><path d="M16.14 3.86a2 2 0 0 1 2.83 0L22 6.83a2 2 0 0 1 0 2.83l-3.03 3.03a2 2 0 0 1-2.83 0l-1.14-1.14" /><path d="m12 12-8.5 8.5" /><path d="M12 12a2 2 0 0 0 0-2.83l.83-.83c.39-.39 1.02-.39 1.41 0l1.41 1.41c.39.39.39 1.02 0 1.41l-.83.83a2 2 0 0 0 0 2.83l.83.83c.39.39 1.02.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41l-.83-.83a2 2 0 0 0-2.83 0" /></Icon>;
+export const ImplantIcon: React.FC = () => <Icon><path d="M16.14 3.86a2 2 0 0 1 2.83 0L22 6.83a2 2 0 0 1 0 2.83l-3.03 3.03a2 2 0 0 1-2.83 0l-1.14-1.14" /><path d="m12 12-8.5 8.5" /><path d="M12 12a2 2 0 0 0 0-2.83l.83-.83c.39-.39 1.02-.39 1.41 0l1.41 1.41c.39.39.39 1.02 0 1.41l-.83.83a2 2 0 0 0 0 2.83l.83.83c.39.39 1.02-.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41l-.83-.83a2 2 0 0 0-2.83 0" /></Icon>;
 export const MissingIcon: React.FC = () => <Icon><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></Icon>;
 export const UneruptedIcon: React.FC = () => <Icon><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></Icon>;
 export const ExtractionIcon: React.FC = () => <Icon><path d="M18 6L6 18M6 6l12 12" /></Icon>;
@@ -49,3 +49,4 @@ export const PencilIcon: React.FC = () => <Icon><path d="M17 3a2.828 2.828 0 1 1
 export const TrashIcon: React.FC = () => <Icon><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></Icon>;
 export const BriefcaseIcon: React.FC = () => <Icon><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></Icon>;
 export const DashboardIcon: React.FC = () => <Icon><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></Icon>;
+export const MegaphoneIcon: React.FC = () => <Icon><path d="m3 11 18-5v12L3 14v-3z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" /></Icon>;

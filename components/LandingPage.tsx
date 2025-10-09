@@ -1,16 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 // FIX: Changed import to be a relative path.
 import { DentalIcon, PreventionIcon, FillingIcon, EndodonticsIcon, OrthodonticsIcon, OralSurgeryIcon, CosmeticDentistryIcon, TeamIcon, AppointmentIcon, EmergencyIcon, ClockIcon, GiftIcon, CloseIcon, CheckIcon } from './icons';
 import { AppointmentForm } from './AppointmentForm';
 // FIX: Changed import to be a relative path.
-import type { Appointment, AppSettings } from '../types';
+import type { Appointment, AppSettings, Promotion } from '../types';
 
 
 interface LandingPageProps {
   onBookAppointment: (appointmentData: Omit<Appointment, 'id' | 'status'>) => void;
   settings: AppSettings;
   onNavigateToLogin: () => void;
+  activePromotion: Promotion | null;
 }
 
 const FeatureCard: React.FC<{icon: React.ReactNode, title: string, description: string}> = ({icon, title, description}) => (
@@ -33,32 +33,35 @@ const ServiceCard: React.FC<{icon: React.ReactNode, title: string, description: 
 const PromotionModal: React.FC<{
     onClose: () => void;
     onBook: () => void;
-    settings: AppSettings;
-}> = ({onClose, onBook, settings}) => (
+    promotion: Promotion;
+}> = ({onClose, onBook, promotion}) => (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in">
         <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden transform animate-scale-in">
+             <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10 bg-white/50 rounded-full p-1 hover:bg-white">
+                <CloseIcon />
+            </button>
             <div className="md:grid md:grid-cols-2">
-                <div className="hidden md:block bg-cover bg-center" style={{backgroundImage: `url('${settings.promoImageUrl}')`}}>
+                <div className="hidden md:block bg-cover bg-center" style={{backgroundImage: `url('${promotion.imageUrl}')`}}>
                 </div>
                 <div className="p-8 flex flex-col justify-center bg-slate-50 text-slate-800">
-                    <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10">
-                        <CloseIcon />
-                    </button>
                     <div className="w-14 h-14 mb-4 text-pink-500">
                         <GiftIcon />
                     </div>
-                    <h2 className="text-3xl font-extrabold mb-2 text-blue-600">{settings.promoTitle}</h2>
-                    <p className="text-lg font-semibold mb-6" dangerouslySetInnerHTML={{ __html: settings.promoSubtitle.replace('GRATIS', '<span class="text-pink-500 font-bold">GRATIS</span>') }} />
+                    <h2 className="text-3xl font-extrabold mb-2 text-blue-600">{promotion.title}</h2>
+                    <p className="text-lg font-semibold mb-6" dangerouslySetInnerHTML={{ __html: promotion.subtitle.replace('GRATIS', '<span class="text-pink-500 font-bold">GRATIS</span>') }} />
 
                     <div className="text-left my-4">
                         <ul className="space-y-3 text-slate-600">
-                            <li className="flex items-start"><span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span><span>Revisión completa con <span className="font-semibold">cámara intraoral</span>.</span></li>
-                            <li className="flex items-start"><span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span><span>Plan de tratamiento digital 100% <span className="font-semibold">personalizado</span>.</span></li>
-                            <li className="flex items-start"><span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span><span>Asesoramiento experto <span className="font-semibold">sin compromiso</span>.</span></li>
+                           {promotion.details.split('\n').map((detail, index) => (
+                                <li key={index} className="flex items-start">
+                                    <span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span>
+                                    <span>{detail}</span>
+                                </li>
+                           ))}
                         </ul>
                     </div>
 
-                    <p className="text-sm font-semibold text-slate-500 my-6 text-center">Promoción válida solo por Octubre. ¡Cupos limitados!</p>
+                    <p className="text-sm font-semibold text-slate-500 my-6 text-center">¡Cupos limitados!</p>
 
                     <button 
                         onClick={() => {
@@ -67,7 +70,7 @@ const PromotionModal: React.FC<{
                         }} 
                         className="bg-pink-500 text-white px-8 py-3 rounded-full hover:bg-pink-600 font-bold shadow-lg transform hover:scale-105 transition-all duration-300 w-full text-lg"
                     >
-                        Agendar mi Diagnóstico Gratis
+                        {promotion.ctaText}
                     </button>
                 </div>
             </div>
@@ -82,20 +85,24 @@ const PromotionModal: React.FC<{
 );
 
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, settings, onNavigateToLogin }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, settings, onNavigateToLogin, activePromotion }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPromotion, setShowPromotion] = useState(false);
   
   useEffect(() => {
-    const hasSeenPromo = sessionStorage.getItem('promoSeen');
+    if (!activePromotion) return;
+
+    const promoSeenKey = `promoSeen_${activePromotion.id}`;
+    const hasSeenPromo = sessionStorage.getItem(promoSeenKey);
+    
     if (!hasSeenPromo) {
       const timer = setTimeout(() => {
         setShowPromotion(true);
-        sessionStorage.setItem('promoSeen', 'true');
-      }, 1500); // Show promo after 1.5 seconds
+        sessionStorage.setItem(promoSeenKey, 'true');
+      }, 1500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [activePromotion]);
 
   return (
     <div className="bg-slate-50 text-slate-800 font-sans">
@@ -241,7 +248,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
             </div>
         </footer>
 
-        {showPromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} settings={settings} />}
+        {showPromotion && activePromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} promotion={activePromotion} />}
         {isModalOpen && <AppointmentForm onClose={() => setIsModalOpen(false)} onBookAppointment={onBookAppointment} />}
     </div>
   );
