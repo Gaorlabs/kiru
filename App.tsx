@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { OdontogramApp } from './components/OdontogramApp';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
+// FIX: Changed import to be a relative path for AdminPage.
 import { AdminPage } from './components/AdminPage';
 import type { Appointment, AppSettings, Promotion, Doctor } from './types';
 

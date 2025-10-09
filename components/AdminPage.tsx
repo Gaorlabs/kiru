@@ -1,11 +1,15 @@
-import React, { useState, useMemo } from 'react';
-import type { Appointment, AppSettings, Promotion, Doctor, AdminAppointmentModalProps, AdminPromotionModalProps, AdminDoctorModalProps } from '../types';
+import React, { useState, useEffect, PropsWithChildren } from 'react';
+// FIX: Changed import to be a relative path.
+import type { Appointment, Doctor, AppSettings, Promotion, AdminAppointmentModalProps, AdminDoctorModalProps, AdminPromotionModalProps } from '../types';
 import { DENTAL_SERVICES_MAP } from '../constants';
-import { DentalIcon, CalendarIcon, SettingsIcon, UserIcon, BriefcaseIcon, PlusIcon, PencilIcon, TrashIcon, OdontogramIcon, MegaphoneIcon, DashboardIcon, UsersIcon } from './icons';
+import {
+    DashboardIcon, AppointmentIcon, UsersIcon, MegaphoneIcon, SettingsIcon, OdontogramIcon, PlusIcon, PencilIcon, TrashIcon, DentalIcon, MoonIcon, SunIcon,
+} from './icons';
 import { AdminAppointmentModal } from './AdminAppointmentModal';
-import { AdminPromotionModal } from './AdminPromotionModal';
 import { AdminDoctorModal } from './AdminDoctorModal';
+import { AdminPromotionModal } from './AdminPromotionModal';
 
+// Props for the main AdminPage component
 interface AdminPageProps {
     appointments: Appointment[];
     doctors: Doctor[];
@@ -22,267 +26,77 @@ interface AdminPageProps {
     onTogglePromotionActive: (id: string) => void;
 }
 
-type AdminTab = 'dashboard' | 'agenda' | 'doctores' | 'atencion' | 'promociones' | 'configuracion';
+type AdminView = 'dashboard' | 'appointments' | 'doctors' | 'promotions' | 'settings';
+type Theme = 'light' | 'dark';
 
-const SidebarLink: React.FC<{
-    icon: React.ReactNode;
-    label: string;
-    isActive: boolean;
-    onClick: () => void;
-}> = ({ icon, label, isActive, onClick }) => (
+const NavItem: React.FC<PropsWithChildren<{ icon: React.ReactNode; isActive: boolean; onClick: () => void; }>> = ({ icon, isActive, onClick, children }) => (
     <button
         onClick={onClick}
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
             isActive
                 ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
         }`}
     >
         <div className="w-6 h-6">{icon}</div>
-        <span className="font-semibold">{label}</span>
+        <span className="font-semibold">{children}</span>
     </button>
 );
 
-export const AdminPage: React.FC<AdminPageProps> = (props) => {
-    const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
-
-    return (
-        <div className="min-h-screen flex bg-slate-100 dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-200">
-            <aside className="w-64 bg-slate-800 text-white flex flex-col p-4">
-                <div className="flex items-center gap-3 mb-8 px-2">
-                    <div className="w-9 h-9 text-blue-400"><DentalIcon /></div>
-                    <h1 className="text-2xl font-bold">Kiru Admin</h1>
-                </div>
-                <nav className="flex flex-col gap-2">
-                    <SidebarLink icon={<DashboardIcon />} label="Dashboard" isActive={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                    <SidebarLink icon={<CalendarIcon />} label="Agenda" isActive={activeTab === 'agenda'} onClick={() => setActiveTab('agenda')} />
-                    <SidebarLink icon={<UsersIcon />} label="Doctores" isActive={activeTab === 'doctores'} onClick={() => setActiveTab('doctores')} />
-                    <SidebarLink icon={<BriefcaseIcon />} label="Atención Clínica" isActive={activeTab === 'atencion'} onClick={() => setActiveTab('atencion')} />
-                    <SidebarLink icon={<MegaphoneIcon />} label="Promociones" isActive={activeTab === 'promociones'} onClick={() => setActiveTab('promociones')} />
-                    <SidebarLink icon={<SettingsIcon />} label="Configuración" isActive={activeTab === 'configuracion'} onClick={() => setActiveTab('configuracion')} />
-                </nav>
-            </aside>
-
-            <main className="flex-1 flex flex-col">
-                <header className="bg-white dark:bg-slate-800 shadow py-4 px-8 flex justify-end items-center">
-                    <button className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                            <UserIcon />
-                        </div>
-                        <span className="font-semibold">Admin</span>
-                    </button>
-                </header>
-                <div className="flex-1 p-8 overflow-y-auto">
-                    {activeTab === 'dashboard' && <DashboardPanel {...props} />}
-                    {activeTab === 'agenda' && <AgendaPanel {...props} />}
-                    {activeTab === 'doctores' && <DoctorsPanel {...props} />}
-                    {activeTab === 'atencion' && <ClinicalCarePanel {...props} />}
-                    {activeTab === 'promociones' && <PromotionsPanel {...props} />}
-                    {activeTab === 'configuracion' && <SettingsPanel {...props} />}
-                </div>
-            </main>
-        </div>
-    );
-};
-
-const StatCard: React.FC<{ title: string, value: string | number, icon: React.ReactNode }> = ({ title, value, icon }) => (
-    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md flex items-center gap-6">
-        <div className="w-12 h-12 text-white bg-blue-500 rounded-full flex items-center justify-center">{icon}</div>
-        <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{title}</p>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white">{value}</p>
+const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; color: string }> = ({ title, value, icon, color }) => (
+    <div className={`bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border-l-4 ${color}`}>
+        <div className="flex items-center justify-between">
+            <div>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase">{title}</p>
+                <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">{value}</p>
+            </div>
+            <div className="w-12 h-12 text-slate-400">{icon}</div>
         </div>
     </div>
 );
 
-const DashboardPanel: React.FC<AdminPageProps> = ({ appointments, promotions }) => {
-    const today = new Date().toDateString();
-    const appointmentsToday = appointments.filter(app => new Date(app.dateTime).toDateString() === today).length;
-    const totalPatients = new Set(appointments.map(app => app.email)).size;
-    const activePromotions = promotions.filter(p => p.isActive).length;
-
-    return (
-        <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Dashboard</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <StatCard title="Citas para Hoy" value={appointmentsToday} icon={<CalendarIcon />} />
-                <StatCard title="Pacientes Totales" value={totalPatients} icon={<UsersIcon />} />
-                <StatCard title="Promociones Activas" value={activePromotions} icon={<MegaphoneIcon />} />
-            </div>
+// Individual view components
+const DashboardView: React.FC<{ appointments: Appointment[], doctors: Doctor[] }> = ({ appointments, doctors }) => (
+    <div>
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Dashboard</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StatCard title="Citas Hoy" value={appointments.filter(a => new Date(a.dateTime).toDateString() === new Date().toDateString()).length} icon={<AppointmentIcon />} color="border-blue-500" />
+            <StatCard title="Total de Citas" value={appointments.length} icon={<AppointmentIcon />} color="border-green-500" />
+            <StatCard title="Doctores Activos" value={doctors.length} icon={<UsersIcon />} color="border-purple-500" />
         </div>
-    );
-};
+    </div>
+);
 
-const AgendaPanel: React.FC<AdminPageProps> = ({ appointments, doctors, onSaveAppointment, onDeleteAppointment }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingAppointment, setEditingAppointment] = useState<Appointment | Partial<Appointment> | null>(null);
-
-    const handleOpenModal = (appointment: Appointment | null = null) => {
-        setEditingAppointment(appointment || { name: '', phone: '', email: '', dateTime: '', service: '', doctorId: '' });
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingAppointment(null);
-    };
-    
-    const doctorsMap = useMemo(() => new Map(doctors.map(doc => [doc.id, doc.name])), [doctors]);
-
+const AppointmentsView: React.FC<Pick<AdminPageProps, 'appointments' | 'doctors' | 'onDeleteAppointment' | 'onNavigateToOdontogram'> & { onEdit: (app: Appointment) => void; onAdd: () => void; }> = ({ appointments, doctors, onDeleteAppointment, onNavigateToOdontogram, onEdit, onAdd }) => {
+    const doctorsMap = doctors.reduce((acc, doc) => ({...acc, [doc.id]: doc.name}), {} as Record<string, string>);
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestión de Agenda</h2>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <PlusIcon />
-                    <span>Nueva Cita</span>
-                </button>
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Citas</h2>
+                <button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-700"><PlusIcon /> Nueva Cita</button>
             </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="border-b border-slate-200 dark:border-slate-700 text-sm text-slate-500 dark:text-slate-400">
-                            <tr>
-                                <th className="py-3 px-4">Paciente</th>
-                                <th className="py-3 px-4">Fecha y Hora</th>
-                                <th className="py-3 px-4">Doctor Asignado</th>
-                                <th className="py-3 px-4">Servicio</th>
-                                <th className="py-3 px-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {appointments.map(app => (
-                                <tr key={app.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                                    <td className="py-3 px-4 font-medium">{app.name}</td>
-                                    <td className="py-3 px-4">{new Date(app.dateTime).toLocaleString('es-ES')}</td>
-                                    <td className="py-3 px-4">{app.doctorId ? doctorsMap.get(app.doctorId) : 'Sin asignar'}</td>
-                                    <td className="py-3 px-4">{DENTAL_SERVICES_MAP[app.service] || app.service}</td>
-                                    <td className="py-3 px-4 flex items-center gap-4">
-                                        <button onClick={() => handleOpenModal(app)} className="text-blue-500 hover:text-blue-700" title="Editar"><PencilIcon /></button>
-                                        <button onClick={() => onDeleteAppointment(app.id)} className="text-red-500 hover:text-red-700" title="Eliminar"><TrashIcon /></button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {isModalOpen && <AdminAppointmentModal appointment={editingAppointment} doctors={doctors} onClose={handleCloseModal} onSave={onSaveAppointment} />}
-        </div>
-    );
-};
-
-const DoctorsPanel: React.FC<AdminPageProps> = ({ doctors, onSaveDoctor, onDeleteDoctor }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingDoctor, setEditingDoctor] = useState<Doctor | Partial<Doctor> | null>(null);
-
-    const handleOpenModal = (doctor: Doctor | null = null) => {
-        setEditingDoctor(doctor || { name: '', specialty: '' });
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingDoctor(null);
-    };
-
-    return (
-        <div>
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestión de Doctores</h2>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <PlusIcon />
-                    <span>Nuevo Doctor</span>
-                </button>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
-                <div className="overflow-x-auto">
-                     <table className="w-full text-left">
-                        <thead className="border-b border-slate-200 dark:border-slate-700 text-sm text-slate-500 dark:text-slate-400">
-                            <tr>
-                                <th className="py-3 px-4">Nombre</th>
-                                <th className="py-3 px-4">Especialidad</th>
-                                <th className="py-3 px-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {doctors.map(doc => (
-                                <tr key={doc.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                                    <td className="py-3 px-4 font-medium">{doc.name}</td>
-                                    <td className="py-3 px-4">{doc.specialty}</td>
-                                    <td className="py-3 px-4 flex items-center gap-4">
-                                        <button onClick={() => handleOpenModal(doc)} className="text-blue-500 hover:text-blue-700" title="Editar"><PencilIcon /></button>
-                                        <button onClick={() => onDeleteDoctor(doc.id)} className="text-red-500 hover:text-red-700" title="Eliminar"><TrashIcon /></button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-             {isModalOpen && <AdminDoctorModal doctor={editingDoctor} onClose={handleCloseModal} onSave={onSaveDoctor} />}
-        </div>
-    );
-};
-
-const ClinicalCarePanel: React.FC<AdminPageProps> = ({ appointments, doctors, onNavigateToOdontogram }) => {
-    const [selectedDoctorId, setSelectedDoctorId] = useState<string>('all');
-    
-    const filteredAppointments = useMemo(() => {
-        if (selectedDoctorId === 'all') {
-            return appointments;
-        }
-        return appointments.filter(app => app.doctorId === selectedDoctorId);
-    }, [appointments, selectedDoctorId]);
-
-    return (
-     <div>
-        <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Flujo de Atención Clínica</h2>
-            <div>
-                 <label htmlFor="doctorFilter" className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Filtrar por Doctor</label>
-                 <select 
-                    id="doctorFilter"
-                    value={selectedDoctorId}
-                    onChange={(e) => setSelectedDoctorId(e.target.value)}
-                    className="w-full md:w-64 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-slate-900 dark:text-white"
-                 >
-                    <option value="all">Todos los Doctores</option>
-                    {doctors.map(doc => <option key={doc.id} value={doc.id}>{doc.name}</option>)}
-                 </select>
-            </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
-             <div className="overflow-x-auto">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
                 <table className="w-full text-left">
-                    <thead className="border-b border-slate-200 dark:border-slate-700 text-sm text-slate-500 dark:text-slate-400">
+                    <thead className="bg-slate-50 dark:bg-slate-700/50">
                         <tr>
-                            <th className="py-3 px-4">Paciente</th>
-                            <th className="py-3 px-4">Fecha y Hora</th>
-                            <th className="py-3 px-4">Servicio</th>
-                            <th className="py-3 px-4">Acción</th>
+                            <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Paciente</th>
+                            <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Fecha y Hora</th>
+                            <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Servicio</th>
+                            <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Doctor</th>
+                            <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredAppointments.filter(a => new Date(a.dateTime) >= new Date()).map(app => (
-                            <tr key={app.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                                <td className="py-3 px-4 font-medium">{app.name}</td>
-                                <td className="py-3 px-4">{new Date(app.dateTime).toLocaleString('es-ES')}</td>
-                                <td className="py-3 px-4">{DENTAL_SERVICES_MAP[app.service] || app.service}</td>
-                                <td className="py-3 px-4">
-                                    <button 
-                                        onClick={() => onNavigateToOdontogram(app)} 
-                                        className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-3 rounded-lg flex items-center gap-2 text-sm transition-colors"
-                                    >
-                                        <OdontogramIcon />
-                                        <span>Atender Cita</span>
-                                    </button>
+                        {appointments.map(app => (
+                            <tr key={app.id} className="border-b border-slate-200 dark:border-slate-700">
+                                <td className="p-4">{app.name}</td>
+                                <td className="p-4">{new Date(app.dateTime).toLocaleString()}</td>
+                                <td className="p-4">{DENTAL_SERVICES_MAP[app.service] || app.service}</td>
+                                <td className="p-4">{app.doctorId ? doctorsMap[app.doctorId] : 'N/A'}</td>
+                                <td className="p-4 flex items-center gap-2">
+                                    <button onClick={() => onNavigateToOdontogram(app)} className="p-2 text-slate-500 hover:text-blue-600"><OdontogramIcon /></button>
+                                    <button onClick={() => onEdit(app)} className="p-2 text-slate-500 hover:text-green-600"><PencilIcon /></button>
+                                    <button onClick={() => onDeleteAppointment(app.id)} className="p-2 text-slate-500 hover:text-red-600"><TrashIcon /></button>
                                 </td>
                             </tr>
                         ))}
@@ -290,122 +104,179 @@ const ClinicalCarePanel: React.FC<AdminPageProps> = ({ appointments, doctors, on
                 </table>
             </div>
         </div>
-    </div>
     );
 };
 
+const DoctorsView: React.FC<Pick<AdminPageProps, 'doctors' | 'onDeleteDoctor'> & { onEdit: (doc: Doctor) => void; onAdd: () => void; }> = ({ doctors, onDeleteDoctor, onEdit, onAdd }) => (
+    <div>
+        <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Doctores</h2>
+            <button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-700"><PlusIcon /> Nuevo Doctor</button>
+        </div>
+         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
+             <table className="w-full text-left">
+                 <thead className="bg-slate-50 dark:bg-slate-700/50">
+                     <tr>
+                         <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Nombre</th>
+                         <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Especialidad</th>
+                         <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Acciones</th>
+                     </tr>
+                 </thead>
+                 <tbody>
+                     {doctors.map(doc => (
+                         <tr key={doc.id} className="border-b border-slate-200 dark:border-slate-700">
+                             <td className="p-4">{doc.name}</td>
+                             <td className="p-4">{doc.specialty}</td>
+                             <td className="p-4 flex items-center gap-2">
+                                 <button onClick={() => onEdit(doc)} className="p-2 text-slate-500 hover:text-green-600"><PencilIcon /></button>
+                                 <button onClick={() => onDeleteDoctor(doc.id)} className="p-2 text-slate-500 hover:text-red-600"><TrashIcon /></button>
+                             </td>
+                         </tr>
+                     ))}
+                 </tbody>
+             </table>
+         </div>
+    </div>
+);
 
-const PromotionsPanel: React.FC<AdminPageProps> = ({ promotions, onSavePromotion, onDeletePromotion, onTogglePromotionActive }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingPromotion, setEditingPromotion] = useState<Promotion | Partial<Promotion> | null>(null);
+const PromotionsView: React.FC<Pick<AdminPageProps, 'promotions' | 'onDeletePromotion' | 'onTogglePromotionActive'> & { onEdit: (promo: Promotion) => void; onAdd: () => void; }> = ({ promotions, onDeletePromotion, onTogglePromotionActive, onEdit, onAdd }) => (
+     <div>
+        <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Promociones</h2>
+            <button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-700"><PlusIcon /> Nueva Promoción</button>
+        </div>
+         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
+            <table className="w-full text-left">
+                <thead className="bg-slate-50 dark:bg-slate-700/50">
+                    <tr>
+                        <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Título</th>
+                        <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Estado</th>
+                        <th className="p-4 font-semibold text-slate-600 dark:text-slate-300">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {promotions.map(promo => (
+                        <tr key={promo.id} className="border-b border-slate-200 dark:border-slate-700">
+                            <td className="p-4">{promo.title}</td>
+                            <td className="p-4">
+                                <button onClick={() => onTogglePromotionActive(promo.id)} className={`px-3 py-1 text-sm font-semibold rounded-full ${promo.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300'}`}>
+                                    {promo.isActive ? 'Activa' : 'Inactiva'}
+                                </button>
+                            </td>
+                            <td className="p-4 flex items-center gap-2">
+                                <button onClick={() => onEdit(promo)} className="p-2 text-slate-500 hover:text-green-600"><PencilIcon /></button>
+                                <button onClick={() => onDeletePromotion(promo.id)} className="p-2 text-slate-500 hover:text-red-600"><TrashIcon /></button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+         </div>
+    </div>
+);
 
-    const handleOpenModal = (promotion: Promotion | null = null) => {
-        setEditingPromotion(promotion || { title: '', subtitle: '', imageUrl: '', ctaText: '', details: '' });
-        setIsModalOpen(true);
+const SettingsView: React.FC<{ settings: AppSettings, onUpdateSettings: (s: AppSettings) => void }> = ({ settings, onUpdateSettings }) => {
+    const [localSettings, setLocalSettings] = useState(settings);
+
+    useEffect(() => setLocalSettings(settings), [settings]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalSettings(prev => ({...prev, [e.target.name]: e.target.value}));
     };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingPromotion(null);
-    };
+    const handleSave = () => onUpdateSettings(localSettings);
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestión de Promociones</h2>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <PlusIcon />
-                    <span>Nueva Promoción</span>
-                </button>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="border-b border-slate-200 dark:border-slate-700 text-sm text-slate-500 dark:text-slate-400">
-                            <tr>
-                                <th className="py-3 px-4">Título</th>
-                                <th className="py-3 px-4">Estado</th>
-                                <th className="py-3 px-4">Activar</th>
-                                <th className="py-3 px-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {promotions.map(promo => (
-                                <tr key={promo.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                                    <td className="py-3 px-4 font-medium">{promo.title}</td>
-                                    <td className="py-3 px-4">
-                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${promo.isActive ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
-                                            {promo.isActive ? 'Activa' : 'Inactiva'}
-                                        </span>
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" checked={promo.isActive} onChange={() => onTogglePromotionActive(promo.id)} className="sr-only peer" />
-                                            <div className="w-11 h-6 bg-slate-200 dark:bg-slate-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 dark:after:border-slate-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
-                                        </label>
-                                    </td>
-                                    <td className="py-3 px-4 flex items-center gap-4">
-                                        <button onClick={() => handleOpenModal(promo)} className="text-blue-500 hover:text-blue-700" title="Editar"><PencilIcon /></button>
-                                        <button onClick={() => onDeletePromotion(promo.id)} className="text-red-500 hover:text-red-700" title="Eliminar"><TrashIcon /></button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Configuración</h2>
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Nombre de la Clínica</label>
+                    <input type="text" name="clinicName" value={localSettings.clinicName} onChange={handleChange} className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Dirección</label>
+                    <input type="text" name="clinicAddress" value={localSettings.clinicAddress} onChange={handleChange} className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Teléfono</label>
+                    <input type="text" name="clinicPhone" value={localSettings.clinicPhone} onChange={handleChange} className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Email</label>
+                    <input type="email" name="clinicEmail" value={localSettings.clinicEmail} onChange={handleChange} className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">URL Imagen Principal</label>
+                    <input type="url" name="heroImageUrl" value={localSettings.heroImageUrl} onChange={handleChange} className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">URL Imagen Login</label>
+                    <input type="url" name="loginImageUrl" value={localSettings.loginImageUrl} onChange={handleChange} className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                </div>
+                <div className="text-right">
+                    <button onClick={handleSave} className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700">Guardar Cambios</button>
                 </div>
             </div>
-            {isModalOpen && <AdminPromotionModal promotion={editingPromotion} onClose={handleCloseModal} onSave={onSavePromotion} />}
         </div>
     );
 };
 
+export const AdminPage: React.FC<AdminPageProps> = (props) => {
+    const [view, setView] = useState<AdminView>('dashboard');
+    const [theme, setTheme] = useState<Theme>('dark');
+    
+    // Modal state
+    const [editingAppointment, setEditingAppointment] = useState<Appointment | Partial<Appointment> | null>(null);
+    const [editingDoctor, setEditingDoctor] = useState<Doctor | Partial<Doctor> | null>(null);
+    const [editingPromotion, setEditingPromotion] = useState<Promotion | Partial<Promotion> | null>(null);
 
-const SettingsPanel: React.FC<AdminPageProps> = ({ settings, onUpdateSettings }) => {
-    const [localSettings, setLocalSettings] = useState(settings);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setLocalSettings({ ...localSettings, [e.target.name]: e.target.value });
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+    }, [theme]);
+    
+    const renderView = () => {
+        switch (view) {
+            case 'dashboard': return <DashboardView appointments={props.appointments} doctors={props.doctors} />;
+            case 'appointments': return <AppointmentsView appointments={props.appointments} doctors={props.doctors} onDeleteAppointment={props.onDeleteAppointment} onNavigateToOdontogram={props.onNavigateToOdontogram} onEdit={setEditingAppointment} onAdd={() => setEditingAppointment({})} />;
+            case 'doctors': return <DoctorsView doctors={props.doctors} onDeleteDoctor={props.onDeleteDoctor} onEdit={setEditingDoctor} onAdd={() => setEditingDoctor({})} />;
+            case 'promotions': return <PromotionsView promotions={props.promotions} onDeletePromotion={props.onDeletePromotion} onTogglePromotionActive={props.onTogglePromotionActive} onEdit={setEditingPromotion} onAdd={() => setEditingPromotion({})} />;
+            case 'settings': return <SettingsView settings={props.settings} onUpdateSettings={props.onUpdateSettings} />;
+            default: return <DashboardView appointments={props.appointments} doctors={props.doctors} />;
+        }
     };
-
-    const handleSave = () => {
-        onUpdateSettings(localSettings);
-        alert("Configuración guardada.");
-    };
-
-    const settingsFields = [
-        { key: 'heroImageUrl', label: 'URL Imagen Principal' },
-        { key: 'loginImageUrl', label: 'URL Imagen de Ingreso' },
-    ];
 
     return (
-        <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Configuración de la Página</h2>
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-md space-y-6 max-w-2xl">
-                {settingsFields.map(({key, label}) => (
-                    <div key={key}>
-                        <label htmlFor={key} className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                           {label}
-                        </label>
-                        <input
-                            type="text"
-                            id={key}
-                            name={key}
-                            value={localSettings[key as keyof AppSettings]}
-                            onChange={handleChange}
-                            className="w-full bg-slate-100 dark:bg-slate-700 border-transparent rounded-lg p-3 text-slate-900 dark:text-white"
-                        />
-                    </div>
-                ))}
-
-                <div className="pt-4 flex justify-end">
-                    <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
-                        Guardar Cambios
+        <div className="flex h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-200 font-sans">
+            {/* Sidebar */}
+            <aside className="w-64 bg-white dark:bg-slate-800 flex flex-col p-4 border-r border-slate-200 dark:border-slate-700">
+                <div className="flex items-center space-x-2 mb-8 px-2">
+                    <div className="w-9 h-9 text-blue-600 dark:text-blue-400"><DentalIcon /></div>
+                    <h1 className="text-2xl font-bold">Kiru Admin</h1>
+                </div>
+                <nav className="flex-1 space-y-2">
+                    <NavItem icon={<DashboardIcon />} isActive={view === 'dashboard'} onClick={() => setView('dashboard')}>Dashboard</NavItem>
+                    <NavItem icon={<AppointmentIcon />} isActive={view === 'appointments'} onClick={() => setView('appointments')}>Citas</NavItem>
+                    <NavItem icon={<UsersIcon />} isActive={view === 'doctors'} onClick={() => setView('doctors')}>Doctores</NavItem>
+                    <NavItem icon={<MegaphoneIcon />} isActive={view === 'promotions'} onClick={() => setView('promotions')}>Promociones</NavItem>
+                    <NavItem icon={<SettingsIcon />} isActive={view === 'settings'} onClick={() => setView('settings')}>Configuración</NavItem>
+                </nav>
+                <div>
+                     <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} title="Toggle Theme" className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+                        <span className="font-semibold">Cambiar Tema</span>
                     </button>
                 </div>
-            </div>
+            </aside>
+            
+            {/* Main Content */}
+            <main className="flex-1 overflow-y-auto p-8">
+                {renderView()}
+            </main>
+
+            {/* Modals */}
+            {editingAppointment && <AdminAppointmentModal appointment={editingAppointment} doctors={props.doctors} onClose={() => setEditingAppointment(null)} onSave={props.onSaveAppointment} />}
+            {editingDoctor && <AdminDoctorModal doctor={editingDoctor} onClose={() => setEditingDoctor(null)} onSave={props.onSaveDoctor} />}
+            {editingPromotion && <AdminPromotionModal promotion={editingPromotion} onClose={() => setEditingPromotion(null)} onSave={props.onSavePromotion} />}
         </div>
     );
 };
