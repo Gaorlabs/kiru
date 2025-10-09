@@ -100,7 +100,7 @@ const AppointmentsView: React.FC<Pick<AdminPageProps, 'appointments' | 'doctors'
                                 <td className="p-4 text-slate-800 dark:text-slate-200">{DENTAL_SERVICES_MAP[app.service] || app.service}</td>
                                 <td className="p-4 text-slate-800 dark:text-slate-200">{app.doctorId ? doctorsMap[app.doctorId] : 'N/A'}</td>
                                 <td className="p-4">
-                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusStyles[app.status]}`}>
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full capitalize ${statusStyles[app.status]}`}>
                                         {app.status === 'confirmed' ? 'Confirmada' : app.status === 'completed' ? 'Completada' : 'Cancelada'}
                                     </span>
                                 </td>
@@ -282,11 +282,9 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     const [editingPromotion, setEditingPromotion] = useState<Promotion | Partial<Promotion> | null>(null);
 
     useEffect(() => {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        const root = window.document.documentElement;
+        root.classList.remove(theme === 'light' ? 'dark' : 'light');
+        root.classList.add(theme);
     }, [theme]);
     
     const renderView = () => {
@@ -331,9 +329,9 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
             </main>
 
             {/* Modals */}
-            {editingAppointment && <AdminAppointmentModal appointment={editingAppointment} doctors={props.doctors} onClose={() => setEditingAppointment(null)} onSave={props.onSaveAppointment} />}
-            {editingDoctor && <AdminDoctorModal doctor={editingDoctor} onClose={() => setEditingDoctor(null)} onSave={props.onSaveDoctor} />}
-            {editingPromotion && <AdminPromotionModal promotion={editingPromotion} onClose={() => setEditingPromotion(null)} onSave={props.onSavePromotion} />}
+            {editingAppointment && <AdminAppointmentModal theme={theme} appointment={editingAppointment} doctors={props.doctors} onClose={() => setEditingAppointment(null)} onSave={props.onSaveAppointment} />}
+            {editingDoctor && <AdminDoctorModal theme={theme} doctor={editingDoctor} onClose={() => setEditingDoctor(null)} onSave={props.onSaveDoctor} />}
+            {editingPromotion && <AdminPromotionModal theme={theme} promotion={editingPromotion} onClose={() => setEditingPromotion(null)} onSave={props.onSavePromotion} />}
         </div>
     );
 };

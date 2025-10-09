@@ -66,27 +66,25 @@ const App: React.FC = () => {
     };
     
     const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id'> & { id?: string }) => {
-        setAppointments(prev => {
-            if (appointmentData.id) {
-                // Update existing appointment
-                return prev.map(app =>
-                    app.id === appointmentData.id ? { ...app, ...appointmentData } as Appointment : app
-                );
-            } else {
-                // Create new appointment
-                const newAppointment: Appointment = {
-                    id: crypto.randomUUID(),
-                    name: appointmentData.name || '',
-                    phone: appointmentData.phone || '',
-                    email: appointmentData.email || '',
-                    dateTime: appointmentData.dateTime || new Date().toISOString(),
-                    service: appointmentData.service || '',
-                    status: appointmentData.status || 'confirmed',
-                    doctorId: appointmentData.doctorId,
-                };
-                return [...prev, newAppointment];
-            }
-        });
+        if (appointmentData.id) {
+            // Update
+            setAppointments(prev =>
+                prev.map(app => (app.id === appointmentData.id ? ({ ...app, ...appointmentData } as Appointment) : app))
+            );
+        } else {
+            // Create
+            const newAppointment: Appointment = {
+                id: crypto.randomUUID(),
+                name: appointmentData.name || '',
+                phone: appointmentData.phone || '',
+                email: appointmentData.email || '',
+                dateTime: appointmentData.dateTime || new Date().toISOString(),
+                service: appointmentData.service || '',
+                status: appointmentData.status || 'confirmed',
+                doctorId: appointmentData.doctorId,
+            };
+            setAppointments(prev => [...prev, newAppointment]);
+        }
     };
     
     const handleDeleteAppointment = (appointmentId: string) => {
@@ -96,22 +94,20 @@ const App: React.FC = () => {
     };
 
     const handleSaveDoctor = (doctorData: Omit<Doctor, 'id'> & { id?: string }) => {
-        setDoctors(prev => {
-            if (doctorData.id) {
-                // Update existing doctor
-                return prev.map(doc =>
-                    doc.id === doctorData.id ? { ...doc, ...doctorData } as Doctor : doc
-                );
-            } else {
-                // Create new doctor
-                const newDoctor: Doctor = {
-                    id: crypto.randomUUID(),
-                    name: doctorData.name || '',
-                    specialty: doctorData.specialty || '',
-                };
-                return [...prev, newDoctor];
-            }
-        });
+        if (doctorData.id) {
+            // Update
+            setDoctors(prev =>
+                prev.map(doc => (doc.id === doctorData.id ? ({ ...doc, ...doctorData } as Doctor) : doc))
+            );
+        } else {
+            // Create
+            const newDoctor: Doctor = {
+                id: crypto.randomUUID(),
+                name: doctorData.name || '',
+                specialty: doctorData.specialty || '',
+            };
+            setDoctors(prev => [...prev, newDoctor]);
+        }
     };
 
     const handleDeleteDoctor = (doctorId: string) => {
@@ -131,26 +127,24 @@ const App: React.FC = () => {
     };
 
     const handleSavePromotion = (promotionData: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
-        setPromotions(prev => {
-            if (promotionData.id) {
-                // Update existing promotion
-                return prev.map(p =>
-                    p.id === promotionData.id ? { ...p, ...promotionData } as Promotion : p
-                );
-            } else {
-                // Create new promotion
-                const newPromotion: Promotion = {
-                    id: crypto.randomUUID(),
-                    title: promotionData.title || '',
-                    subtitle: promotionData.subtitle || '',
-                    imageUrl: promotionData.imageUrl || '',
-                    ctaText: promotionData.ctaText || '',
-                    details: promotionData.details || '',
-                    isActive: false,
-                };
-                return [...prev, newPromotion];
-            }
-        });
+       if (promotionData.id) {
+            // Update
+            setPromotions(prev =>
+                prev.map(p => (p.id === promotionData.id ? ({ ...p, ...promotionData } as Promotion) : p))
+            );
+        } else {
+            // Create
+            const newPromotion: Promotion = {
+                id: crypto.randomUUID(),
+                title: promotionData.title || '',
+                subtitle: promotionData.subtitle || '',
+                imageUrl: promotionData.imageUrl || '',
+                ctaText: promotionData.ctaText || '',
+                details: promotionData.details || '',
+                isActive: false,
+            };
+            setPromotions(prev => [...prev, newPromotion]);
+        }
     };
 
     const handleDeletePromotion = (promotionId: string) => {
@@ -163,7 +157,7 @@ const App: React.FC = () => {
         setPromotions(prev =>
             prev.map(p => ({
                 ...p,
-                isActive: p.id === promotionId ? !p.isActive : false,
+                isActive: p.id === promotionId, // Only one can be active
             }))
         );
     };
