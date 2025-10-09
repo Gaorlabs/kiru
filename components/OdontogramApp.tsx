@@ -4,7 +4,7 @@ import { Toolbar } from './Toolbar';
 import { TreatmentPlan } from './TreatmentPlan';
 import type { OdontogramState, ToothCondition, ToothSurfaceName, WholeToothCondition, ToothState, AppliedTreatment, Session, ClinicalFinding, Appointment } from '../types';
 import { ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS, DENTAL_TREATMENTS, QUADRANTS_PERMANENT, QUADRANTS_DECIDUOUS } from '../constants';
-import { DentalIcon, PrintIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon } from './icons';
+import { DentalIcon, PrintIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon } from './icons';
 import { ClinicalFindings } from './ClinicalFindings';
 import { PatientHeader } from './PatientHeader';
 import { Tabs } from './Tabs';
@@ -29,6 +29,8 @@ type Theme = 'light' | 'dark';
 
 interface OdontogramAppProps {
     appointments: Appointment[];
+    isAuthenticated: boolean;
+    onNavigateToAdmin: () => void;
 }
 
 // FIX: Redefined TabPanel with a Props interface to fix an issue where TypeScript was not correctly inferring the `children` prop.
@@ -43,7 +45,7 @@ const TabPanel = ({ children }: TabPanelProps) => {
     return <>{children}</>;
 };
 
-export function OdontogramApp({ appointments }: OdontogramAppProps) {
+export function OdontogramApp({ appointments, isAuthenticated, onNavigateToAdmin }: OdontogramAppProps) {
     const [permanentState, setPermanentState] = useState<OdontogramState>(createInitialState(ALL_TEETH_PERMANENT));
     const [deciduousState, setDeciduousState] = useState<OdontogramState>(createInitialState(ALL_TEETH_DECIDUOUS));
     const [odontogramType, setOdontogramType] = useState<OdontogramType>('permanent');
@@ -214,6 +216,16 @@ export function OdontogramApp({ appointments }: OdontogramAppProps) {
                 <div className="flex items-center">
                     <div className="w-8 h-8 mr-2 text-teal-500 dark:text-teal-400"><DentalIcon /></div>
                     <h1 className="text-lg font-bold">Odontograma Digital</h1>
+                    {isAuthenticated && (
+                        <button
+                            onClick={onNavigateToAdmin}
+                            className="ml-6 flex items-center space-x-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 px-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
+                            title="Volver al Panel de Administración"
+                        >
+                            <div className="w-5 h-5"><ArrowLeftIcon /></div>
+                            <span>Volver al Panel</span>
+                        </button>
+                    )}
                 </div>
                 <div className="flex items-center space-x-2">
                     <button title="Guardar" className="flex items-center justify-center w-8 h-8 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-md transition-colors">

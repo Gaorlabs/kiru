@@ -73,7 +73,11 @@ function App() {
             // If not authenticated, redirect to login
             return <LoginPage onLogin={handleLogin} onNavigateToLanding={() => navigateTo('landing')} settings={settings} />;
         case 'odontogram':
-            return <OdontogramApp appointments={appointments} />;
+            return <OdontogramApp 
+                appointments={appointments} 
+                isAuthenticated={isAuthenticated}
+                onNavigateToAdmin={() => navigateTo('admin')}
+            />;
         case 'landing':
         default:
              return <LandingPage 
