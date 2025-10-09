@@ -26,7 +26,7 @@ export const AdminDoctorModal: React.FC<AdminDoctorModalProps & { theme: 'light'
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md ${theme}`}>
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md">
                 <div className="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700">
                     <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{formData.id ? 'Editar Doctor' : 'Nuevo Doctor'}</h2>
                     <button onClick={onClose} className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 w-8 h-8"><CloseIcon /></button>

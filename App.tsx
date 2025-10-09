@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { OdontogramApp } from './components/OdontogramApp';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
@@ -65,7 +65,7 @@ const App: React.FC = () => {
         }
     };
     
-    const handleSaveAppointment = useCallback((appointmentData: Omit<Appointment, 'id'> & { id?: string }) => {
+    const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id'> & { id?: string }) => {
         if (appointmentData.id) {
             setAppointments(prev =>
                 prev.map(app =>
@@ -87,7 +87,7 @@ const App: React.FC = () => {
             };
             setAppointments(prev => [...prev, newAppointment]);
         }
-    }, []);
+    };
     
     const handleDeleteAppointment = (appointmentId: string) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
@@ -95,7 +95,7 @@ const App: React.FC = () => {
         }
     };
 
-    const handleSaveDoctor = useCallback((doctorData: Omit<Doctor, 'id'> & { id?: string }) => {
+    const handleSaveDoctor = (doctorData: Omit<Doctor, 'id'> & { id?: string }) => {
         if (doctorData.id) {
             setDoctors(prev =>
                 prev.map(doc =>
@@ -110,7 +110,7 @@ const App: React.FC = () => {
             };
             setDoctors(prev => [...prev, newDoctor]);
         }
-    }, []);
+    };
 
     const handleDeleteDoctor = (doctorId: string) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar este doctor? Se desasignarán sus citas.')) {
@@ -128,11 +128,11 @@ const App: React.FC = () => {
         setCurrentPage('odontogram');
     };
 
-    const handleSavePromotion = useCallback((promotionData: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
+    const handleSavePromotion = (promotionData: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
        if (promotionData.id) {
             setPromotions(prev =>
                 prev.map(p =>
-                    p.id === promotionData.id ? { ...p, ...promotionData } as Promotion : p
+                    p.id === promotionData.id ? { ...p, ...promotionData, isActive: p.isActive } as Promotion : p
                 )
             );
         } else {
@@ -147,7 +147,7 @@ const App: React.FC = () => {
             };
             setPromotions(prev => [...prev, newPromotion]);
         }
-    }, []);
+    };
 
     const handleDeletePromotion = (promotionId: string) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar esta promoción?')) {

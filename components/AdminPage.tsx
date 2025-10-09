@@ -283,8 +283,11 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
 
     useEffect(() => {
         const root = window.document.documentElement;
-        root.classList.remove(theme === 'light' ? 'dark' : 'light');
-        root.classList.add(theme);
+        if (theme === 'dark') {
+            root.classList.add('dark');
+        } else {
+            root.classList.remove('dark');
+        }
     }, [theme]);
     
     const renderView = () => {
@@ -315,7 +318,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     }
 
     return (
-        <div className={`flex h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors ${theme}`}>
+        <div className="flex h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors">
             {/* Sidebar */}
             <aside className="w-64 bg-white dark:bg-slate-800 flex flex-col p-4 border-r border-slate-200 dark:border-slate-700">
                 <div className="flex items-center space-x-2 mb-8 px-2">
