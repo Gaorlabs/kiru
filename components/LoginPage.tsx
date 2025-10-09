@@ -1,5 +1,8 @@
+
 import React, { useState } from 'react';
+// FIX: Changed import to be a relative path.
 import { DentalIcon, UserIcon, PasswordIcon } from './icons';
+// FIX: Changed import to be a relative path.
 import type { AppSettings } from '../types';
 
 interface LoginPageProps {

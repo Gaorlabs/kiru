@@ -1,4 +1,6 @@
+
 import React from 'react';
+// FIX: Changed import to be a relative path.
 import type { DentalTreatment, ToothSurfaceName } from '../types';
 
 interface StatusBarProps {

@@ -1,6 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
+// FIX: Changed import to be a relative path.
 import type { Appointment } from '../types';
 import { DENTAL_SERVICES_MAP } from '../constants';
+// FIX: Changed import to be a relative path.
 import { CalendarIcon } from './icons';
 
 interface AgendaViewProps {

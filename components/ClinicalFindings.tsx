@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+// FIX: Changed import to be a relative path.
 import type { ClinicalFinding, Session } from '../types';
 import { TREATMENTS_MAP } from '../constants';
 

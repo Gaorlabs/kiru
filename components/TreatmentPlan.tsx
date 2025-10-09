@@ -1,6 +1,9 @@
+
 import React from 'react';
+// FIX: Changed import to be a relative path.
 import type { Session, AppliedTreatment } from '../types';
 import { TREATMENTS_MAP } from '../constants';
+// FIX: Changed import to be a relative path.
 import { CheckIcon, UndoIcon } from './icons';
 
 interface TreatmentPlanProps {

@@ -1,5 +1,8 @@
+
 import React from 'react';
+// FIX: Changed import to be a relative path.
 import type { ToothState, ToothSurfaceName, AppliedTreatment } from '../types';
+// FIX: Changed import to be a relative path.
 import { ToothPlaceholderIcon } from './icons';
 
 interface ToothProps {

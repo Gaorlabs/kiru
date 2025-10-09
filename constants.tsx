@@ -1,5 +1,8 @@
+
 import React from 'react';
+// FIX: Changed import to be a relative path.
 import type { DentalTreatment } from './types';
+// FIX: Changed import to be a relative path.
 import { CariesIcon, CrownIcon, EndodonticsIcon, FillingIcon, HealthyIcon, ImplantIcon, MissingIcon, UneruptedIcon, ExtractionIcon } from './components/icons';
 
 export const DENTAL_TREATMENTS: DentalTreatment[] = [

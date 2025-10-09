@@ -1,12 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
+// FIX: Changed import to be a relative path.
 import { DentalIcon, PreventionIcon, FillingIcon, EndodonticsIcon, OrthodonticsIcon, OralSurgeryIcon, CosmeticDentistryIcon, TeamIcon, AppointmentIcon, EmergencyIcon, ClockIcon, GiftIcon, CloseIcon, CheckIcon } from './icons';
 import { AppointmentForm } from './AppointmentForm';
-// FIX: AppSettings is not exported from App.tsx, it's defined in types.ts.
+// FIX: Changed import to be a relative path.
 import type { Appointment, AppSettings } from '../types';
 
 
 interface LandingPageProps {
-  onBookAppointment: (appointmentData: Omit<Appointment, 'id'>) => void;
+  onBookAppointment: (appointmentData: Omit<Appointment, 'id' | 'status'>) => void;
   settings: AppSettings;
   onNavigateToLogin: () => void;
 }

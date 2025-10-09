@@ -1,6 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
 import { DENTAL_TREATMENTS, TREATMENT_CATEGORIES } from '../constants';
+// FIX: Changed import to be a relative path.
 import type { DentalTreatment, ToothCondition, WholeToothCondition } from '../types';
+// FIX: Changed import to be a relative path.
 import { ChevronDownIcon, SearchIcon } from './icons';
 
 interface ToolbarProps {

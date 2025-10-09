@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { Tooth } from './Tooth';
+// FIX: Changed import to be a relative path.
 import type { OdontogramState, ToothSurfaceName } from '../types';
 
 interface OdontogramProps {

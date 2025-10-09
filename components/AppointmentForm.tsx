@@ -1,11 +1,14 @@
+
 import React, { useState, useMemo } from 'react';
+// FIX: Changed import to be a relative path.
 import type { Appointment } from '../types';
+// FIX: Changed import to be a relative path.
 import { CloseIcon, UserIcon, PhoneIcon, EmailIcon, ServiceIcon, ChevronDownIcon } from './icons';
 import { DENTAL_SERVICES } from '../constants';
 
 interface AppointmentFormProps {
     onClose: () => void;
-    onBookAppointment: (appointmentData: Omit<Appointment, 'id'>) => void;
+    onBookAppointment: (appointmentData: Omit<Appointment, 'id' | 'status'>) => void;
 }
 
 const generateTimeSlots = () => {

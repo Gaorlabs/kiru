@@ -1,20 +1,28 @@
-import type { ReactElement } from 'react';
+import React from 'react';
 
 export type ToothSurfaceName = 'buccal' | 'lingual' | 'occlusal' | 'distal' | 'mesial' | 'root';
-
-export type ToothCondition = 'caries' | 'filling' | 'crown' | 'endodontics' | 'implant';
-export type WholeToothCondition = 'missing' | 'unerupted' | 'healthy' | 'extraction'; 
-
 export type TreatmentStatus = 'proposed' | 'completed';
-export type SessionStatus = 'pending' | 'completed';
+export type TreatmentApplication = 'surface' | 'whole_tooth' | 'root';
+
+export type ToothCondition = 'caries' | 'filling' | 'endodontics' | 'crown' | 'implant';
+export type WholeToothCondition = 'extraction' | 'missing' | 'unerupted';
+
+export interface DentalTreatment {
+    id: ToothCondition | WholeToothCondition;
+    label: string;
+    category: string;
+    price: number;
+    appliesTo: TreatmentApplication;
+    icon: React.ReactNode;
+}
 
 export interface AppliedTreatment {
-    id: string; 
+    id: string;
     treatmentId: ToothCondition | WholeToothCondition;
     toothId: number;
     surface: ToothSurfaceName | 'whole';
     status: TreatmentStatus;
-    sessionId: string | null; // Link to a session
+    sessionId: string;
 }
 
 export interface ClinicalFinding {
@@ -24,47 +32,39 @@ export interface ClinicalFinding {
     condition: ToothCondition | WholeToothCondition;
 }
 
+export interface ToothState {
+    surfaces: Record<ToothSurfaceName, AppliedTreatment[]>;
+    whole: AppliedTreatment[];
+    findings: ClinicalFinding[];
+}
+
+export type OdontogramState = Record<number, ToothState>;
+
 export interface Session {
     id: string;
     name: string;
-    status: SessionStatus;
+    status: 'pending' | 'completed';
     treatments: AppliedTreatment[];
 }
 
-export interface ToothState {
-    surfaces: {
-        [key in ToothSurfaceName]: AppliedTreatment[];
-    };
-    whole: AppliedTreatment[];
-    findings: ClinicalFinding[]; // To store diagnoses before they become treatments
-}
-
-export type OdontogramState = {
-    [toothId: number]: ToothState;
-};
-
-export interface DentalTreatment {
-    id: ToothCondition | WholeToothCondition;
-    label: string;
-    category: 'Patología' | 'Operatoria' | 'Endodoncia' | 'Rehabilitación' | 'Cirugía' | 'Otros';
-    price: number;
-    appliesTo: 'surface' | 'whole_tooth' | 'root';
-    icon: ReactElement;
-}
-
 export interface Appointment {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  dateTime: string; // ISO String
-  service: string;
+    id: string;
+    name: string;
+    phone: string;
+    email: string;
+    dateTime: string;
+    service: string;
+    status: 'confirmed' | 'completed' | 'canceled';
 }
 
 export interface AppSettings {
-  heroImageUrl: string;
-  promoImageUrl: string;
-  promoTitle: string;
-  promoSubtitle: string;
-  loginImageUrl: string;
+    clinicName: string;
+    clinicAddress: string;
+    clinicPhone: string;
+    clinicEmail: string;
+    heroImageUrl: string;
+    promoImageUrl: string;
+    loginImageUrl: string;
+    promoTitle: string;
+    promoSubtitle: string;
 }

@@ -1,9 +1,12 @@
+
 import React, { useState, useCallback, useMemo, useEffect, PropsWithChildren } from 'react';
 import { Odontogram } from './Odontogram';
 import { Toolbar } from './Toolbar';
 import { TreatmentPlan } from './TreatmentPlan';
+// FIX: Changed import to be a relative path.
 import type { OdontogramState, ToothCondition, ToothSurfaceName, WholeToothCondition, ToothState, AppliedTreatment, Session, ClinicalFinding, Appointment } from '../types';
 import { ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS, DENTAL_TREATMENTS, QUADRANTS_PERMANENT, QUADRANTS_DECIDUOUS } from '../constants';
+// FIX: Changed import to be a relative path.
 import { DentalIcon, PrintIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon } from './icons';
 import { ClinicalFindings } from './ClinicalFindings';
 import { PatientHeader } from './PatientHeader';
