@@ -66,7 +66,7 @@ const App: React.FC = () => {
         }
     };
     
-    const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id' | 'status'> & { id?: string; status?: 'confirmed' | 'completed' | 'canceled' }) => {
+    const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id'> & { id?: string }) => {
         if (appointmentData.id) {
             setAppointments(prev => prev.map(app => app.id === appointmentData.id ? { ...app, ...appointmentData } as Appointment : app));
         } else {
@@ -77,7 +77,7 @@ const App: React.FC = () => {
                 email: appointmentData.email,
                 dateTime: appointmentData.dateTime,
                 service: appointmentData.service,
-                status: 'confirmed',
+                status: appointmentData.status || 'confirmed',
                 doctorId: appointmentData.doctorId,
             };
             setAppointments(prev => [...prev, newAppointment]);

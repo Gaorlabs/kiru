@@ -36,35 +36,35 @@ export const AdminPromotionModal: React.FC<AdminPromotionModalProps> = ({ promot
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
-                <div className="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700">
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-white">{formData.id ? 'Editar Promoción' : 'Nueva Promoción'}</h2>
-                    <button onClick={onClose} className="text-slate-500 hover:text-slate-800 dark:hover:text-white w-8 h-8"><CloseIcon /></button>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+                <div className="p-4 flex justify-between items-center border-b border-slate-200">
+                    <h2 className="text-xl font-bold text-slate-800">{formData.id ? 'Editar Promoción' : 'Nueva Promoción'}</h2>
+                    <button onClick={onClose} className="text-slate-500 hover:text-slate-800 w-8 h-8"><CloseIcon /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                     <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Título</label>
-                        <input type="text" name="title" value={formData.title} onChange={handleChange} required className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                        <label htmlFor="title" className="block text-sm font-medium text-slate-600 mb-1">Título</label>
+                        <input type="text" name="title" value={formData.title} onChange={handleChange} required className="w-full p-2 border border-slate-300 rounded-md" />
                     </div>
                     <div>
-                        <label htmlFor="subtitle" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Subtítulo</label>
-                        <input type="text" name="subtitle" value={formData.subtitle} onChange={handleChange} required className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                        <label htmlFor="subtitle" className="block text-sm font-medium text-slate-600 mb-1">Subtítulo</label>
+                        <input type="text" name="subtitle" value={formData.subtitle} onChange={handleChange} required className="w-full p-2 border border-slate-300 rounded-md" />
                     </div>
                     <div>
-                        <label htmlFor="imageUrl" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">URL de la Imagen</label>
-                        <input type="url" name="imageUrl" value={formData.imageUrl} onChange={handleChange} required className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                        <label htmlFor="imageUrl" className="block text-sm font-medium text-slate-600 mb-1">URL de la Imagen</label>
+                        <input type="url" name="imageUrl" value={formData.imageUrl} onChange={handleChange} required className="w-full p-2 border border-slate-300 rounded-md" />
                     </div>
                     <div>
-                        <label htmlFor="ctaText" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Texto del Botón (CTA)</label>
-                        <input type="text" name="ctaText" value={formData.ctaText} onChange={handleChange} required className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" />
+                        <label htmlFor="ctaText" className="block text-sm font-medium text-slate-600 mb-1">Texto del Botón (CTA)</label>
+                        <input type="text" name="ctaText" value={formData.ctaText} onChange={handleChange} required className="w-full p-2 border border-slate-300 rounded-md" />
                     </div>
                     <div>
-                        <label htmlFor="details" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Detalles (un item por línea)</label>
-                        <textarea name="details" value={formData.details} onChange={handleChange} required rows={4} className="w-full p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600"></textarea>
+                        <label htmlFor="details" className="block text-sm font-medium text-slate-600 mb-1">Detalles (un item por línea)</label>
+                        <textarea name="details" value={formData.details} onChange={handleChange} required rows={4} className="w-full p-2 border border-slate-300 rounded-md"></textarea>
                     </div>
                 </form>
-                <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl flex justify-end gap-3">
-                    <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 font-semibold transition-colors">Cancelar</button>
+                <div className="p-4 border-t border-slate-200 bg-slate-50 rounded-b-xl flex justify-end gap-3">
+                    <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 font-semibold transition-colors">Cancelar</button>
                     <button type="submit" onClick={handleSubmit} className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-colors">Guardar</button>
                 </div>
             </div>

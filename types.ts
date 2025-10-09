@@ -77,7 +77,7 @@ export interface AdminAppointmentModalProps {
     appointment: Appointment | Partial<Appointment> | null;
     doctors: Doctor[];
     onClose: () => void;
-    onSave: (appointment: Omit<Appointment, 'id' | 'status'> & { id?: string; status?: 'confirmed' | 'completed' | 'canceled' }) => void;
+    onSave: (appointment: Omit<Appointment, 'id'> & { id?: string }) => void;
 }
 
 export interface Promotion {
