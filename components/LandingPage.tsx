@@ -1,11 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
-import { DentalIcon, PreventionIcon, FillingIcon, EndodonticsIcon, OrthodonticsIcon, OralSurgeryIcon, CosmeticDentistryIcon, TeamIcon, AppointmentIcon, EmergencyIcon, ClockIcon, GiftIcon, SettingsIcon, CloseIcon, UserIcon, PasswordIcon } from './icons';
+import { DentalIcon, PreventionIcon, FillingIcon, EndodonticsIcon, OrthodonticsIcon, OralSurgeryIcon, CosmeticDentistryIcon, TeamIcon, AppointmentIcon, EmergencyIcon, ClockIcon, GiftIcon, SettingsIcon, CloseIcon, UserIcon, PasswordIcon, CheckIcon } from './icons';
 import { AppointmentForm } from './AppointmentForm';
 import type { Appointment } from '../types';
+import type { AppSettings } from '../App';
+
 
 interface LandingPageProps {
   onBookAppointment: (appointmentData: Omit<Appointment, 'id'>) => void;
+  heroImageUrl: string;
+  promoImageUrl: string;
+  onSettingsChange: (settings: AppSettings) => void;
 }
 
 const FeatureCard: React.FC<{icon: React.ReactNode, title: string, description: string}> = ({icon, title, description}) => (
@@ -25,30 +29,42 @@ const ServiceCard: React.FC<{icon: React.ReactNode, title: string, description: 
     </div>
 );
 
-const PromotionModal: React.FC<{onClose: () => void, onBook: () => void}> = ({onClose, onBook}) => (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-2xl w-full max-w-md text-white overflow-hidden transform animate-scale-in">
-            <div className="p-8 text-center relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
-                    <CloseIcon />
-                </button>
-                <div className="w-20 h-20 mx-auto mb-4 text-yellow-300 animate-bounce">
-                    <GiftIcon />
+const PromotionModal: React.FC<{onClose: () => void, onBook: () => void, promoImageUrl: string}> = ({onClose, onBook, promoImageUrl}) => (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden transform animate-scale-in">
+            <div className="md:grid md:grid-cols-2">
+                <div className="hidden md:block bg-cover bg-center" style={{backgroundImage: `url('${promoImageUrl}')`}}>
                 </div>
-                <h2 className="text-3xl font-extrabold mb-2">¡Promoción Especial de Octubre!</h2>
-                <p className="text-lg font-semibold mb-4 text-white/90">¡Tu Diagnóstico Dental Completo es GRATIS!</p>
-                <p className="mb-6">
-                    Durante todo el mes de Octubre, obtén un chequeo dental completo sin costo alguno. ¡No dejes pasar esta oportunidad de cuidar tu sonrisa!
-                </p>
-                <button 
-                    onClick={() => {
-                        onBook();
-                        onClose();
-                    }} 
-                    className="bg-yellow-400 text-purple-700 px-8 py-3 rounded-full hover:bg-yellow-300 font-bold shadow-lg transform hover:scale-105 transition-all duration-300 w-full"
-                >
-                    ¡Agendar mi Diagnóstico Gratis!
-                </button>
+                <div className="p-8 flex flex-col justify-center bg-slate-50 text-slate-800">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10">
+                        <CloseIcon />
+                    </button>
+                    <div className="w-14 h-14 mb-4 text-pink-500">
+                        <GiftIcon />
+                    </div>
+                    <h2 className="text-3xl font-extrabold mb-2 text-blue-600">Una Sonrisa Saludable Comienza Aquí</h2>
+                    <p className="text-lg font-semibold mb-6">¡Tu Diagnóstico Dental Completo es <span className="text-pink-500 font-bold">GRATIS</span>!</p>
+                    
+                    <div className="text-left my-4">
+                        <ul className="space-y-3 text-slate-600">
+                            <li className="flex items-start"><span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span><span>Revisión completa con <span className="font-semibold">cámara intraoral</span>.</span></li>
+                            <li className="flex items-start"><span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span><span>Plan de tratamiento digital 100% <span className="font-semibold">personalizado</span>.</span></li>
+                            <li className="flex items-start"><span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span><span>Asesoramiento experto <span className="font-semibold">sin compromiso</span>.</span></li>
+                        </ul>
+                    </div>
+
+                    <p className="text-sm font-semibold text-slate-500 my-6 text-center">Promoción válida solo por Octubre. ¡Cupos limitados!</p>
+
+                    <button 
+                        onClick={() => {
+                            onBook();
+                            onClose();
+                        }} 
+                        className="bg-pink-500 text-white px-8 py-3 rounded-full hover:bg-pink-600 font-bold shadow-lg transform hover:scale-105 transition-all duration-300 w-full text-lg"
+                    >
+                        Agendar mi Diagnóstico Gratis
+                    </button>
+                </div>
             </div>
         </div>
         <style>{`
@@ -60,41 +76,77 @@ const PromotionModal: React.FC<{onClose: () => void, onBook: () => void}> = ({on
     </div>
 );
 
-const AdminPanel: React.FC<{onClose: () => void}> = ({onClose}) => (
+const AdminPanel: React.FC<{
+  onClose: () => void;
+  onSave: (settings: AppSettings) => void;
+  currentSettings: AppSettings;
+}> = ({ onClose, onSave, currentSettings }) => {
+  const [heroUrl, setHeroUrl] = useState(currentSettings.heroImageUrl);
+  const [promoUrl, setPromoUrl] = useState(currentSettings.promoImageUrl);
+
+  const handleSave = () => {
+    onSave({
+      heroImageUrl: heroUrl,
+      promoImageUrl: promoUrl,
+    });
+    onClose();
+  };
+
+  return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col transform animate-scale-in">
-             <div className="p-4 flex justify-between items-center border-b border-slate-200">
-                <h2 className="text-xl font-bold text-slate-800">Panel de Administrador</h2>
-                <button onClick={onClose} className="text-slate-500 hover:text-slate-800 w-8 h-8">
-                    <CloseIcon />
-                </button>
-            </div>
-            <div className="p-6 space-y-4">
-                <p className="text-sm text-slate-600 bg-slate-100 p-3 rounded-lg">Esta es una vista previa del panel de administrador. Desde aquí, podrías editar el contenido de la página, gestionar citas y ver analíticas.</p>
-                <div>
-                    <label className="block text-sm font-medium text-slate-500 mb-1">Usuario</label>
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 w-10"><UserIcon /></div>
-                        <input type="text" placeholder="admin" className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-11 pr-4 text-slate-900" />
-                    </div>
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-slate-500 mb-1">Contraseña</label>
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 w-10"><PasswordIcon /></div>
-                        <input type="password" placeholder="••••••••" className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-11 pr-4 text-slate-900" />
-                    </div>
-                </div>
-                <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold transition-colors">
-                    Iniciar Sesión
-                </button>
-            </div>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col transform animate-scale-in">
+        <div className="p-4 flex justify-between items-center border-b border-slate-200">
+          <h2 className="text-xl font-bold text-slate-800">Administrar Imágenes</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-800 w-8 h-8">
+            <CloseIcon />
+          </button>
         </div>
+        <div className="p-6 space-y-4 overflow-y-auto">
+          <p className="text-sm text-slate-600 bg-slate-100 p-3 rounded-lg">
+            Pega las URLs de las imágenes que deseas mostrar en la página principal y en el pop-up promocional.
+          </p>
+          <div>
+            <label htmlFor="heroUrl" className="block text-sm font-medium text-slate-500 mb-1">
+              URL de Imagen Principal (Hero)
+            </label>
+            <input
+              id="heroUrl"
+              type="text"
+              value={heroUrl}
+              onChange={(e) => setHeroUrl(e.target.value)}
+              placeholder="https://ejemplo.com/imagen.jpg"
+              className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2 px-4 text-slate-900"
+            />
+          </div>
+          <div>
+            <label htmlFor="promoUrl" className="block text-sm font-medium text-slate-500 mb-1">
+              URL de Imagen del Pop-up
+            </label>
+            <input
+              id="promoUrl"
+              type="text"
+              value={promoUrl}
+              onChange={(e) => setPromoUrl(e.target.value)}
+              placeholder="https://ejemplo.com/promo.jpg"
+              className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2 px-4 text-slate-900"
+            />
+          </div>
+        </div>
+        <div className="p-4 border-t border-slate-200 bg-slate-50 mt-auto">
+          <button
+            onClick={handleSave}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold transition-colors"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </div>
     </div>
-);
+  );
+};
 
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, heroImageUrl, promoImageUrl, onSettingsChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPromotion, setShowPromotion] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -138,7 +190,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment }) =
               <div className="md:w-1/2 z-10 text-center md:text-left">
                 <h2 className="text-4xl lg:text-6xl font-extrabold mb-4 leading-tight">Tu Sonrisa, Nuestra Pasión.</h2>
                 <p className="mb-8 text-blue-200 max-w-lg mx-auto md:mx-0 text-lg">
-                  Descubre una experiencia dental diferente. En Kiru, combinamos tecnología de punta con un trato cálido y personalizado para que te sientas como en casa.
+                 Descubre una experiencia dental diferente. En Kiru, combinamos tecnología de punta con un trato cálido y personalizado para que te sientas como en casa.
                 </p>
                 <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
                   <button onClick={() => setIsModalOpen(true)} className="bg-pink-500 text-white px-10 py-4 text-lg rounded-full hover:bg-pink-600 font-semibold shadow-lg transform hover:scale-105 transition-transform duration-300">
@@ -150,7 +202,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment }) =
                 </div>
               </div>
               <div className="md:w-1/2 mt-12 md:mt-0 flex justify-center items-center z-10">
-                <img className="rounded-3xl shadow-2xl max-w-md w-full" src="https://images.unsplash.com/photo-1629904851222-19d3f024c0d0?q=80&w=2070&auto=format&fit=crop" alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
+                <img className="rounded-3xl shadow-2xl max-w-md w-full h-96 object-cover" src={heroImageUrl} alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
               </div>
             </div>
         </section>
@@ -251,9 +303,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment }) =
             </div>
         </footer>
 
-        {showPromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} />}
+        {showPromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} promoImageUrl={promoImageUrl} />}
         {isModalOpen && <AppointmentForm onClose={() => setIsModalOpen(false)} onBookAppointment={onBookAppointment} />}
-        {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} />}
+        {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} onSave={onSettingsChange} currentSettings={{ heroImageUrl, promoImageUrl }} />}
         
         <button 
             onClick={() => setShowAdminPanel(true)}
