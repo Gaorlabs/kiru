@@ -60,3 +60,10 @@ export interface Appointment {
   dateTime: string; // ISO String
   service: string;
 }
+
+export interface AppSettings {
+  heroImageUrl: string;
+  promoImageUrl: string;
+  promoTitle: string;
+  promoSubtitle: string;
+}

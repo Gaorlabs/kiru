@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DentalIcon, PreventionIcon, FillingIcon, EndodonticsIcon, OrthodonticsIcon, OralSurgeryIcon, CosmeticDentistryIcon, TeamIcon, AppointmentIcon, EmergencyIcon, ClockIcon, GiftIcon, SettingsIcon, CloseIcon, UserIcon, PasswordIcon, CheckIcon } from './icons';
+import { DentalIcon, PreventionIcon, FillingIcon, EndodonticsIcon, OrthodonticsIcon, OralSurgeryIcon, CosmeticDentistryIcon, TeamIcon, AppointmentIcon, EmergencyIcon, ClockIcon, GiftIcon, CloseIcon, CheckIcon } from './icons';
 import { AppointmentForm } from './AppointmentForm';
 import type { Appointment } from '../types';
 import type { AppSettings } from '../App';
@@ -7,9 +7,9 @@ import type { AppSettings } from '../App';
 
 interface LandingPageProps {
   onBookAppointment: (appointmentData: Omit<Appointment, 'id'>) => void;
-  heroImageUrl: string;
-  promoImageUrl: string;
+  settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
+  onNavigateToLogin: () => void;
 }
 
 const FeatureCard: React.FC<{icon: React.ReactNode, title: string, description: string}> = ({icon, title, description}) => (
@@ -29,11 +29,15 @@ const ServiceCard: React.FC<{icon: React.ReactNode, title: string, description: 
     </div>
 );
 
-const PromotionModal: React.FC<{onClose: () => void, onBook: () => void, promoImageUrl: string}> = ({onClose, onBook, promoImageUrl}) => (
+const PromotionModal: React.FC<{
+    onClose: () => void;
+    onBook: () => void;
+    settings: AppSettings;
+}> = ({onClose, onBook, settings}) => (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in">
         <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden transform animate-scale-in">
             <div className="md:grid md:grid-cols-2">
-                <div className="hidden md:block bg-cover bg-center" style={{backgroundImage: `url('${promoImageUrl}')`}}>
+                <div className="hidden md:block bg-cover bg-center" style={{backgroundImage: `url('${settings.promoImageUrl}')`}}>
                 </div>
                 <div className="p-8 flex flex-col justify-center bg-slate-50 text-slate-800">
                     <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10">
@@ -42,9 +46,9 @@ const PromotionModal: React.FC<{onClose: () => void, onBook: () => void, promoIm
                     <div className="w-14 h-14 mb-4 text-pink-500">
                         <GiftIcon />
                     </div>
-                    <h2 className="text-3xl font-extrabold mb-2 text-blue-600">Una Sonrisa Saludable Comienza Aquí</h2>
-                    <p className="text-lg font-semibold mb-6">¡Tu Diagnóstico Dental Completo es <span className="text-pink-500 font-bold">GRATIS</span>!</p>
-                    
+                    <h2 className="text-3xl font-extrabold mb-2 text-blue-600">{settings.promoTitle}</h2>
+                    <p className="text-lg font-semibold mb-6" dangerouslySetInnerHTML={{ __html: settings.promoSubtitle.replace('GRATIS', '<span class="text-pink-500 font-bold">GRATIS</span>') }} />
+
                     <div className="text-left my-4">
                         <ul className="space-y-3 text-slate-600">
                             <li className="flex items-start"><span className="text-green-500 mr-2 mt-1 w-5 h-5 flex-shrink-0"><CheckIcon /></span><span>Revisión completa con <span className="font-semibold">cámara intraoral</span>.</span></li>
@@ -76,80 +80,10 @@ const PromotionModal: React.FC<{onClose: () => void, onBook: () => void, promoIm
     </div>
 );
 
-const AdminPanel: React.FC<{
-  onClose: () => void;
-  onSave: (settings: AppSettings) => void;
-  currentSettings: AppSettings;
-}> = ({ onClose, onSave, currentSettings }) => {
-  const [heroUrl, setHeroUrl] = useState(currentSettings.heroImageUrl);
-  const [promoUrl, setPromoUrl] = useState(currentSettings.promoImageUrl);
 
-  const handleSave = () => {
-    onSave({
-      heroImageUrl: heroUrl,
-      promoImageUrl: promoUrl,
-    });
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col transform animate-scale-in">
-        <div className="p-4 flex justify-between items-center border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800">Administrar Imágenes</h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-800 w-8 h-8">
-            <CloseIcon />
-          </button>
-        </div>
-        <div className="p-6 space-y-4 overflow-y-auto">
-          <p className="text-sm text-slate-600 bg-slate-100 p-3 rounded-lg">
-            Pega las URLs de las imágenes que deseas mostrar en la página principal y en el pop-up promocional.
-          </p>
-          <div>
-            <label htmlFor="heroUrl" className="block text-sm font-medium text-slate-500 mb-1">
-              URL de Imagen Principal (Hero)
-            </label>
-            <input
-              id="heroUrl"
-              type="text"
-              value={heroUrl}
-              onChange={(e) => setHeroUrl(e.target.value)}
-              placeholder="https://ejemplo.com/imagen.jpg"
-              className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2 px-4 text-slate-900"
-            />
-          </div>
-          <div>
-            <label htmlFor="promoUrl" className="block text-sm font-medium text-slate-500 mb-1">
-              URL de Imagen del Pop-up
-            </label>
-            <input
-              id="promoUrl"
-              type="text"
-              value={promoUrl}
-              onChange={(e) => setPromoUrl(e.target.value)}
-              placeholder="https://ejemplo.com/promo.jpg"
-              className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2 px-4 text-slate-900"
-            />
-          </div>
-        </div>
-        <div className="p-4 border-t border-slate-200 bg-slate-50 mt-auto">
-          <button
-            onClick={handleSave}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold transition-colors"
-          >
-            Guardar Cambios
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, heroImageUrl, promoImageUrl, onSettingsChange }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, settings, onNavigateToLogin }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPromotion, setShowPromotion] = useState(false);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
   
   useEffect(() => {
     const hasSeenPromo = sessionStorage.getItem('promoSeen');
@@ -202,7 +136,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, her
                 </div>
               </div>
               <div className="md:w-1/2 mt-12 md:mt-0 flex justify-center items-center z-10">
-                <img className="rounded-3xl shadow-2xl max-w-md w-full h-96 object-cover" src={heroImageUrl} alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
+                <img className="rounded-3xl shadow-2xl max-w-md w-full h-96 object-cover" src={settings.heroImageUrl} alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
               </div>
             </div>
         </section>
@@ -300,20 +234,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, her
                     <span>Dirección: Av. Sonrisas 123, Lima, Perú</span>
                  </div>
                 <p className="text-slate-400 mt-8">&copy; {new Date().getFullYear()} Clínica Dental Kiru. Todos los derechos reservados.</p>
+                 <div className="mt-4 text-slate-500 text-sm">
+                    <button onClick={onNavigateToLogin} className="hover:text-slate-300 transition-colors">Admin Login</button>
+                </div>
             </div>
         </footer>
 
-        {showPromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} promoImageUrl={promoImageUrl} />}
+        {showPromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} settings={settings} />}
         {isModalOpen && <AppointmentForm onClose={() => setIsModalOpen(false)} onBookAppointment={onBookAppointment} />}
-        {showAdminPanel && <AdminPanel onClose={() => setShowAdminPanel(false)} onSave={onSettingsChange} currentSettings={{ heroImageUrl, promoImageUrl }} />}
-        
-        <button 
-            onClick={() => setShowAdminPanel(true)}
-            className="fixed bottom-5 right-5 bg-slate-700 text-white p-3 rounded-full shadow-lg hover:bg-slate-800 transition-colors z-40"
-            title="Panel de Administrador"
-        >
-          <div className="w-6 h-6"><SettingsIcon /></div>
-        </button>
     </div>
   );
 };
