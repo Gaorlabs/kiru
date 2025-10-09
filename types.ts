@@ -58,4 +58,5 @@ export interface Appointment {
   phone: string;
   email: string;
   dateTime: string; // ISO String
+  service: string;
 }

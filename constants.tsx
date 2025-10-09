@@ -13,6 +13,21 @@ export const DENTAL_TREATMENTS: DentalTreatment[] = [
     { id: 'unerupted', label: 'No Erupcionado', category: 'Otros', price: 0, appliesTo: 'whole_tooth', icon: <UneruptedIcon /> },
 ];
 
+export const DENTAL_SERVICES = [
+    { id: 'prevention', label: 'Prevención y Diagnóstico' },
+    { id: 'restorations', label: 'Restauraciones' },
+    { id: 'endodontics', label: 'Endodoncia' },
+    { id: 'orthodontics', label: 'Ortodoncia' },
+    { id: 'oral_surgery', label: 'Cirugía Bucal' },
+    { id: 'cosmetic_dentistry', label: 'Estética Dental' },
+    { id: 'emergency', label: 'Urgencia' },
+];
+
+export const DENTAL_SERVICES_MAP = DENTAL_SERVICES.reduce((acc, service) => {
+    acc[service.id] = service.label;
+    return acc;
+}, {} as Record<string, string>);
+
 export const TREATMENT_CATEGORIES = [
     'Patología',
     'Operatoria',

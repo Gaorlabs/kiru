@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, PropsWithChildren } from 'react';
 import { Odontogram } from './Odontogram';
 import { Toolbar } from './Toolbar';
 import { TreatmentPlan } from './TreatmentPlan';
@@ -31,10 +31,15 @@ interface OdontogramAppProps {
     appointments: Appointment[];
 }
 
+// FIX: Redefined TabPanel with a Props interface to fix an issue where TypeScript was not correctly inferring the `children` prop.
+type TabPanelProps = PropsWithChildren<{
+    title: React.ReactNode;
+}>;
+
 // FIX: Create a wrapper component for Tab panels to allow ReactNode in title prop,
 // which is not supported by standard div elements. This component consumes the 'title'
 // prop and only renders its children, preventing the 'title' from being passed to the DOM.
-const TabPanel = ({ children }: { title: React.ReactNode; children: React.ReactNode }) => {
+const TabPanel = ({ children }: TabPanelProps) => {
     return <>{children}</>;
 };
 
