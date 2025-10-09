@@ -30,6 +30,7 @@ const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
     const [settings, setSettings] = useState<AppSettings>(initialSettings);
+    const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
 
     const handleBookAppointment = (appointmentData: Omit<Appointment, 'id' | 'status'>) => {
         const newAppointment: Appointment = {
@@ -48,12 +49,38 @@ const App: React.FC = () => {
         }
     };
     
-    const handleUpdateAppointment = (updatedAppointment: Appointment) => {
-        setAppointments(prev => prev.map(app => app.id === updatedAppointment.id ? updatedAppointment : app));
+    const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id' | 'status'> & { id?: string; status?: 'confirmed' | 'completed' | 'canceled' }) => {
+        if (appointmentData.id) {
+            // Update
+            setAppointments(prev => prev.map(app => app.id === appointmentData.id ? { ...app, ...appointmentData } as Appointment : app));
+        } else {
+            // Create
+            const newAppointment: Appointment = {
+                id: crypto.randomUUID(),
+                name: appointmentData.name,
+                phone: appointmentData.phone,
+                email: appointmentData.email,
+                dateTime: appointmentData.dateTime,
+                service: appointmentData.service,
+                status: 'confirmed',
+            };
+            setAppointments(prev => [...prev, newAppointment]);
+        }
+    };
+    
+    const handleDeleteAppointment = (appointmentId: string) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
+            setAppointments(prev => prev.filter(app => app.id !== appointmentId));
+        }
     };
     
     const handleUpdateSettings = (updatedSettings: AppSettings) => {
         setSettings(updatedSettings);
+    };
+
+    const handleNavigateToOdontogram = (appointment: Appointment) => {
+        setSelectedPatient(appointment);
+        setCurrentPage('odontogram');
     };
 
     const renderPage = () => {
@@ -63,9 +90,21 @@ const App: React.FC = () => {
             case 'login':
                 return <LoginPage onLogin={handleLogin} onNavigateToLanding={() => setCurrentPage('landing')} settings={settings} />;
             case 'admin':
-                return <AdminPage appointments={appointments} onUpdateAppointment={handleUpdateAppointment} settings={settings} onUpdateSettings={handleUpdateSettings} onNavigateToOdontogram={() => setCurrentPage('odontogram')} />;
+                return <AdminPage 
+                            appointments={appointments} 
+                            onSaveAppointment={handleSaveAppointment}
+                            onDeleteAppointment={handleDeleteAppointment}
+                            settings={settings} 
+                            onUpdateSettings={handleUpdateSettings} 
+                            onNavigateToOdontogram={handleNavigateToOdontogram} 
+                        />;
             case 'odontogram':
-                 return <OdontogramApp appointments={appointments} isAuthenticated={isAuthenticated} onNavigateToAdmin={() => setCurrentPage('admin')} />;
+                 return <OdontogramApp 
+                            appointments={appointments} 
+                            isAuthenticated={isAuthenticated} 
+                            onNavigateToAdmin={() => setCurrentPage('admin')}
+                            patient={selectedPatient} 
+                        />;
             default:
                 return <LandingPage onBookAppointment={handleBookAppointment} settings={settings} onNavigateToLogin={() => setCurrentPage('login')} />;
         }

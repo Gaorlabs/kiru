@@ -68,3 +68,9 @@ export interface AppSettings {
     promoTitle: string;
     promoSubtitle: string;
 }
+
+export interface AdminAppointmentModalProps {
+    appointment: Appointment | Partial<Appointment> | null;
+    onClose: () => void;
+    onSave: (appointment: Omit<Appointment, 'id' | 'status'> & { id?: string; status?: 'confirmed' | 'completed' | 'canceled' }) => void;
+}

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect, PropsWithChildren } from 'react';
 import { Odontogram } from './Odontogram';
 import { Toolbar } from './Toolbar';
@@ -34,6 +33,7 @@ interface OdontogramAppProps {
     appointments: Appointment[];
     isAuthenticated: boolean;
     onNavigateToAdmin: () => void;
+    patient: Appointment | null;
 }
 
 // FIX: Redefined TabPanel with a Props interface to fix an issue where TypeScript was not correctly inferring the `children` prop.
@@ -48,7 +48,7 @@ const TabPanel = ({ children }: TabPanelProps) => {
     return <>{children}</>;
 };
 
-export function OdontogramApp({ appointments, isAuthenticated, onNavigateToAdmin }: OdontogramAppProps) {
+export function OdontogramApp({ appointments, isAuthenticated, onNavigateToAdmin, patient }: OdontogramAppProps) {
     const [permanentState, setPermanentState] = useState<OdontogramState>(createInitialState(ALL_TEETH_PERMANENT));
     const [deciduousState, setDeciduousState] = useState<OdontogramState>(createInitialState(ALL_TEETH_DECIDUOUS));
     const [odontogramType, setOdontogramType] = useState<OdontogramType>('permanent');
@@ -287,7 +287,7 @@ export function OdontogramApp({ appointments, isAuthenticated, onNavigateToAdmin
                 </aside>
                 
                 <div className="flex-1 flex flex-col p-4 overflow-hidden">
-                    <PatientHeader />
+                    <PatientHeader patient={patient} />
                      <div className="flex items-center justify-center mb-4">
                         <div className="bg-slate-200 dark:bg-slate-800 p-1 rounded-lg">
                             <button onClick={() => setOdontogramType('permanent')} className={`px-4 py-1 rounded-md text-sm font-semibold transition-colors ${odontogramType === 'permanent' ? 'bg-white dark:bg-white text-slate-800 shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'}`}>Permanente</button>
