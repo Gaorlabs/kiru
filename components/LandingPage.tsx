@@ -37,7 +37,11 @@ const PromotionModal: React.FC<{
 }> = ({onClose, onBook, promotion}) => (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in">
         <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden transform animate-scale-in">
-             <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10 bg-white/50 rounded-full p-1 hover:bg-white">
+             <button 
+                onClick={onClose} 
+                className="absolute top-3 right-3 text-slate-600 hover:text-slate-900 transition-colors z-10 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white"
+                aria-label="Cerrar promoción"
+            >
                 <CloseIcon />
             </button>
             <div className="md:grid md:grid-cols-2">
