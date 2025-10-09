@@ -3,14 +3,8 @@ import { LandingPage } from './components/LandingPage';
 import { OdontogramApp } from './components/OdontogramApp';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
-import type { Appointment } from './types';
+import type { Appointment, AppSettings } from './types';
 
-export interface AppSettings {
-  heroImageUrl: string;
-  promoImageUrl: string;
-  promoTitle: string;
-  promoSubtitle: string;
-}
 
 function App() {
     const [view, setView] = useState<'landing' | 'odontogram' | 'login' | 'admin'>('landing');
@@ -21,6 +15,7 @@ function App() {
       promoImageUrl: 'https://images.pexels.com/photos/6528860/pexels-photo-6528860.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       promoTitle: 'Una Sonrisa Saludable Comienza Aquí',
       promoSubtitle: '¡Tu Diagnóstico Dental Completo es GRATIS!',
+      loginImageUrl: 'https://images.pexels.com/photos/5356037/pexels-photo-5356037.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     });
 
     const handleBookAppointment = (appointmentData: Omit<Appointment, 'id'>) => {
@@ -62,7 +57,7 @@ function App() {
 
     switch (view) {
         case 'login':
-            return <LoginPage onLogin={handleLogin} />;
+            return <LoginPage onLogin={handleLogin} onNavigateToLanding={() => navigateTo('landing')} settings={settings} />;
         case 'admin':
             if (isAuthenticated) {
                 return <AdminPage
@@ -75,7 +70,7 @@ function App() {
                 />;
             }
             // If not authenticated, redirect to login
-            return <LoginPage onLogin={handleLogin} />;
+            return <LoginPage onLogin={handleLogin} onNavigateToLanding={() => navigateTo('landing')} settings={settings} />;
         case 'odontogram':
             return <OdontogramApp appointments={appointments} />;
         case 'landing':
@@ -83,7 +78,6 @@ function App() {
              return <LandingPage 
                   onBookAppointment={handleBookAppointment}
                   settings={settings}
-                  onSettingsChange={handleSettingsChange}
                   onNavigateToLogin={() => navigateTo('login')}
                 />;
     }

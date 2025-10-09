@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { DentalIcon, UserIcon, PasswordIcon } from './icons';
+import type { AppSettings } from '../types';
 
 interface LoginPageProps {
     onLogin: (success: boolean) => void;
+    onNavigateToLanding: () => void;
+    settings: AppSettings;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onNavigateToLanding, settings }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -13,8 +16,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-
-        // Simple hardcoded authentication
         if (username === 'admin' && password === 'kiru2024') {
             onLogin(true);
         } else {
@@ -24,20 +25,36 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                <div className="bg-white shadow-2xl rounded-2xl p-8 space-y-6">
-                    <div className="text-center">
-                         <div className="w-16 h-16 text-blue-600 mx-auto mb-3"><DentalIcon /></div>
-                        <h1 className="text-3xl font-bold text-slate-900">Acceso de Administrador</h1>
-                        <p className="text-slate-500 mt-1">Inicia sesión para gestionar la clínica.</p>
+        <div className="min-h-screen bg-white dark:bg-slate-900 flex font-sans">
+            {/* Left Side - Image */}
+            <div className="hidden lg:flex w-1/2 bg-cover bg-center relative" style={{ backgroundImage: `url('${settings.loginImageUrl}')` }}>
+                <div className="absolute inset-0 bg-blue-900/60"></div>
+                <div className="relative z-10 flex flex-col justify-center items-center text-white text-center p-12">
+                     <div className="flex items-center space-x-3 mb-6">
+                        <div className="w-16 h-16"><DentalIcon /></div>
+                        <h1 className="text-6xl font-bold tracking-tight">Kiru</h1>
+                     </div>
+                    <p className="text-2xl font-light max-w-sm">Gestión Profesional para una Sonrisa Perfecta.</p>
+                </div>
+            </div>
+
+            {/* Right Side - Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+                <div className="w-full max-w-sm">
+                    <div className="text-center lg:text-left mb-10">
+                         <div className="flex items-center space-x-2 mb-4 justify-center lg:hidden">
+                            <div className="w-10 h-10 text-blue-600 dark:text-blue-400"><DentalIcon /></div>
+                            <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Kiru</h1>
+                         </div>
+                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Bienvenido de Vuelta</h2>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2">Ingresa tus credenciales para acceder al panel.</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="username" className="block text-sm font-medium text-slate-600 mb-1">Usuario</label>
+                            <label htmlFor="username" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Usuario</label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                                     <UserIcon />
                                 </div>
                                 <input
@@ -46,15 +63,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
-                                    className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 text-base text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                    className="block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 py-3 pl-11 pr-4 text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-colors"
                                     placeholder="admin"
                                 />
                             </div>
                         </div>
                         <div>
-                             <label htmlFor="password"className="block text-sm font-medium text-slate-600 mb-1">Contraseña</label>
+                             <label htmlFor="password"className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Contraseña</label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                                     <PasswordIcon />
                                 </div>
                                 <input
@@ -63,18 +80,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    className="block w-full rounded-lg border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 text-base text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                    className="block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 py-3 pl-11 pr-4 text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-colors"
                                     placeholder="••••••••"
                                 />
                             </div>
                         </div>
                         
-                        {error && <p className="text-sm text-red-600 bg-red-100 p-2 rounded-lg text-center">{error}</p>}
+                        {error && <p className="text-sm text-red-600 dark:text-red-500 text-center font-medium">{error}</p>}
                         
-                        <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-all transform hover:scale-105">
+                        <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5">
                             Iniciar Sesión
                         </button>
                     </form>
+
+                     <div className="text-center mt-8">
+                        <button onClick={onNavigateToLanding} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            &larr; Volver a la página principal
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

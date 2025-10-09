@@ -66,4 +66,5 @@ export interface AppSettings {
   promoImageUrl: string;
   promoTitle: string;
   promoSubtitle: string;
+  loginImageUrl: string;
 }

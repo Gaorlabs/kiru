@@ -35,6 +35,10 @@ const SettingsPanel: React.FC<{
                     <label htmlFor="heroImageUrl" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">URL Imagen Principal</label>
                     <input type="text" name="heroImageUrl" value={settings.heroImageUrl} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg py-2 px-3 text-slate-900 dark:text-white" />
                 </div>
+                 <div>
+                    <label htmlFor="loginImageUrl" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">URL Imagen de Ingreso</label>
+                    <input type="text" name="loginImageUrl" value={settings.loginImageUrl} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg py-2 px-3 text-slate-900 dark:text-white" />
+                </div>
                 <div>
                     <label htmlFor="promoImageUrl" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">URL Imagen Pop-up</label>
                     <input type="text" name="promoImageUrl" value={settings.promoImageUrl} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg py-2 px-3 text-slate-900 dark:text-white" />
