@@ -67,6 +67,7 @@ function App() {
                     onDeleteAppointment={handleDeleteAppointment}
                     onLogout={handleLogout}
                     onNavigateToLanding={() => navigateTo('landing')}
+                    onNavigateToOdontogram={() => navigateTo('odontogram')}
                 />;
             }
             // If not authenticated, redirect to login
