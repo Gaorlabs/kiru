@@ -3,12 +3,17 @@ import { OdontogramApp } from './components/OdontogramApp';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
-import type { Appointment, AppSettings, Promotion } from './types';
+import type { Appointment, AppSettings, Promotion, Doctor } from './types';
 
 // Mock Data
+const initialDoctors: Doctor[] = [
+    { id: 'doc1', name: 'Dr. Alejandro Vargas', specialty: 'Odontología General' },
+    { id: 'doc2', name: 'Dra. Sofia Castillo', specialty: 'Ortodoncia' },
+];
+
 const initialAppointments: Appointment[] = [
-    { id: '1', name: 'Carlos Sanchez', phone: '987654321', email: 'carlos.s@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), service: 'restorations', status: 'confirmed' },
-    { id: '2', name: 'Maria Rodriguez', phone: '912345678', email: 'maria.r@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), service: 'orthodontics', status: 'confirmed' },
+    { id: '1', name: 'Carlos Sanchez', phone: '987654321', email: 'carlos.s@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), service: 'restorations', status: 'confirmed', doctorId: 'doc1' },
+    { id: '2', name: 'Maria Rodriguez', phone: '912345678', email: 'maria.r@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), service: 'orthodontics', status: 'confirmed', doctorId: 'doc2' },
 ];
 
 const initialSettings: Omit<AppSettings, 'promoImageUrl' | 'promoTitle' | 'promoSubtitle'> = {
@@ -37,6 +42,7 @@ type Page = 'landing' | 'login' | 'odontogram' | 'admin';
 const App: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<Page>('landing');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
     const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
     const [settings, setSettings] = useState<AppSettings>(initialSettings as AppSettings);
     const [promotions, setPromotions] = useState<Promotion[]>(initialPromotions);
@@ -71,6 +77,7 @@ const App: React.FC = () => {
                 dateTime: appointmentData.dateTime,
                 service: appointmentData.service,
                 status: 'confirmed',
+                doctorId: appointmentData.doctorId,
             };
             setAppointments(prev => [...prev, newAppointment]);
         }
@@ -79,6 +86,26 @@ const App: React.FC = () => {
     const handleDeleteAppointment = (appointmentId: string) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
             setAppointments(prev => prev.filter(app => app.id !== appointmentId));
+        }
+    };
+
+    const handleSaveDoctor = (doctorData: Omit<Doctor, 'id'> & { id?: string }) => {
+        if (doctorData.id) {
+            setDoctors(prev => prev.map(doc => doc.id === doctorData.id ? { ...doc, ...doctorData } as Doctor : doc));
+        } else {
+            const newDoctor: Doctor = {
+                id: crypto.randomUUID(),
+                name: doctorData.name,
+                specialty: doctorData.specialty,
+            };
+            setDoctors(prev => [...prev, newDoctor]);
+        }
+    };
+
+    const handleDeleteDoctor = (doctorId: string) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar este doctor? Se desasignarán sus citas.')) {
+            setDoctors(prev => prev.filter(doc => doc.id !== doctorId));
+            setAppointments(prev => prev.map(app => app.doctorId === doctorId ? { ...app, doctorId: undefined } : app));
         }
     };
     
@@ -98,7 +125,7 @@ const App: React.FC = () => {
             const newPromotion: Promotion = {
                 ...promotionData,
                 id: crypto.randomUUID(),
-                isActive: false, // New promotions are inactive by default
+                isActive: false, 
             };
             setPromotions(prev => [...prev, newPromotion]);
         }
@@ -135,12 +162,15 @@ const App: React.FC = () => {
             case 'admin':
                 return <AdminPage 
                             appointments={appointments} 
+                            doctors={doctors}
+                            promotions={promotions}
+                            settings={settings} 
                             onSaveAppointment={handleSaveAppointment}
                             onDeleteAppointment={handleDeleteAppointment}
-                            settings={settings} 
+                            onSaveDoctor={handleSaveDoctor}
+                            onDeleteDoctor={handleDeleteDoctor}
                             onUpdateSettings={handleUpdateSettings} 
                             onNavigateToOdontogram={handleNavigateToOdontogram}
-                            promotions={promotions}
                             onSavePromotion={handleSavePromotion}
                             onDeletePromotion={handleDeletePromotion}
                             onTogglePromotionActive={handleTogglePromotionActive}

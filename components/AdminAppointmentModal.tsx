@@ -3,13 +3,12 @@ import type { AdminAppointmentModalProps } from '../types';
 import { CloseIcon } from './icons';
 import { DENTAL_SERVICES } from '../constants';
 
-export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ appointment, onClose, onSave }) => {
+export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ appointment, doctors, onClose, onSave }) => {
     const [formData, setFormData] = useState<any>({});
 
     useEffect(() => {
         if (appointment) {
              const { dateTime } = appointment;
-             // Format date for datetime-local input
              const formattedDateTime = dateTime ? new Date(new Date(dateTime).getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
              setFormData({ ...appointment, dateTime: formattedDateTime });
         }
@@ -60,6 +59,13 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ ap
                         <div>
                             <label htmlFor="dateTime" className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Fecha y Hora</label>
                             <input type="datetime-local" name="dateTime" id="dateTime" value={formData.dateTime || ''} onChange={handleChange} required className="w-full bg-slate-100 dark:bg-slate-700 border-transparent rounded-lg p-2 text-slate-900 dark:text-white" />
+                        </div>
+                         <div>
+                            <label htmlFor="doctorId" className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Doctor Asignado</label>
+                             <select name="doctorId" id="doctorId" value={formData.doctorId || ''} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-700 border-transparent rounded-lg p-2 text-slate-900 dark:text-white">
+                                <option value="">Sin asignar</option>
+                                 {doctors.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                             </select>
                         </div>
                         <div>
                             <label htmlFor="service" className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Servicio</label>

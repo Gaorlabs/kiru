@@ -39,7 +39,7 @@ const PromotionModal: React.FC<{
         <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden transform animate-scale-in">
              <button 
                 onClick={onClose} 
-                className="absolute top-3 right-3 text-slate-600 hover:text-slate-900 transition-colors z-10 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white"
+                className="absolute top-4 right-4 text-slate-500 hover:text-slate-800 transition-all z-10 bg-white rounded-full p-2.5 shadow-xl hover:bg-slate-200 hover:scale-110 border border-slate-200"
                 aria-label="Cerrar promoción"
             >
                 <CloseIcon />
@@ -246,8 +246,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     <span>Dirección: Av. Sonrisas 123, Lima, Perú</span>
                  </div>
                 <p className="text-slate-400 mt-8">&copy; {new Date().getFullYear()} Clínica Dental Kiru. Todos los derechos reservados.</p>
-                 <div className="mt-4 text-slate-500 text-sm">
-                    <button onClick={onNavigateToLogin} className="hover:text-slate-300 transition-colors">Admin Login</button>
+                 <div className="mt-6">
+                    <button 
+                        onClick={onNavigateToLogin} 
+                        className="border border-slate-600 hover:border-slate-500 hover:bg-slate-700 text-slate-400 font-semibold py-2 px-5 rounded-full transition-colors text-xs uppercase tracking-wider"
+                    >
+                        Admin Login
+                    </button>
                 </div>
             </div>
         </footer>

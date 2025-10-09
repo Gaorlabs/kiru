@@ -55,6 +55,13 @@ export interface Appointment {
     dateTime: string;
     service: string;
     status: 'confirmed' | 'completed' | 'canceled';
+    doctorId?: string;
+}
+
+export interface Doctor {
+    id: string;
+    name: string;
+    specialty: string;
 }
 
 export interface AppSettings {
@@ -68,6 +75,7 @@ export interface AppSettings {
 
 export interface AdminAppointmentModalProps {
     appointment: Appointment | Partial<Appointment> | null;
+    doctors: Doctor[];
     onClose: () => void;
     onSave: (appointment: Omit<Appointment, 'id' | 'status'> & { id?: string; status?: 'confirmed' | 'completed' | 'canceled' }) => void;
 }
@@ -86,4 +94,10 @@ export interface AdminPromotionModalProps {
     promotion: Promotion | Partial<Promotion> | null;
     onClose: () => void;
     onSave: (promotion: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => void;
+}
+
+export interface AdminDoctorModalProps {
+    doctor: Doctor | Partial<Doctor> | null;
+    onClose: () => void;
+    onSave: (doctor: Omit<Doctor, 'id'> & { id?: string }) => void;
 }

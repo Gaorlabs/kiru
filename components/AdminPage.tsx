@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
-import type { Appointment, AppSettings, Promotion, AdminAppointmentModalProps, AdminPromotionModalProps } from '../types';
+import React, { useState, useMemo } from 'react';
+import type { Appointment, AppSettings, Promotion, Doctor, AdminAppointmentModalProps, AdminPromotionModalProps, AdminDoctorModalProps } from '../types';
 import { DENTAL_SERVICES_MAP } from '../constants';
-import { DentalIcon, CalendarIcon, SettingsIcon, UserIcon, BriefcaseIcon, PlusIcon, PencilIcon, TrashIcon, OdontogramIcon, MegaphoneIcon } from './icons';
+import { DentalIcon, CalendarIcon, SettingsIcon, UserIcon, BriefcaseIcon, PlusIcon, PencilIcon, TrashIcon, OdontogramIcon, MegaphoneIcon, DashboardIcon, UsersIcon } from './icons';
 import { AdminAppointmentModal } from './AdminAppointmentModal';
 import { AdminPromotionModal } from './AdminPromotionModal';
+import { AdminDoctorModal } from './AdminDoctorModal';
 
 interface AdminPageProps {
     appointments: Appointment[];
+    doctors: Doctor[];
+    promotions: Promotion[];
+    settings: AppSettings;
     onSaveAppointment: AdminAppointmentModalProps['onSave'];
     onDeleteAppointment: (id: string) => void;
-    settings: AppSettings;
+    onSaveDoctor: AdminDoctorModalProps['onSave'];
+    onDeleteDoctor: (id: string) => void;
     onUpdateSettings: (settings: AppSettings) => void;
     onNavigateToOdontogram: (appointment: Appointment) => void;
-    promotions: Promotion[];
     onSavePromotion: AdminPromotionModalProps['onSave'];
     onDeletePromotion: (id: string) => void;
     onTogglePromotionActive: (id: string) => void;
 }
 
-type AdminTab = 'agenda' | 'doctores' | 'promociones' | 'configuracion';
+type AdminTab = 'dashboard' | 'agenda' | 'doctores' | 'atencion' | 'promociones' | 'configuracion';
 
 const SidebarLink: React.FC<{
     icon: React.ReactNode;
@@ -40,25 +44,25 @@ const SidebarLink: React.FC<{
 );
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {
-    const [activeTab, setActiveTab] = useState<AdminTab>('agenda');
+    const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
 
     return (
         <div className="min-h-screen flex bg-slate-100 dark:bg-slate-900 font-sans text-slate-800 dark:text-slate-200">
-            {/* Sidebar */}
             <aside className="w-64 bg-slate-800 text-white flex flex-col p-4">
                 <div className="flex items-center gap-3 mb-8 px-2">
                     <div className="w-9 h-9 text-blue-400"><DentalIcon /></div>
                     <h1 className="text-2xl font-bold">Kiru Admin</h1>
                 </div>
                 <nav className="flex flex-col gap-2">
+                    <SidebarLink icon={<DashboardIcon />} label="Dashboard" isActive={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
                     <SidebarLink icon={<CalendarIcon />} label="Agenda" isActive={activeTab === 'agenda'} onClick={() => setActiveTab('agenda')} />
-                    <SidebarLink icon={<BriefcaseIcon />} label="Doctores" isActive={activeTab === 'doctores'} onClick={() => setActiveTab('doctores')} />
+                    <SidebarLink icon={<UsersIcon />} label="Doctores" isActive={activeTab === 'doctores'} onClick={() => setActiveTab('doctores')} />
+                    <SidebarLink icon={<BriefcaseIcon />} label="Atención Clínica" isActive={activeTab === 'atencion'} onClick={() => setActiveTab('atencion')} />
                     <SidebarLink icon={<MegaphoneIcon />} label="Promociones" isActive={activeTab === 'promociones'} onClick={() => setActiveTab('promociones')} />
                     <SidebarLink icon={<SettingsIcon />} label="Configuración" isActive={activeTab === 'configuracion'} onClick={() => setActiveTab('configuracion')} />
                 </nav>
             </aside>
 
-            {/* Main Content */}
             <main className="flex-1 flex flex-col">
                 <header className="bg-white dark:bg-slate-800 shadow py-4 px-8 flex justify-end items-center">
                     <button className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
@@ -69,8 +73,10 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                     </button>
                 </header>
                 <div className="flex-1 p-8 overflow-y-auto">
+                    {activeTab === 'dashboard' && <DashboardPanel {...props} />}
                     {activeTab === 'agenda' && <AgendaPanel {...props} />}
-                    {activeTab === 'doctores' && <DoctorPanel {...props} />}
+                    {activeTab === 'doctores' && <DoctorsPanel {...props} />}
+                    {activeTab === 'atencion' && <ClinicalCarePanel {...props} />}
                     {activeTab === 'promociones' && <PromotionsPanel {...props} />}
                     {activeTab === 'configuracion' && <SettingsPanel {...props} />}
                 </div>
@@ -79,12 +85,40 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     );
 };
 
-const AgendaPanel: React.FC<AdminPageProps> = ({ appointments, onSaveAppointment, onDeleteAppointment }) => {
+const StatCard: React.FC<{ title: string, value: string | number, icon: React.ReactNode }> = ({ title, value, icon }) => (
+    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md flex items-center gap-6">
+        <div className="w-12 h-12 text-white bg-blue-500 rounded-full flex items-center justify-center">{icon}</div>
+        <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{title}</p>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">{value}</p>
+        </div>
+    </div>
+);
+
+const DashboardPanel: React.FC<AdminPageProps> = ({ appointments, promotions }) => {
+    const today = new Date().toDateString();
+    const appointmentsToday = appointments.filter(app => new Date(app.dateTime).toDateString() === today).length;
+    const totalPatients = new Set(appointments.map(app => app.email)).size;
+    const activePromotions = promotions.filter(p => p.isActive).length;
+
+    return (
+        <div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Dashboard</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <StatCard title="Citas para Hoy" value={appointmentsToday} icon={<CalendarIcon />} />
+                <StatCard title="Pacientes Totales" value={totalPatients} icon={<UsersIcon />} />
+                <StatCard title="Promociones Activas" value={activePromotions} icon={<MegaphoneIcon />} />
+            </div>
+        </div>
+    );
+};
+
+const AgendaPanel: React.FC<AdminPageProps> = ({ appointments, doctors, onSaveAppointment, onDeleteAppointment }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAppointment, setEditingAppointment] = useState<Appointment | Partial<Appointment> | null>(null);
 
     const handleOpenModal = (appointment: Appointment | null = null) => {
-        setEditingAppointment(appointment || { name: '', phone: '', email: '', dateTime: '', service: '' });
+        setEditingAppointment(appointment || { name: '', phone: '', email: '', dateTime: '', service: '', doctorId: '' });
         setIsModalOpen(true);
     };
 
@@ -92,6 +126,8 @@ const AgendaPanel: React.FC<AdminPageProps> = ({ appointments, onSaveAppointment
         setIsModalOpen(false);
         setEditingAppointment(null);
     };
+    
+    const doctorsMap = useMemo(() => new Map(doctors.map(doc => [doc.id, doc.name])), [doctors]);
 
     return (
         <div>
@@ -112,8 +148,8 @@ const AgendaPanel: React.FC<AdminPageProps> = ({ appointments, onSaveAppointment
                             <tr>
                                 <th className="py-3 px-4">Paciente</th>
                                 <th className="py-3 px-4">Fecha y Hora</th>
+                                <th className="py-3 px-4">Doctor Asignado</th>
                                 <th className="py-3 px-4">Servicio</th>
-                                <th className="py-3 px-4">Teléfono</th>
                                 <th className="py-3 px-4">Acciones</th>
                             </tr>
                         </thead>
@@ -122,8 +158,8 @@ const AgendaPanel: React.FC<AdminPageProps> = ({ appointments, onSaveAppointment
                                 <tr key={app.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                                     <td className="py-3 px-4 font-medium">{app.name}</td>
                                     <td className="py-3 px-4">{new Date(app.dateTime).toLocaleString('es-ES')}</td>
+                                    <td className="py-3 px-4">{app.doctorId ? doctorsMap.get(app.doctorId) : 'Sin asignar'}</td>
                                     <td className="py-3 px-4">{DENTAL_SERVICES_MAP[app.service] || app.service}</td>
-                                    <td className="py-3 px-4">{app.phone}</td>
                                     <td className="py-3 px-4 flex items-center gap-4">
                                         <button onClick={() => handleOpenModal(app)} className="text-blue-500 hover:text-blue-700" title="Editar"><PencilIcon /></button>
                                         <button onClick={() => onDeleteAppointment(app.id)} className="text-red-500 hover:text-red-700" title="Eliminar"><TrashIcon /></button>
@@ -134,14 +170,94 @@ const AgendaPanel: React.FC<AdminPageProps> = ({ appointments, onSaveAppointment
                     </table>
                 </div>
             </div>
-            {isModalOpen && <AdminAppointmentModal appointment={editingAppointment} onClose={handleCloseModal} onSave={onSaveAppointment} />}
+            {isModalOpen && <AdminAppointmentModal appointment={editingAppointment} doctors={doctors} onClose={handleCloseModal} onSave={onSaveAppointment} />}
         </div>
     );
 };
 
-const DoctorPanel: React.FC<AdminPageProps> = ({ appointments, onNavigateToOdontogram }) => (
+const DoctorsPanel: React.FC<AdminPageProps> = ({ doctors, onSaveDoctor, onDeleteDoctor }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingDoctor, setEditingDoctor] = useState<Doctor | Partial<Doctor> | null>(null);
+
+    const handleOpenModal = (doctor: Doctor | null = null) => {
+        setEditingDoctor(doctor || { name: '', specialty: '' });
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingDoctor(null);
+    };
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestión de Doctores</h2>
+                <button
+                    onClick={() => handleOpenModal()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                    <PlusIcon />
+                    <span>Nuevo Doctor</span>
+                </button>
+            </div>
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                <div className="overflow-x-auto">
+                     <table className="w-full text-left">
+                        <thead className="border-b border-slate-200 dark:border-slate-700 text-sm text-slate-500 dark:text-slate-400">
+                            <tr>
+                                <th className="py-3 px-4">Nombre</th>
+                                <th className="py-3 px-4">Especialidad</th>
+                                <th className="py-3 px-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {doctors.map(doc => (
+                                <tr key={doc.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                    <td className="py-3 px-4 font-medium">{doc.name}</td>
+                                    <td className="py-3 px-4">{doc.specialty}</td>
+                                    <td className="py-3 px-4 flex items-center gap-4">
+                                        <button onClick={() => handleOpenModal(doc)} className="text-blue-500 hover:text-blue-700" title="Editar"><PencilIcon /></button>
+                                        <button onClick={() => onDeleteDoctor(doc.id)} className="text-red-500 hover:text-red-700" title="Eliminar"><TrashIcon /></button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+             {isModalOpen && <AdminDoctorModal doctor={editingDoctor} onClose={handleCloseModal} onSave={onSaveDoctor} />}
+        </div>
+    );
+};
+
+const ClinicalCarePanel: React.FC<AdminPageProps> = ({ appointments, doctors, onNavigateToOdontogram }) => {
+    const [selectedDoctorId, setSelectedDoctorId] = useState<string>('all');
+    
+    const filteredAppointments = useMemo(() => {
+        if (selectedDoctorId === 'all') {
+            return appointments;
+        }
+        return appointments.filter(app => app.doctorId === selectedDoctorId);
+    }, [appointments, selectedDoctorId]);
+
+    return (
      <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Flujo de Atención de Pacientes</h2>
+        <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Flujo de Atención Clínica</h2>
+            <div>
+                 <label htmlFor="doctorFilter" className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Filtrar por Doctor</label>
+                 <select 
+                    id="doctorFilter"
+                    value={selectedDoctorId}
+                    onChange={(e) => setSelectedDoctorId(e.target.value)}
+                    className="w-full md:w-64 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-slate-900 dark:text-white"
+                 >
+                    <option value="all">Todos los Doctores</option>
+                    {doctors.map(doc => <option key={doc.id} value={doc.id}>{doc.name}</option>)}
+                 </select>
+            </div>
+        </div>
         <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
              <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -154,7 +270,7 @@ const DoctorPanel: React.FC<AdminPageProps> = ({ appointments, onNavigateToOdont
                         </tr>
                     </thead>
                     <tbody>
-                        {appointments.filter(a => new Date(a.dateTime) >= new Date()).map(app => (
+                        {filteredAppointments.filter(a => new Date(a.dateTime) >= new Date()).map(app => (
                             <tr key={app.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
                                 <td className="py-3 px-4 font-medium">{app.name}</td>
                                 <td className="py-3 px-4">{new Date(app.dateTime).toLocaleString('es-ES')}</td>
@@ -175,7 +291,9 @@ const DoctorPanel: React.FC<AdminPageProps> = ({ appointments, onNavigateToOdont
             </div>
         </div>
     </div>
-);
+    );
+};
+
 
 const PromotionsPanel: React.FC<AdminPageProps> = ({ promotions, onSavePromotion, onDeletePromotion, onTogglePromotionActive }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -261,7 +379,6 @@ const SettingsPanel: React.FC<AdminPageProps> = ({ settings, onUpdateSettings })
         { key: 'heroImageUrl', label: 'URL Imagen Principal' },
         { key: 'loginImageUrl', label: 'URL Imagen de Ingreso' },
     ];
-
 
     return (
         <div>
