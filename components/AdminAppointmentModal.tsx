@@ -37,7 +37,6 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps & { them
         } as Omit<Appointment, 'id'> & { id?: string };
 
         onSave(dataToSave);
-        onClose();
     };
 
     if (!appointment) return null;

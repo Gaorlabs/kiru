@@ -299,8 +299,23 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
         }
     };
 
+    const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id'> & { id?: string }) => {
+        props.onSaveAppointment(appointmentData);
+        setEditingAppointment(null);
+    };
+
+    const handleSaveDoctor = (doctorData: Omit<Doctor, 'id'> & { id?: string }) => {
+        props.onSaveDoctor(doctorData);
+        setEditingDoctor(null);
+    };
+    
+    const handleSavePromotion = (promotionData: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
+        props.onSavePromotion(promotionData);
+        setEditingPromotion(null);
+    }
+
     return (
-        <div className="flex h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors">
+        <div className={`flex h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors ${theme}`}>
             {/* Sidebar */}
             <aside className="w-64 bg-white dark:bg-slate-800 flex flex-col p-4 border-r border-slate-200 dark:border-slate-700">
                 <div className="flex items-center space-x-2 mb-8 px-2">
@@ -329,9 +344,9 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
             </main>
 
             {/* Modals */}
-            {editingAppointment && <AdminAppointmentModal theme={theme} appointment={editingAppointment} doctors={props.doctors} onClose={() => setEditingAppointment(null)} onSave={props.onSaveAppointment} />}
-            {editingDoctor && <AdminDoctorModal theme={theme} doctor={editingDoctor} onClose={() => setEditingDoctor(null)} onSave={props.onSaveDoctor} />}
-            {editingPromotion && <AdminPromotionModal theme={theme} promotion={editingPromotion} onClose={() => setEditingPromotion(null)} onSave={props.onSavePromotion} />}
+            {editingAppointment && <AdminAppointmentModal theme={theme} appointment={editingAppointment} doctors={props.doctors} onClose={() => setEditingAppointment(null)} onSave={handleSaveAppointment} />}
+            {editingDoctor && <AdminDoctorModal theme={theme} doctor={editingDoctor} onClose={() => setEditingDoctor(null)} onSave={handleSaveDoctor} />}
+            {editingPromotion && <AdminPromotionModal theme={theme} promotion={editingPromotion} onClose={() => setEditingPromotion(null)} onSave={handleSavePromotion} />}
         </div>
     );
 };

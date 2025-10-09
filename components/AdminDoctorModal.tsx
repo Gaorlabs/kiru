@@ -20,7 +20,6 @@ export const AdminDoctorModal: React.FC<AdminDoctorModalProps & { theme: 'light'
         e.preventDefault();
         const { id, ...saveData } = formData;
         onSave({ id, ...(saveData as Omit<Doctor, 'id'>) });
-        onClose();
     };
 
     if (!doctor) return null;

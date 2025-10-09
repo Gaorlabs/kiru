@@ -26,7 +26,6 @@ export const AdminPromotionModal: React.FC<AdminPromotionModalProps & { theme: '
         e.preventDefault();
         const { id, isActive, ...saveData } = formData;
         onSave({ id, ...(saveData as Omit<Promotion, 'id' | 'isActive'>) });
-        onClose();
     };
 
     if (!promotion) return null;

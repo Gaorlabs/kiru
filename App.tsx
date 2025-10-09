@@ -12,11 +12,11 @@ const initialDoctors: Doctor[] = [
 ];
 
 const initialAppointments: Appointment[] = [
-    { id: '1', name: 'Carlos Sanchez', phone: '987654321', email: 'carlos.s@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), service: 'restorations', status: 'confirmed', doctorId: 'doc1' },
-    { id: '2', name: 'Maria Rodriguez', phone: '912345678', email: 'maria.r@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), service: 'orthodontics', status: 'confirmed', doctorId: 'doc2' },
+    { id: '1', name: 'Carlos Sanchez', phone: '987654321', email: 'carlos.s@example.com', dateTime: new Date(new Date().setDate(new Date().getDate())).toISOString(), service: 'restorations', status: 'confirmed', doctorId: 'doc1' },
+    { id: '2', name: 'Maria Rodriguez', phone: '912345678', email: 'maria.r@example.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), service: 'orthodontics', status: 'confirmed', doctorId: 'doc2' },
 ];
 
-const initialSettings: Omit<AppSettings, 'promoImageUrl' | 'promoTitle' | 'promoSubtitle'> = {
+const initialSettings: AppSettings = {
     clinicName: "Kiru",
     clinicAddress: "Av. Sonrisas 123, Lima, Perú",
     clinicPhone: "(+51) 123 456 78",
@@ -44,7 +44,7 @@ const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
     const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
-    const [settings, setSettings] = useState<AppSettings>(initialSettings as AppSettings);
+    const [settings, setSettings] = useState<AppSettings>(initialSettings);
     const [promotions, setPromotions] = useState<Promotion[]>(initialPromotions);
     const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
 
@@ -65,14 +65,16 @@ const App: React.FC = () => {
         }
     };
     
-    const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id'> & { id?: string }) => {
+    const handleSaveAppointment = useCallback((appointmentData: Omit<Appointment, 'id'> & { id?: string }) => {
         if (appointmentData.id) {
-            // Update
             setAppointments(prev =>
-                prev.map(app => (app.id === appointmentData.id ? ({ ...app, ...appointmentData } as Appointment) : app))
+                prev.map(app =>
+                    app.id === appointmentData.id
+                        ? { ...app, ...appointmentData } as Appointment
+                        : app
+                )
             );
         } else {
-            // Create
             const newAppointment: Appointment = {
                 id: crypto.randomUUID(),
                 name: appointmentData.name || '',
@@ -85,7 +87,7 @@ const App: React.FC = () => {
             };
             setAppointments(prev => [...prev, newAppointment]);
         }
-    };
+    }, []);
     
     const handleDeleteAppointment = (appointmentId: string) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
@@ -93,14 +95,14 @@ const App: React.FC = () => {
         }
     };
 
-    const handleSaveDoctor = (doctorData: Omit<Doctor, 'id'> & { id?: string }) => {
+    const handleSaveDoctor = useCallback((doctorData: Omit<Doctor, 'id'> & { id?: string }) => {
         if (doctorData.id) {
-            // Update
             setDoctors(prev =>
-                prev.map(doc => (doc.id === doctorData.id ? ({ ...doc, ...doctorData } as Doctor) : doc))
+                prev.map(doc =>
+                    doc.id === doctorData.id ? ({ ...doc, ...doctorData } as Doctor) : doc
+                )
             );
         } else {
-            // Create
             const newDoctor: Doctor = {
                 id: crypto.randomUUID(),
                 name: doctorData.name || '',
@@ -108,7 +110,7 @@ const App: React.FC = () => {
             };
             setDoctors(prev => [...prev, newDoctor]);
         }
-    };
+    }, []);
 
     const handleDeleteDoctor = (doctorId: string) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar este doctor? Se desasignarán sus citas.')) {
@@ -126,14 +128,14 @@ const App: React.FC = () => {
         setCurrentPage('odontogram');
     };
 
-    const handleSavePromotion = (promotionData: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
+    const handleSavePromotion = useCallback((promotionData: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
        if (promotionData.id) {
-            // Update
             setPromotions(prev =>
-                prev.map(p => (p.id === promotionData.id ? ({ ...p, ...promotionData } as Promotion) : p))
+                prev.map(p =>
+                    p.id === promotionData.id ? { ...p, ...promotionData } as Promotion : p
+                )
             );
         } else {
-            // Create
             const newPromotion: Promotion = {
                 id: crypto.randomUUID(),
                 title: promotionData.title || '',
@@ -145,7 +147,7 @@ const App: React.FC = () => {
             };
             setPromotions(prev => [...prev, newPromotion]);
         }
-    };
+    }, []);
 
     const handleDeletePromotion = (promotionId: string) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar esta promoción?')) {
@@ -157,7 +159,7 @@ const App: React.FC = () => {
         setPromotions(prev =>
             prev.map(p => ({
                 ...p,
-                isActive: p.id === promotionId, // Only one can be active
+                isActive: p.id === promotionId ? !p.isActive : false,
             }))
         );
     };
