@@ -20,7 +20,17 @@ export const AdminPromotionModal: React.FC<AdminPromotionModalProps> = ({ promot
     }, [promotion]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        const { name, value } = e.target;
+        if (name === 'imageUrl') {
+            let finalValue = value.trim();
+            const urlMatch = finalValue.match(/url\((['"]?)(.*?)\1\)/);
+            if (urlMatch) {
+                finalValue = urlMatch[2].trim();
+            }
+            setFormData(prev => ({ ...prev, [name]: finalValue }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {

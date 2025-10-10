@@ -256,7 +256,16 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
             case 'settings': {
                 const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                     const { name, value } = e.target;
-                    setLocalSettings(prev => ({ ...prev, [name]: value }));
+                    if (name === 'heroImageUrl' || name === 'loginImageUrl') {
+                        let finalValue = value.trim();
+                        const urlMatch = finalValue.match(/url\((['"]?)(.*?)\1\)/);
+                        if (urlMatch) {
+                            finalValue = urlMatch[2].trim();
+                        }
+                        setLocalSettings(prev => ({ ...prev, [name]: finalValue }));
+                    } else {
+                        setLocalSettings(prev => ({ ...prev, [name]: value }));
+                    }
                 };
                 
                 const handleSettingsSave = (e: React.FormEvent) => {
