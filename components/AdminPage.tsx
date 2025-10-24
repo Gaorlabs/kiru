@@ -63,10 +63,11 @@ const statusConfig: Record<AppointmentStatus, { title: string; color: string; }>
     requested: { title: 'Por Confirmar', color: 'bg-yellow-500' },
     confirmed: { title: 'Confirmadas', color: 'bg-blue-500' },
     waiting: { title: 'En Sala de Espera', color: 'bg-purple-500' },
+    in_consultation: { title: 'En Consulta', color: 'bg-teal-500' },
     completed: { title: 'Completadas', color: 'bg-green-500' },
     canceled: { title: 'Canceladas', color: 'bg-red-500' },
 };
-const KANBAN_COLUMNS: AppointmentStatus[] = ['requested', 'confirmed', 'waiting', 'completed', 'canceled'];
+const KANBAN_COLUMNS: AppointmentStatus[] = ['requested', 'confirmed', 'waiting', 'in_consultation', 'completed', 'canceled'];
 
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {

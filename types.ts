@@ -47,7 +47,7 @@ export interface Session {
     treatments: AppliedTreatment[];
 }
 
-export type AppointmentStatus = 'requested' | 'confirmed' | 'waiting' | 'completed' | 'canceled';
+export type AppointmentStatus = 'requested' | 'confirmed' | 'waiting' | 'in_consultation' | 'completed' | 'canceled';
 
 
 export interface Appointment {

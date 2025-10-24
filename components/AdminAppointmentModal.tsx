@@ -87,6 +87,7 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ ap
                             <option value="requested">Por Confirmar</option>
                             <option value="confirmed">Confirmada</option>
                             <option value="waiting">En Sala de Espera</option>
+                            <option value="in_consultation">En Consulta</option>
                             <option value="completed">Completada</option>
                             <option value="canceled">Cancelada</option>
                         </select>
