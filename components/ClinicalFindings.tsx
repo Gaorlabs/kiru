@@ -2,14 +2,15 @@
 import React from 'react';
 import type { ClinicalFinding } from '../types';
 import { TREATMENTS_MAP } from '../constants';
-import { TrashIcon } from './icons';
+import { TrashIcon, PencilIcon } from './icons';
 
 interface ClinicalFindingsProps {
     findings: ClinicalFinding[];
     onDeleteFinding: (findingId: string) => void;
+    onEditFinding: (finding: ClinicalFinding) => void;
 }
 
-const FindingItem: React.FC<{ finding: ClinicalFinding; onDeleteFinding: (findingId: string) => void; }> = ({ finding, onDeleteFinding }) => {
+const FindingItem: React.FC<{ finding: ClinicalFinding; onDeleteFinding: (findingId: string) => void; onEditFinding: (finding: ClinicalFinding) => void; }> = ({ finding, onDeleteFinding, onEditFinding }) => {
     const treatmentInfo = TREATMENTS_MAP[finding.condition];
     
     if (!treatmentInfo) return null;
@@ -20,17 +21,24 @@ const FindingItem: React.FC<{ finding: ClinicalFinding; onDeleteFinding: (findin
             <td className="px-4 py-3">{finding.toothId}</td>
             <td className="px-4 py-3 capitalize">{finding.surface}</td>
             <td className="px-4 py-3 text-center">
-                 <button 
-                    onClick={() => onDeleteFinding(finding.id)}
-                    className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600/50 rounded-full transition-colors" title="Eliminar Hallazgo">
-                    <TrashIcon className="w-4 h-4" />
-                </button>
+                 <div className="flex items-center justify-center space-x-2">
+                    <button 
+                        onClick={() => onEditFinding(finding)}
+                        className="p-2 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-600/50 rounded-full transition-colors" title="Editar Hallazgo">
+                        <PencilIcon className="w-4 h-4" />
+                    </button>
+                    <button 
+                        onClick={() => onDeleteFinding(finding.id)}
+                        className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600/50 rounded-full transition-colors" title="Eliminar Hallazgo">
+                        <TrashIcon className="w-4 h-4" />
+                    </button>
+                </div>
             </td>
         </tr>
     );
 }
 
-export const ClinicalFindings: React.FC<ClinicalFindingsProps> = ({ findings, onDeleteFinding }) => {
+export const ClinicalFindings: React.FC<ClinicalFindingsProps> = ({ findings, onDeleteFinding, onEditFinding }) => {
     const sortedFindings = [...findings].sort((a,b) => a.toothId - b.toothId);
     
     return (
@@ -48,7 +56,7 @@ export const ClinicalFindings: React.FC<ClinicalFindingsProps> = ({ findings, on
                                 <th scope="col" className="px-4 py-2">Hallazgo</th>
                                 <th scope="col" className="px-4 py-2">Diente</th>
                                 <th scope="col" className="px-4 py-2">Superficie</th>
-                                <th scope="col" className="px-4 py-2 text-center">Acción</th>
+                                <th scope="col" className="px-4 py-2 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -57,6 +65,7 @@ export const ClinicalFindings: React.FC<ClinicalFindingsProps> = ({ findings, on
                                     key={finding.id} 
                                     finding={finding}
                                     onDeleteFinding={onDeleteFinding}
+                                    onEditFinding={onEditFinding}
                                 />
                             ))}
                         </tbody>

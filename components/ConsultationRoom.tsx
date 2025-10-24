@@ -5,7 +5,7 @@ import { Toolbar } from './Toolbar';
 import { TreatmentPlan } from './TreatmentPlan';
 import type { OdontogramState, ToothCondition, ToothSurfaceName, WholeToothCondition, ToothState, AppliedTreatment, Session, ClinicalFinding, Appointment, PatientRecord, Prescription, ConsentForm, Payment } from '../types';
 import { ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS, DENTAL_TREATMENTS, QUADRANTS_PERMANENT, QUADRANTS_DECIDUOUS } from '../constants';
-import { DentalIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon, OdontogramIcon, BriefcaseIcon, ChevronLeftIcon, ChevronRightIcon, FileTextIcon, ClipboardListIcon, DollarSignIcon } from './icons';
+import { DentalIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon, OdontogramIcon, BriefcaseIcon, ChevronLeftIcon, ChevronRightIcon, FileTextIcon, ClipboardListIcon, DollarSignIcon, PlusIcon } from './icons';
 import { ClinicalFindings } from './ClinicalFindings';
 import { StatusBar } from './StatusBar';
 import { PatientFile } from './PatientFile';
@@ -39,6 +39,7 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
     const [odontogramType, setOdontogramType] = useState<OdontogramType>('permanent');
     const [activeTooth, setActiveTooth] = useState<{ toothId: number; surface: ToothSurfaceName | 'whole' } | null>(null);
     const [isTreatmentModalOpen, setIsTreatmentModalOpen] = useState(false);
+    const [editingFinding, setEditingFinding] = useState<ClinicalFinding | null>(null);
     
     useEffect(() => {
         setRecord(patientRecord);
@@ -134,17 +135,55 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
         });
 
     }, [setOdontogramState]);
+    
+     const updateFinding = (findingId: string, newCondition: ToothCondition | WholeToothCondition) => {
+        setRecord(prev => {
+            const newRecord = structuredClone(prev);
+            let found = false;
+            
+            const findAndUpdate = (odontogram: OdontogramState) => {
+                for (const toothId in odontogram) {
+                    const tooth = odontogram[toothId];
+                    const findingIndex = tooth.findings.findIndex(f => f.id === findingId);
+                    if (findingIndex > -1) {
+                        tooth.findings[findingIndex].condition = newCondition;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (findAndUpdate(newRecord.permanentOdontogram)) {
+                found = true;
+            }
+            if (!found) {
+                findAndUpdate(newRecord.deciduousOdontogram);
+            }
+            
+            return newRecord;
+        });
+    };
 
      const handleToothClick = (toothInfo: { toothId: number; surface: ToothSurfaceName | 'whole' }) => {
         setActiveTooth(toothInfo);
         setIsTreatmentModalOpen(true);
     };
+    
+    const handleEditFindingClick = (finding: ClinicalFinding) => {
+        setEditingFinding(finding);
+        setActiveTooth({ toothId: finding.toothId, surface: finding.surface });
+        setIsTreatmentModalOpen(true);
+    };
 
     const handleSelectTreatmentFromModal = (treatmentId: ToothCondition | WholeToothCondition) => {
-        if (activeTooth) {
+        if (editingFinding) {
+            updateFinding(editingFinding.id, treatmentId);
+        } else if (activeTooth) {
             addFinding(treatmentId, activeTooth);
         }
         setIsTreatmentModalOpen(false);
+        setActiveTooth(null);
+        setEditingFinding(null);
     };
     
     const handleSavePlan = (proposedSessions: { name: string; scheduledDate?: string; findingIds: string[] }[]) => {
@@ -367,7 +406,20 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
                                     <ClinicalFindings 
                                         findings={allFindings}
                                         onDeleteFinding={handleDeleteFinding}
+                                        onEditFinding={handleEditFindingClick}
                                     />
+                                     {allFindings.length > 0 && record.sessions.length === 0 && (
+                                        <div className="mt-6 text-center">
+                                            <button
+                                                onClick={() => setActiveView('plan')}
+                                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2 mx-auto shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-0.5"
+                                            >
+                                                <PlusIcon className="w-5 h-5" />
+                                                <span>Crear Plan de Tratamiento</span>
+                                            </button>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Crea una cotización y organiza los tratamientos en sesiones para el paciente.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -382,7 +434,11 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
                 {isTreatmentModalOpen && (
                     <Toolbar
                         target={activeTooth}
-                        onClose={() => setIsTreatmentModalOpen(false)}
+                        onClose={() => {
+                            setIsTreatmentModalOpen(false);
+                            setActiveTooth(null);
+                            setEditingFinding(null);
+                        }}
                         onSelectTreatment={handleSelectTreatmentFromModal}
                     />
                 )}
