@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import type { Appointment, Doctor, Promotion, AppSettings, AppointmentStatus } from '../types';
-import { DENTAL_SERVICES_MAP } from '../constants';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import type { Appointment, Doctor, Promotion, AppSettings, AppointmentStatus, PatientRecord, Payment } from '../types';
+import { APPOINTMENT_STATUS_CONFIG, KANBAN_COLUMNS, DENTAL_SERVICES_MAP, TREATMENTS_MAP } from '../constants';
 import {
-    DashboardIcon, AppointmentIcon, UsersIcon, MegaphoneIcon, SettingsIcon, PlusIcon, PencilIcon, TrashIcon, BriefcaseIcon, DentalIcon, MoonIcon, SunIcon, OdontogramIcon, ChevronDownIcon
+    DashboardIcon, AppointmentIcon, UsersIcon, MegaphoneIcon, SettingsIcon, PlusIcon, PencilIcon, TrashIcon, BriefcaseIcon, DentalIcon, MoonIcon, SunIcon, OdontogramIcon, ChevronDownIcon, CalendarIcon, WhatsappIcon, DollarSignIcon
 } from './icons';
 import { AdminAppointmentModal } from './AdminAppointmentModal';
 import { AdminDoctorModal } from './AdminDoctorModal';
 import { AdminPromotionModal } from './AdminPromotionModal';
+import { AgendaView } from './AgendaView';
+import { DoctorAvailabilityModal } from './DoctorAvailabilityModal';
+import { AdminPaymentModal } from './AdminPaymentModal';
 
-type AdminTab = 'dashboard' | 'agenda' | 'patients' | 'doctors' | 'promotions' | 'settings';
+
+type AdminTab = 'dashboard' | 'agenda' | 'patients' | 'doctors' | 'promotions' | 'settings' | 'accounts';
+type MainView = 'odontogram' | 'plan' | 'history' | 'prescriptions' | 'consents' | 'accounts';
+
 type Theme = 'light' | 'dark';
 
 interface AdminPageProps {
@@ -16,6 +23,7 @@ interface AdminPageProps {
     doctors: Doctor[];
     promotions: Promotion[];
     settings: AppSettings;
+    patientRecords: Record<string, PatientRecord>;
     onSaveAppointment: (data: Omit<Appointment, 'id'> & { id?: string }) => void;
     onDeleteAppointment: (id: string) => void;
     onSaveDoctor: (data: Omit<Doctor, 'id'> & { id?: string }) => void;
@@ -25,7 +33,7 @@ interface AdminPageProps {
     onTogglePromotionStatus: (id: string) => void;
     setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
     onLogout: () => void;
-    onOpenClinicalRecord: (patient: Appointment) => void;
+    onOpenClinicalRecord: (patient: Appointment, targetTab?: MainView) => void;
 }
 
 const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode }> = ({ title, value, icon }) => (
@@ -59,20 +67,91 @@ const TabButton: React.FC<{
     </button>
 );
 
-const statusConfig: Record<AppointmentStatus, { title: string; color: string; }> = {
-    requested: { title: 'Por Confirmar', color: 'bg-yellow-500' },
-    confirmed: { title: 'Confirmadas', color: 'bg-blue-500' },
-    waiting: { title: 'En Sala de Espera', color: 'bg-purple-500' },
-    in_consultation: { title: 'En Consulta', color: 'bg-teal-500' },
-    completed: { title: 'Completadas', color: 'bg-green-500' },
-    canceled: { title: 'Canceladas', color: 'bg-red-500' },
+
+const AdminAccountsView: React.FC<{
+    patientRecords: Record<string, PatientRecord>,
+    appointments: Appointment[],
+    onOpenClinicalRecord: (patient: Appointment, targetTab: MainView) => void;
+}> = ({ patientRecords, appointments, onOpenClinicalRecord }) => {
+
+    const patientSummaries = useMemo(() => {
+        const summaries: Record<string, { patientId: string; name: string; totalBilled: number; totalPaid: number; balance: number; appointment: Appointment }> = {};
+
+        appointments.forEach(app => {
+            if (!summaries[app.id]) {
+                summaries[app.id] = {
+                    patientId: app.id,
+                    name: app.name,
+                    totalBilled: 0,
+                    totalPaid: 0,
+                    balance: 0,
+                    appointment: app,
+                };
+            }
+        });
+
+        // FIX: Explicitly typed the `record` variable as `PatientRecord` within the `forEach` loop to resolve a TypeScript inference issue where `Object.values` was returning `unknown[]` instead of `PatientRecord[]`.
+        Object.values(patientRecords).forEach((record: PatientRecord) => {
+            const summary = summaries[record.patientId];
+            if (summary) {
+                const billed = (record.sessions || []).flatMap(s => s.treatments).reduce((sum, t) => sum + (TREATMENTS_MAP[t.treatmentId]?.price || 0), 0);
+                const paid = (record.payments || []).reduce((sum, p) => sum + p.amount, 0);
+                
+                summary.totalBilled = billed;
+                summary.totalPaid = paid;
+                summary.balance = billed - paid;
+            }
+        });
+        
+        return Object.values(summaries);
+
+    }, [patientRecords, appointments]);
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Finanzas - Cuentas por Cobrar</h2>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-x-auto border border-slate-200 dark:border-slate-700">
+                <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                    <thead className="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-50 dark:bg-slate-700">
+                        <tr>
+                            <th scope="col" className="px-6 py-3">Paciente</th>
+                            <th scope="col" className="px-6 py-3 text-right">Total Facturado</th>
+                            <th scope="col" className="px-6 py-3 text-right">Total Pagado</th>
+                            <th scope="col" className="px-6 py-3 text-right">Saldo Pendiente</th>
+                             <th scope="col" className="px-6 py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {patientSummaries.map(summary => (
+                            <tr key={summary.patientId} className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600/50">
+                                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{summary.name}</td>
+                                <td className="px-6 py-4 text-right">S/ {summary.totalBilled.toFixed(2)}</td>
+                                <td className="px-6 py-4 text-right text-green-600 dark:text-green-400">S/ {summary.totalPaid.toFixed(2)}</td>
+                                <td className={`px-6 py-4 text-right font-semibold ${summary.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-600 dark:text-slate-300'}`}>S/ {summary.balance.toFixed(2)}</td>
+                                 <td className="px-6 py-4 text-center">
+                                    <button
+                                        onClick={() => onOpenClinicalRecord(summary.appointment, 'accounts')}
+                                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900 font-semibold py-1 px-3 rounded-full text-xs"
+                                    >
+                                        Administrar Pagos
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
 };
-const KANBAN_COLUMNS: AppointmentStatus[] = ['requested', 'confirmed', 'waiting', 'in_consultation', 'completed', 'canceled'];
 
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {
     const [activeTab, setActiveTab] = useState<AdminTab>('agenda');
     const [theme, setTheme] = useState<Theme>('dark');
+    const [agendaView, setAgendaView] = useState<'kanban' | 'calendar'>('kanban');
     
     const [editingAppointment, setEditingAppointment] = useState<Appointment | Partial<Appointment> | null>(null);
     const [editingDoctor, setEditingDoctor] = useState<Doctor | Partial<Doctor> | null>(null);
@@ -81,6 +160,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     
     const [draggedItem, setDraggedItem] = useState<Appointment | null>(null);
     const [dragOverStatus, setDragOverStatus] = useState<AppointmentStatus | null>(null);
+    const [editingAvailabilityDoctor, setEditingAvailabilityDoctor] = useState<Doctor | null>(null);
 
 
     useEffect(() => {
@@ -108,6 +188,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     const handleSaveDoctor = (data: Omit<Doctor, 'id'> & { id?: string }) => {
         props.onSaveDoctor(data);
         setEditingDoctor(null);
+        setEditingAvailabilityDoctor(null);
     };
 
     const handleSavePromotion = (data: Omit<Promotion, 'id' | 'isActive'> & { id?: string }) => {
@@ -158,50 +239,73 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                  return (
                     <div className="h-full flex flex-col">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Flujo de Citas</h2>
-                            <button onClick={() => setEditingAppointment({})} className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nueva Cita</span></button>
+                            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Agenda</h2>
+                             <div className="flex items-center space-x-4">
+                                <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-lg">
+                                    <button onClick={() => setAgendaView('kanban')} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${agendaView === 'kanban' ? 'bg-white dark:bg-slate-800 shadow' : 'text-slate-600 dark:text-slate-300'}`}>Kanban</button>
+                                    <button onClick={() => setAgendaView('calendar')} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${agendaView === 'calendar' ? 'bg-white dark:bg-slate-800 shadow' : 'text-slate-600 dark:text-slate-300'}`}>Calendario</button>
+                                </div>
+                                <button onClick={() => setEditingAppointment({})} className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nueva Cita</span></button>
+                             </div>
                         </div>
-                        <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
-                            {KANBAN_COLUMNS.map(status => (
-                                <div 
-                                    key={status} 
-                                    className={`w-72 flex-shrink-0 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl p-3 flex flex-col transition-colors ${dragOverStatus === status ? 'bg-blue-100 dark:bg-slate-700' : ''}`}
-                                    onDragOver={(e) => handleDragOver(e, status)}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={(e) => handleDrop(e, status)}
-                                >
-                                    <div className="flex items-center mb-4">
-                                        <span className={`w-3 h-3 rounded-full mr-2 ${statusConfig[status].color}`}></span>
-                                        <h3 className="font-semibold text-slate-700 dark:text-slate-200">{statusConfig[status].title}</h3>
-                                        <span className="ml-auto text-sm font-bold bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full w-6 h-6 flex items-center justify-center">
-                                            {props.appointments.filter(a => a.status === status).length}
-                                        </span>
-                                    </div>
-                                    <div className="flex-1 space-y-3 overflow-y-auto pr-1">
-                                        {props.appointments.filter(app => app.status === status).sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()).map(app => (
-                                            <div 
-                                                key={app.id} 
-                                                draggable
-                                                onDragStart={(e) => handleDragStart(e, app)}
-                                                className={`bg-white dark:bg-slate-700 p-4 rounded-lg shadow-md border border-slate-200 dark:border-slate-600 cursor-grab active:cursor-grabbing ${draggedItem?.id === app.id ? 'opacity-50' : ''}`}
-                                            >
-                                                <p className="font-bold text-slate-800 dark:text-white">{app.name}</p>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400">{DENTAL_SERVICES_MAP[app.service]}</p>
-                                                <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1">{new Date(app.dateTime).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-                                                <div className="border-t border-slate-200 dark:border-slate-600 my-3"></div>
-                                                <div className="flex justify-start items-center">
-                                                    <div className="flex items-center space-x-1">
-                                                        <button onClick={() => props.onOpenClinicalRecord(app)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Abrir Ficha Clínica"><OdontogramIcon className="w-5 h-5" /></button>
-                                                        <button onClick={() => setEditingAppointment(app)} className="p-1.5 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Editar Cita"><PencilIcon className="w-5 h-5" /></button>
-                                                        <button onClick={() => props.onDeleteAppointment(app.id)} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Eliminar Cita"><TrashIcon className="w-5 h-5" /></button>
+                        {agendaView === 'kanban' ? (
+                            <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
+                                {KANBAN_COLUMNS.map(status => (
+                                    <div 
+                                        key={status} 
+                                        className={`w-72 flex-shrink-0 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl p-3 flex flex-col transition-colors ${dragOverStatus === status ? 'bg-blue-100 dark:bg-slate-700' : ''}`}
+                                        onDragOver={(e) => handleDragOver(e, status)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, status)}
+                                    >
+                                        <div className="flex items-center mb-4">
+                                            <span className={`w-3 h-3 rounded-full mr-2 ${APPOINTMENT_STATUS_CONFIG[status].kanbanHeaderBg}`}></span>
+                                            <h3 className="font-semibold text-slate-700 dark:text-slate-200">{APPOINTMENT_STATUS_CONFIG[status].title}</h3>
+                                            <span className="ml-auto text-sm font-bold bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full w-6 h-6 flex items-center justify-center">
+                                                {props.appointments.filter(a => a.status === status).length}
+                                            </span>
+                                        </div>
+                                        <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+                                            {props.appointments.filter(app => app.status === status).sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()).map(app => (
+                                                <div 
+                                                    key={app.id} 
+                                                    draggable
+                                                    onDragStart={(e) => handleDragStart(e, app)}
+                                                    className={`bg-white dark:bg-slate-700 p-4 rounded-lg shadow-md border border-slate-200 dark:border-slate-600 cursor-grab active:cursor-grabbing ${draggedItem?.id === app.id ? 'opacity-50' : ''}`}
+                                                >
+                                                    <p className="font-bold text-slate-800 dark:text-white">{app.name}</p>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">{DENTAL_SERVICES_MAP[app.service]}</p>
+                                                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1">{new Date(app.dateTime).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                                                    <div className="border-t border-slate-200 dark:border-slate-600 my-3"></div>
+                                                    <div className="flex justify-start items-center">
+                                                        <div className="flex items-center space-x-1">
+                                                            <button onClick={() => props.onOpenClinicalRecord(app)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Abrir Ficha Clínica"><OdontogramIcon className="w-5 h-5" /></button>
+                                                            <button onClick={() => setEditingAppointment(app)} className="p-1.5 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Editar Cita"><PencilIcon className="w-5 h-5" /></button>
+                                                             <button onClick={() => {
+                                                                const phone = app.phone.replace(/\D/g, '');
+                                                                const message = `Hola ${app.name}, te confirmamos tu cita para ${DENTAL_SERVICES_MAP[app.service]} el ${new Date(app.dateTime).toLocaleString('es-ES')}. ¡Te esperamos en Kiru!`;
+                                                                window.open(`https://wa.me/51${phone}?text=${encodeURIComponent(message)}`, '_blank');
+                                                            }} className="p-1.5 text-green-500 hover:bg-green-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Enviar WhatsApp">
+                                                                <WhatsappIcon className="w-5 h-5" />
+                                                            </button>
+                                                            <button onClick={() => props.onDeleteAppointment(app.id)} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Eliminar Cita"><TrashIcon className="w-5 h-5" /></button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 h-full">
+                                <AgendaView 
+                                    appointments={props.appointments} 
+                                    doctors={props.doctors}
+                                    onSelectAppointment={(app) => setEditingAppointment(app)}
+                                />
+                            </div>
+                        )}
                     </div>
                 );
             case 'patients': {
@@ -267,6 +371,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                                             <td className="px-6 py-4">{doc.specialty}</td>
                                             <td className="px-6 py-4 flex items-center space-x-2">
                                                  <button onClick={() => setEditingDoctor(doc)} className="p-2 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-700 rounded-full transition-colors" title="Editar"><PencilIcon className="w-5 h-5" /></button>
+                                                 <button onClick={() => setEditingAvailabilityDoctor(doc)} className="p-2 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-700 rounded-full transition-colors" title="Gestionar Disponibilidad"><CalendarIcon className="w-5 h-5" /></button>
                                                  <button onClick={() => props.onDeleteDoctor(doc.id)} className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-slate-700 rounded-full transition-colors" title="Eliminar"><TrashIcon className="w-5 h-5" /></button>
                                             </td>
                                         </tr>
@@ -310,6 +415,12 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                         </div>
                     </div>
                 );
+            case 'accounts':
+                return <AdminAccountsView
+                    patientRecords={props.patientRecords}
+                    appointments={props.appointments}
+                    onOpenClinicalRecord={props.onOpenClinicalRecord}
+                />;
             case 'settings': {
                 const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                     const { name, value } = e.target;
@@ -384,6 +495,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                     <TabButton icon={<BriefcaseIcon />} label="Pacientes" isActive={activeTab === 'patients'} onClick={() => setActiveTab('patients')} />
                     <TabButton icon={<UsersIcon />} label="Doctores" isActive={activeTab === 'doctors'} onClick={() => setActiveTab('doctors')} />
                     <TabButton icon={<MegaphoneIcon />} label="Promociones" isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} />
+                    <TabButton icon={<DollarSignIcon />} label="Finanzas" isActive={activeTab === 'accounts'} onClick={() => setActiveTab('accounts')} />
                     <TabButton icon={<SettingsIcon />} label="Configuración" isActive={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
                 </nav>
                  <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -404,6 +516,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
             {editingAppointment && <AdminAppointmentModal appointment={editingAppointment} doctors={props.doctors} onClose={() => setEditingAppointment(null)} onSave={handleSaveAppointment} />}
             {editingDoctor && <AdminDoctorModal doctor={editingDoctor} onClose={() => setEditingDoctor(null)} onSave={handleSaveDoctor} />}
             {editingPromotion && <AdminPromotionModal promotion={editingPromotion} onClose={() => setEditingPromotion(null)} onSave={handleSavePromotion} />}
+            {editingAvailabilityDoctor && <DoctorAvailabilityModal doctor={editingAvailabilityDoctor} onClose={() => setEditingAvailabilityDoctor(null)} onSave={handleSaveDoctor} />}
         </div>
     );
 };

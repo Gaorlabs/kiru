@@ -26,20 +26,24 @@ interface ConsultationRoomProps {
     onNavigateToPatient: (direction: 'next' | 'previous') => void;
     isFirstPatient: boolean;
     isLastPatient: boolean;
+    onSavePayment: (paymentData: { patientId: string; amount: number; method: string; date: string; id?: string }) => void;
+    onDeletePayment: (paymentId: string, patientId: string) => void;
+    initialTab?: MainView;
 }
 
 
-export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToAdmin, onNavigateToPatient, isFirstPatient, isLastPatient }: ConsultationRoomProps) {
+export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToAdmin, onNavigateToPatient, isFirstPatient, isLastPatient, onSavePayment, onDeletePayment, initialTab }: ConsultationRoomProps) {
     const [record, setRecord] = useState(patientRecord);
     const [theme, setTheme] = useState<Theme>('dark');
-    const [activeView, setActiveView] = useState<MainView>('odontogram');
+    const [activeView, setActiveView] = useState<MainView>(initialTab || 'odontogram');
     const [odontogramType, setOdontogramType] = useState<OdontogramType>('permanent');
     const [activeTooth, setActiveTooth] = useState<{ toothId: number; surface: ToothSurfaceName | 'whole' } | null>(null);
     const [isTreatmentModalOpen, setIsTreatmentModalOpen] = useState(false);
     
     useEffect(() => {
         setRecord(patientRecord);
-    }, [patientRecord]);
+        setActiveView(initialTab || 'odontogram');
+    }, [patientRecord, initialTab]);
 
     useEffect(() => {
         document.documentElement.classList.remove('dark', 'light');
@@ -277,10 +281,6 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
     const handleUpdateConsents = (consents: ConsentForm[]) => {
         setRecord(prev => ({ ...prev, consents }));
     };
-
-    const handleUpdatePayments = (payments: Payment[]) => {
-        setRecord(prev => ({ ...prev, payments }));
-    };
     
     const quadrants = isPermanent ? QUADRANTS_PERMANENT : QUADRANTS_DECIDUOUS;
     
@@ -375,7 +375,7 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
                          {activeView === 'history' && <ClinicalHistory sessions={record.sessions} onUpdateSession={handleUpdateSession} />}
                          {activeView === 'prescriptions' && <Prescriptions prescriptions={record.prescriptions} onUpdate={handleUpdatePrescriptions} patientName={patient.name} />}
                          {activeView === 'consents' && <Consents consents={record.consents} onUpdate={handleUpdateConsents} />}
-                         {activeView === 'accounts' && <Accounts sessions={record.sessions} patientName={patient?.name || ''} payments={record.payments} onUpdatePayments={handleUpdatePayments} />}
+                         {activeView === 'accounts' && <Accounts sessions={record.sessions} patientId={record.patientId} payments={record.payments} onSavePayment={onSavePayment} onDeletePayment={onDeletePayment} patientName={patient.name}/>}
                     </div>
                 </main>
 

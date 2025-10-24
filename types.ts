@@ -71,6 +71,7 @@ export interface Doctor {
     id: string;
     name: string;
     specialty: string;
+    availability?: Record<string, string[]>;
 }
 
 export interface AppSettings {
@@ -143,4 +144,11 @@ export interface AdminDoctorModalProps {
     doctor: Doctor | Partial<Doctor> | null;
     onClose: () => void;
     onSave: (doctor: Omit<Doctor, 'id'> & { id?: string }) => void;
+}
+
+export interface AdminPaymentModalProps {
+    payment: (Payment & { patientId: string }) | { patientId?: string } | null;
+    patients: { id: string; name: string }[];
+    onClose: () => void;
+    onSave: (paymentData: { patientId: string; amount: number; method: string; date: string; id?: string }) => void;
 }

@@ -1,141 +1,296 @@
 import React, { useState, useMemo } from 'react';
-// FIX: Changed import to be a relative path.
-import type { Appointment } from '../types';
-import { DENTAL_SERVICES_MAP } from '../constants';
-// FIX: Changed import to be a relative path.
-import { CalendarIcon } from './icons';
+import type { Appointment, Doctor } from '../types';
+// FIX: Corrected a typo in the import of 'APPOINTMENT_STATUS_CONFIG'.
+import { DENTAL_SERVICES_MAP, APPOINTMENT_STATUS_CONFIG } from '../constants';
+import { ChevronLeftIcon, ChevronRightIcon } from './icons';
 
 interface AgendaViewProps {
     appointments: Appointment[];
+    doctors: Doctor[];
+    onSelectAppointment: (appointment: Appointment) => void;
 }
 
-export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
-    const [selectedDate, setSelectedDate] = useState(new Date());
+// --- Date Helper Functions ---
+const getStartOfWeek = (date: Date): Date => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    return new Date(d.setDate(diff));
+};
 
-    const days = useMemo(() => Array.from({ length: 7 }, (_, i) => {
-        const date = new Date();
-        date.setHours(0, 0, 0, 0);
-        date.setDate(date.getDate() + i);
-        return date;
-    }), []);
+const addDays = (date: Date, days: number): Date => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+};
 
-    const timeSlots = useMemo(() => {
-        const slots = [];
-        const now = new Date();
-        const isToday = selectedDate.toDateString() === now.toDateString();
+const getMonthName = (date: Date, locale = 'es-ES') => {
+    return date.toLocaleString(locale, { month: 'long' });
+};
 
-        for (let hour = 9; hour < 19; hour++) {
-            const slotStart = new Date(selectedDate);
-            slotStart.setHours(hour, 0, 0, 0);
+// --- Component ---
+export const AgendaView: React.FC<AgendaViewProps> = ({ appointments, doctors, onSelectAppointment }) => {
+    const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('week');
+    const [currentDate, setCurrentDate] = useState(new Date());
 
-            const slotEnd = new Date(slotStart);
-            slotEnd.setMinutes(slotStart.getMinutes() + 35);
+    const doctorsMap = useMemo(() =>
+        doctors.reduce((acc, doc) => {
+            acc[doc.id] = doc;
+            return acc;
+        }, {} as Record<string, Doctor>),
+        [doctors]
+    );
 
-            const appointmentInSlot = appointments.find(app => {
-                const appDate = new Date(app.dateTime);
-                return appDate.getFullYear() === slotStart.getFullYear() &&
-                       appDate.getMonth() === slotStart.getMonth() &&
-                       appDate.getDate() === slotStart.getDate() &&
-                       appDate.getHours() === slotStart.getHours();
-            });
-
-            slots.push({
-                start: slotStart,
-                end: slotEnd,
-                isBooked: !!appointmentInSlot,
-                appointment: appointmentInSlot,
-                isPast: isToday && slotStart < now,
-            });
-        }
-        return slots;
-    }, [selectedDate, appointments]);
-    
-    const appointmentsByDay = useMemo(() => {
-        // FIX: Changed the reduce function to type the initial value instead of using a type argument on the function call for better compatibility.
+    const appointmentsByDate = useMemo(() => {
         return appointments.reduce((acc, app) => {
             const dateStr = new Date(app.dateTime).toDateString();
-            acc[dateStr] = (acc[dateStr] || 0) + 1;
+            if (!acc[dateStr]) {
+                acc[dateStr] = [];
+            }
+            acc[dateStr].push(app);
+            // Sort appointments within the day
+            acc[dateStr].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
             return acc;
-        }, {} as Record<string, number>);
+        }, {} as Record<string, Appointment[]>);
     }, [appointments]);
 
-    const formatTime = (date: Date) => date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
-    
-    return (
-        <div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-4">Agenda Semanal</h3>
-            <div className="flex flex-col lg:flex-row gap-6">
-                {/* Days Column */}
-                <div className="lg:w-1/3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-3">
-                    {days.map(day => {
-                        const dayStr = day.toDateString();
-                        const isSelected = dayStr === selectedDate.toDateString();
-                        const appointmentCount = appointmentsByDay[dayStr] || 0;
+    const handlePrev = () => {
+        if (viewMode === 'week') {
+            setCurrentDate(addDays(currentDate, -7));
+        } else if (viewMode === 'month') {
+            setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+        } else {
+            setCurrentDate(addDays(currentDate, -1));
+        }
+    };
+
+    const handleNext = () => {
+        if (viewMode === 'week') {
+            setCurrentDate(addDays(currentDate, 7));
+        } else if (viewMode === 'month') {
+            setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+        } else {
+            setCurrentDate(addDays(currentDate, 1));
+        }
+    };
+
+    const handleToday = () => {
+        setCurrentDate(new Date());
+        setViewMode('day');
+    };
+
+    const renderHeader = () => {
+        let title = '';
+        if (viewMode === 'week') {
+            const startOfWeek = getStartOfWeek(currentDate);
+            const endOfWeek = addDays(startOfWeek, 6);
+            const startMonth = getMonthName(startOfWeek);
+            const endMonth = getMonthName(endOfWeek);
+            if (startMonth === endMonth) {
+                title = `${startMonth} ${startOfWeek.getFullYear()}`;
+            } else {
+                title = `${startMonth} - ${endMonth} ${endOfWeek.getFullYear()}`;
+            }
+        } else if (viewMode === 'day') {
+            title = currentDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        } else {
+            title = `${getMonthName(currentDate)} ${currentDate.getFullYear()}`;
+        }
+
+        return (
+            <div className="flex justify-between items-center mb-4 px-2">
+                <div className="flex items-center space-x-2">
+                    <button onClick={handlePrev} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"><ChevronLeftIcon className="w-5 h-5" /></button>
+                    <button onClick={handleNext} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"><ChevronRightIcon className="w-5 h-5" /></button>
+                    <button onClick={handleToday} className="px-4 py-2 text-sm font-semibold border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">Hoy</button>
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white capitalize">{title}</h3>
+                <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-lg">
+                    <button onClick={() => setViewMode('month')} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${viewMode === 'month' ? 'bg-white dark:bg-slate-800 shadow' : 'text-slate-600 dark:text-slate-300'}`}>Mes</button>
+                    <button onClick={() => setViewMode('week')} className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${viewMode === 'week' ? 'bg-white dark:bg-slate-800 shadow' : 'text-slate-600 dark:text-slate-300'}`}>Semana</button>
+                </div>
+            </div>
+        );
+    };
+
+    const renderDayView = () => {
+        const day = currentDate;
+        const dayAppointments = appointmentsByDate[day.toDateString()] || [];
+        const timeSlots = Array.from({ length: 11 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`); // 8am to 6pm
+
+        return (
+            <div className="overflow-auto h-full bg-white dark:bg-slate-900">
+                <div className="border-t border-slate-200 dark:border-slate-700">
+                    {timeSlots.map(time => {
+                        const hour = parseInt(time.split(':')[0]);
+                        const hourAppointments = dayAppointments.filter(app => new Date(app.dateTime).getHours() === hour);
                         
                         return (
-                            <button
-                                key={dayStr}
-                                onClick={() => setSelectedDate(day)}
-                                className={`p-4 rounded-xl text-center transition-all duration-200 transform hover:scale-105 ${
-                                    isSelected 
-                                        ? 'bg-white dark:bg-gray-800 ring-2 ring-blue-500 shadow-lg' 
-                                        : 'bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50'
-                                }`}
-                            >
-                                <p className="text-sm font-bold uppercase text-gray-500 dark:text-gray-400">{day.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
-                                <p className="text-4xl font-extrabold text-blue-600 dark:text-blue-400 my-1">{day.getDate()}</p>
-                                <p className="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400">{day.toLocaleDateString('es-ES', { month: 'short' })}</p>
-                                {appointmentCount > 0 && (
-                                    <div className="mt-2 bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 rounded-full px-2 py-0.5 text-xs font-semibold">
-                                        {appointmentCount} Cita{appointmentCount > 1 ? 's' : ''}
-                                    </div>
-                                )}
-                            </button>
+                            <div key={time} className="flex border-b border-slate-200 dark:border-slate-700 min-h-[60px]">
+                                <div className="w-24 text-center text-sm font-semibold text-slate-500 dark:text-slate-400 p-2 border-r border-slate-200 dark:border-slate-700 flex-shrink-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50">
+                                    {time}
+                                </div>
+                                <div className="flex-1 p-2 space-y-2">
+                                    {hourAppointments.map(app => {
+                                        const doctor = app.doctorId ? doctorsMap[app.doctorId] : null;
+                                        const statusInfo = APPOINTMENT_STATUS_CONFIG[app.status];
+                                        return (
+                                            <button 
+                                                key={app.id} 
+                                                onClick={() => onSelectAppointment(app)}
+                                                className={`w-full text-left ${statusInfo.color} border-l-4 ${statusInfo.borderColor} p-2 rounded-md text-sm hover:shadow-lg transition-all duration-200`}
+                                            >
+                                                <div className="flex justify-between items-center">
+                                                    <p className={`font-bold ${statusInfo.textColor}`}>{app.name}</p>
+                                                    <p className={`font-semibold ${statusInfo.textColor}`}>{new Date(app.dateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
+                                                </div>
+                                                <p className={statusInfo.textColor}>{DENTAL_SERVICES_MAP[app.service]}</p>
+                                                {doctor && <p className={`text-xs italic ${statusInfo.textColor} opacity-80`}>{doctor.name}</p>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         );
                     })}
                 </div>
+            </div>
+        );
+    };
 
-                {/* Time Slots Column */}
-                <div className="lg:w-2/3">
-                     <h4 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-3 pb-2 border-b border-gray-300 dark:border-gray-600 capitalize">
-                        Horarios para {selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    </h4>
-                    {timeSlots.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {timeSlots.map(slot => (
-                                <div
-                                    key={slot.start.toISOString()}
-                                    className={`p-4 rounded-lg border-l-4 ${
-                                        slot.isBooked 
-                                            ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-500' 
-                                            : slot.isPast 
-                                                ? 'bg-gray-100 dark:bg-gray-800/60 border-gray-400 text-gray-400 dark:text-gray-500' 
-                                                : 'bg-white dark:bg-gray-800 border-green-500'
-                                    }`}
-                                >
-                                    <p className="font-bold text-gray-800 dark:text-gray-100">{formatTime(slot.start)} - {formatTime(slot.end)}</p>
-                                    {slot.isBooked && slot.appointment ? (
-                                        <div className="mt-2">
-                                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{slot.appointment.name}</p>
-                                            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">{DENTAL_SERVICES_MAP[slot.appointment.service] || slot.appointment.service}</p>
+    const renderWeekView = () => {
+        const startOfWeek = getStartOfWeek(currentDate);
+        const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek, i));
+        const timeSlots = Array.from({ length: 11 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`); // 8am to 6pm
+
+        return (
+            <div className="overflow-auto h-full">
+                <div className="grid grid-cols-[auto_repeat(7,1fr)] min-w-[1200px]">
+                    {/* Time column */}
+                    <div className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400"></div>
+                    {/* Day headers */}
+                    {weekDays.map(day => (
+                        <div key={day.toISOString()} className="text-center p-2 border-b border-l border-slate-200 dark:border-slate-700">
+                            <p className="font-semibold text-slate-700 dark:text-slate-300">{day.toLocaleDateString('es-ES', { weekday: 'short' })}</p>
+                            <p className={`text-2xl font-bold ${new Date().toDateString() === day.toDateString() ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-white'}`}>{day.getDate()}</p>
+                        </div>
+                    ))}
+                    {/* Grid body */}
+                    {timeSlots.map(time => (
+                        <React.Fragment key={time}>
+                            <div className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400 p-2 border-t border-slate-200 dark:border-slate-700 sticky left-0 bg-white dark:bg-slate-800">{time}</div>
+                            {weekDays.map(day => {
+                                const dayAppointments = appointmentsByDate[day.toDateString()] || [];
+                                const hourAppointments = dayAppointments.filter(app => new Date(app.dateTime).getHours() === parseInt(time.split(':')[0]));
+                                
+                                return (
+                                    <div key={day.toISOString()} className="border-t border-l border-slate-200 dark:border-slate-700 p-1 min-h-[80px]">
+                                        {hourAppointments.map(app => {
+                                            const doctor = app.doctorId ? doctorsMap[app.doctorId] : null;
+                                            const statusInfo = APPOINTMENT_STATUS_CONFIG[app.status];
+                                            return (
+                                                <button 
+                                                    key={app.id} 
+                                                    onClick={() => onSelectAppointment(app)}
+                                                    className={`w-full text-left ${statusInfo.color} border-l-4 ${statusInfo.borderColor} p-1.5 rounded-md text-xs mb-1 hover:shadow-lg hover:scale-105 transition-transform duration-200`}
+                                                >
+                                                    <p className={`font-bold ${statusInfo.textColor}`}>{app.name}</p>
+                                                    <p className={statusInfo.textColor}>{DENTAL_SERVICES_MAP[app.service]}</p>
+                                                    {doctor && <p className={`text-xs italic ${statusInfo.textColor} opacity-80`}>{doctor.name}</p>}
+                                                    <p className={`font-semibold mt-1 ${statusInfo.textColor}`}>{new Date(app.dateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })}
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    const renderMonthView = () => {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+
+        // Adjust to start the week on Monday
+        const firstDayGrid = new Date(firstDayOfMonth);
+        const dayOfWeek = firstDayGrid.getDay();
+        const diff = firstDayGrid.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+        const startDate = new Date(firstDayGrid.setDate(diff));
+
+        const days = [];
+        let day = new Date(startDate);
+        
+        for (let i = 0; i < 42; i++) {
+             days.push(new Date(day));
+             day = addDays(day, 1);
+        }
+
+        const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+        return (
+            <div className="flex flex-col h-full">
+                <div className="grid grid-cols-7">
+                    {weekDays.map(dayName => (
+                        <div key={dayName} className="text-center py-2 text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-b border-l border-slate-200 dark:border-slate-700">{dayName}</div>
+                    ))}
+                </div>
+                <div className="flex-1 grid grid-cols-7 grid-rows-6 border-t border-r border-slate-200 dark:border-slate-700">
+                    {days.map((d, index) => {
+                        const isCurrentMonth = d.getMonth() === month;
+                        const isToday = d.toDateString() === new Date().toDateString();
+                        const dayAppointments = appointmentsByDate[d.toDateString()] || [];
+
+                        return (
+                            <div key={index} className={`p-1.5 flex flex-col border-b border-l border-slate-200 dark:border-slate-700 ${isCurrentMonth ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
+                                <div className={`text-sm self-end ${isToday ? 'bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold' : isCurrentMonth ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+                                    {d.getDate()}
+                                </div>
+                                <div className="flex-1 mt-1 overflow-y-auto text-xs space-y-1">
+                                    {dayAppointments.slice(0, 2).map(app => {
+                                        const statusInfo = APPOINTMENT_STATUS_CONFIG[app.status];
+                                        return (
+                                            <button 
+                                                key={app.id} 
+                                                onClick={() => onSelectAppointment(app)}
+                                                className={`w-full text-left ${statusInfo.color} p-1 rounded`} 
+                                                title={`${app.name} - ${new Date(app.dateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`}
+                                            >
+                                                <p className={`font-semibold ${statusInfo.textColor} truncate`}>
+                                                    <span className="font-mono">{new Date(app.dateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span> {app.name}
+                                                </p>
+                                            </button>
+                                        );
+                                    })}
+                                    {dayAppointments.length > 2 && (
+                                        <div className="text-blue-600 dark:text-blue-400 font-semibold p-1">
+                                            +{dayAppointments.length - 2} más
                                         </div>
-                                    ) : slot.isPast ? (
-                                         <p className="text-sm font-semibold mt-2">No disponible</p>
-                                    ) : (
-                                        <p className="text-sm font-semibold text-green-600 dark:text-green-400 mt-2">Disponible</p>
                                     )}
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                         <div className="text-center p-6 bg-gray-100 dark:bg-gray-700/50 rounded-lg h-full flex flex-col justify-center items-center">
-                            <div className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4">
-                                <CalendarIcon />
                             </div>
-                            <p className="text-gray-500 dark:text-gray-400">No hay horarios disponibles para este día.</p>
-                        </div>
-                    )}
+                        );
+                    })}
                 </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="h-full flex flex-col">
+            {renderHeader()}
+            <div className="flex-1 overflow-hidden">
+                {{
+                    'week': renderWeekView(),
+                    'month': renderMonthView(),
+                    'day': renderDayView(),
+                }[viewMode]}
             </div>
         </div>
     );

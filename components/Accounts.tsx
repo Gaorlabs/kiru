@@ -1,18 +1,28 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import type { Session, Payment } from '../types';
 import { TREATMENTS_MAP } from '../constants';
-// FIX: Added 'CheckIcon' to the import list to resolve the "Cannot find name" error.
-import { PrintIcon, DentalIcon, PlusIcon, CloseIcon, TrashIcon, DollarSignIcon, CheckIcon } from './icons';
+import { PrintIcon, DentalIcon, PlusIcon, CloseIcon, TrashIcon, DollarSignIcon, CheckIcon, PencilIcon } from './icons';
+import { PaymentReceiptToPrint } from './PaymentReceiptToPrint';
 
 interface PaymentModalProps {
     onClose: () => void;
-    onSave: (payment: Omit<Payment, 'id' | 'date'>) => void;
+    onSave: (payment: { amount: number; method: string; date: string; id?: string }) => void;
+    paymentToEdit?: Payment | null;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, onSave }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, onSave, paymentToEdit }) => {
     const [amount, setAmount] = useState('');
     const [method, setMethod] = useState('Efectivo');
+    const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
+    useEffect(() => {
+        if (paymentToEdit) {
+            setAmount(paymentToEdit.amount.toString());
+            setMethod(paymentToEdit.method);
+            setDate(new Date(paymentToEdit.date).toISOString().slice(0, 10));
+        }
+    }, [paymentToEdit]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,18 +31,27 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, onSave }) => {
             alert('Por favor, ingrese un monto válido.');
             return;
         }
-        onSave({ amount: numericAmount, method });
+        onSave({ 
+            amount: numericAmount, 
+            method, 
+            date: new Date(date).toISOString(), 
+            id: paymentToEdit?.id 
+        });
     };
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md">
                 <div className="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700">
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-white">Registrar Pago</h2>
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-white">{paymentToEdit ? 'Editar Pago' : 'Registrar Pago'}</h2>
                     <button onClick={onClose} className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"><CloseIcon /></button>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="p-6 space-y-4">
+                        <div>
+                            <label htmlFor="date" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Fecha del Pago</label>
+                            <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} required className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                        </div>
                         <div>
                             <label htmlFor="amount" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Monto (S/)</label>
                             <input type="number" id="amount" value={amount} onChange={e => setAmount(e.target.value)} required min="0.01" step="0.01" className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
@@ -59,12 +78,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, onSave }) => {
 
 interface AccountsProps {
     sessions: Session[];
-    patientName: string;
+    patientId: string;
     payments: Payment[];
-    onUpdatePayments: (payments: Payment[]) => void;
+    patientName: string;
+    onSavePayment: (paymentData: { patientId: string; amount: number; method: string; date: string; id?: string }) => void;
+    onDeletePayment: (paymentId: string, patientId: string) => void;
 }
 
-const ReceiptToPrint = React.forwardRef<HTMLDivElement, AccountsProps & { clinicName: string }>(({ sessions, patientName, clinicName, payments }, ref) => {
+const AccountStatementToPrint = React.forwardRef<HTMLDivElement, Omit<AccountsProps, 'onSavePayment' | 'onDeletePayment' | 'patientId'>>(({ sessions, patientName, clinicName, payments }, ref) => {
     const allTreatments = useMemo(() => sessions.flatMap(s => s.treatments.map(t => ({ ...t, sessionName: s.name }))), [sessions]);
     const totalCost = useMemo(() => allTreatments.reduce((sum, t) => sum + (TREATMENTS_MAP[t.treatmentId]?.price || 0), 0), [allTreatments]);
     const totalPaid = useMemo(() => payments.reduce((sum, p) => sum + p.amount, 0), [payments]);
@@ -149,57 +170,57 @@ const StatCard: React.FC<{ title: string; value: string; colorClass: string; ico
     </div>
 );
 
-export const Accounts: React.FC<AccountsProps> = ({ sessions, patientName, payments, onUpdatePayments }) => {
-    const printRef = React.useRef<HTMLDivElement>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    
+export const Accounts: React.FC<AccountsProps> = ({ sessions, patientId, payments, patientName, onSavePayment, onDeletePayment }) => {
+    const printRef = useRef<HTMLDivElement>(null);
+    const [editingPayment, setEditingPayment] = useState<Payment | null | {}>(null);
+    const [itemToPrint, setItemToPrint] = useState<Payment | 'statement' | null>(null);
+
     const totalCost = useMemo(() => sessions.flatMap(s => s.treatments).reduce((sum, t) => sum + (TREATMENTS_MAP[t.treatmentId]?.price || 0), 0), [sessions]);
     const totalPaid = useMemo(() => payments.reduce((sum, p) => sum + p.amount, 0), [payments]);
     const balance = totalCost - totalPaid;
 
-    const handleSavePayment = (paymentData: Omit<Payment, 'id' | 'date'>) => {
-        const newPayment: Payment = {
+    const handleSavePayment = (paymentData: { amount: number; method: string; date: string; id?: string }) => {
+        onSavePayment({
             ...paymentData,
-            id: crypto.randomUUID(),
-            date: new Date().toISOString(),
-        };
-        onUpdatePayments([...payments, newPayment]);
-        setIsModalOpen(false);
+            patientId: patientId,
+        });
+        setEditingPayment(null);
     };
     
     const handleDeletePayment = (paymentId: string) => {
-        if(window.confirm("¿Está seguro de que desea eliminar este pago?")) {
-            onUpdatePayments(payments.filter(p => p.id !== paymentId));
-        }
+        onDeletePayment(paymentId, patientId);
     };
     
-    const handlePrint = () => {
-        const printContent = printRef.current;
-        if (printContent) {
-            const WinPrint = window.open('', '', 'width=900,height=650');
-            if (WinPrint) {
-                WinPrint.document.write('<html><head><title>Estado de Cuenta</title>');
-                WinPrint.document.write('<script src="https://cdn.tailwindcss.com"></script>');
-                WinPrint.document.write('</head><body>');
-                WinPrint.document.write(printContent.innerHTML);
-                WinPrint.document.write('</body></html>');
-                WinPrint.document.close();
-                WinPrint.focus();
-                setTimeout(() => {
-                    WinPrint.print();
-                    WinPrint.close();
-                }, 500);
+    useEffect(() => {
+        if (itemToPrint) {
+            const printContent = printRef.current;
+            if (printContent) {
+                const WinPrint = window.open('', '', 'width=900,height=650');
+                if (WinPrint) {
+                    WinPrint.document.write('<html><head><title>Recibo</title>');
+                    WinPrint.document.write('<script src="https://cdn.tailwindcss.com"></script>');
+                    WinPrint.document.write('</head><body>');
+                    WinPrint.document.write(printContent.innerHTML);
+                    WinPrint.document.write('</body></html>');
+                    WinPrint.document.close();
+                    WinPrint.focus();
+                    setTimeout(() => {
+                        WinPrint.print();
+                        WinPrint.close();
+                        setItemToPrint(null);
+                    }, 500); // Delay to ensure content is rendered
+                }
             }
         }
-    };
+    }, [itemToPrint]);
 
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-gray-200">Cuentas del Paciente</h3>
                 <div className="flex space-x-2">
-                    <button onClick={() => setIsModalOpen(true)} className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><PlusIcon /><span>Registrar Pago</span></button>
-                    <button onClick={handlePrint} className="flex items-center space-x-2 bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg"><PrintIcon /><span>Generar Recibo</span></button>
+                    <button onClick={() => setEditingPayment({})} className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"><PlusIcon /><span>Registrar Pago</span></button>
+                    <button onClick={() => setItemToPrint('statement')} className="flex items-center space-x-2 bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg"><PrintIcon /><span>Estado de Cuenta</span></button>
                 </div>
             </div>
 
@@ -233,9 +254,17 @@ export const Accounts: React.FC<AccountsProps> = ({ sessions, patientName, payme
                                         <td className="px-4 py-3">{p.method}</td>
                                         <td className="px-4 py-3 text-right font-semibold">S/ {p.amount.toFixed(2)}</td>
                                         <td className="px-4 py-3 text-center">
-                                            <button onClick={() => handleDeletePayment(p.id)} className="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-gray-700 rounded-full">
-                                                <TrashIcon className="w-4 h-4"/>
-                                            </button>
+                                            <div className="flex items-center justify-center space-x-1">
+                                                <button onClick={() => setItemToPrint(p)} className="p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full" title="Imprimir Recibo">
+                                                    <PrintIcon className="w-4 h-4" />
+                                                </button>
+                                                <button onClick={() => setEditingPayment(p)} className="p-1 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-gray-700 rounded-full" title="Editar Pago">
+                                                    <PencilIcon className="w-4 h-4"/>
+                                                </button>
+                                                <button onClick={() => handleDeletePayment(p.id)} className="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-gray-700 rounded-full" title="Eliminar Pago">
+                                                    <TrashIcon className="w-4 h-4"/>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -245,10 +274,11 @@ export const Accounts: React.FC<AccountsProps> = ({ sessions, patientName, payme
                 </div>
             </div>
 
-            {isModalOpen && <PaymentModal onClose={() => setIsModalOpen(false)} onSave={handleSavePayment}/>}
+            {editingPayment && <PaymentModal onClose={() => setEditingPayment(null)} onSave={handleSavePayment} paymentToEdit={'id' in editingPayment ? editingPayment : undefined} />}
 
             <div className="hidden">
-                 <ReceiptToPrint ref={printRef} sessions={sessions} patientName={patientName} clinicName="Kiru" payments={payments} />
+                 {itemToPrint === 'statement' && <AccountStatementToPrint ref={printRef} sessions={sessions} clinicName="Kiru" payments={payments} patientName={patientName} />}
+                 {itemToPrint && typeof itemToPrint === 'object' && <PaymentReceiptToPrint ref={printRef} payment={itemToPrint} clinicName="Kiru" patientName={patientName} />}
             </div>
         </div>
     );

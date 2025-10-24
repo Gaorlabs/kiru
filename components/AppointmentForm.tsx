@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 // FIX: Changed import to be a relative path.
-import type { Appointment } from '../types';
+import type { Appointment, Doctor } from '../types';
 // FIX: Changed import to be a relative path.
 import { CloseIcon, UserIcon, PhoneIcon, EmailIcon, ServiceIcon, ChevronDownIcon } from './icons';
 import { DENTAL_SERVICES } from '../constants';
@@ -9,55 +9,52 @@ import { DENTAL_SERVICES } from '../constants';
 interface AppointmentFormProps {
     onClose: () => void;
     onBookAppointment: (appointmentData: Omit<Appointment, 'id' | 'status'>) => void;
+    doctors: Doctor[];
 }
 
-const generateTimeSlots = () => {
-    const daysWithSlots = [];
+const generateTimeSlots = (doctors: Doctor[]) => {
+    const daysWithSlots: { date: Date, slots: Date[] }[] = [];
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Start from today
-
-    while (daysWithSlots.length < 3) {
-        // Move to the next day if it's today and past working hours, or if it's a weekend.
-        const now = new Date();
-        const endOfDay = new Date(currentDate);
-        endOfDay.setHours(17, 0, 0, 0); // Assuming last slot starts before 5 PM
+    
+    for (let i = 0; i < 7; i++) { // Check for next 7 days
+        const dayDate = new Date(currentDate);
+        dayDate.setDate(currentDate.getDate() + i);
+        dayDate.setHours(0, 0, 0, 0);
+        const dayName = daysOfWeek[dayDate.getDay()];
         
-        // Skip weekends (Sunday=0, Saturday=6)
-        if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
-            currentDate.setDate(currentDate.getDate() + 1);
-            continue;
-        }
-
-        const daySlots = [];
-        // Set start time to 9:00 AM for the current day
-        const slotStartTime = new Date(currentDate);
-        slotStartTime.setHours(9, 0, 0, 0);
-
-        // Generate a maximum of 8 slots
-        for (let i = 0; i < 8; i++) {
-             // Only add slots that are in the future
-            if (new Date() < slotStartTime) {
-                daySlots.push(new Date(slotStartTime));
+        const daySlots: Date[] = [];
+        
+        // From 8:00 to 18:00 (6 PM), assuming 1 hour slots
+        for (let hour = 8; hour <= 18; hour++) {
+            const slotTime = new Date(dayDate);
+            slotTime.setHours(hour, 0, 0, 0);
+            
+            const timeString = `${String(hour).padStart(2, '0')}:00`;
+            
+            // Check if any doctor is available at this time
+            const isAvailable = doctors.some(doc => 
+                doc.availability && doc.availability[dayName] && doc.availability[dayName].includes(timeString)
+            );
+            
+            // Only add future slots where a doctor is available
+            if (isAvailable && new Date() < slotTime) {
+                daySlots.push(slotTime);
             }
-            // Add 50 minutes (30 min appointment + 20 min break) for the next slot
-            slotStartTime.setMinutes(slotStartTime.getMinutes() + 50);
         }
         
         if (daySlots.length > 0) {
             daysWithSlots.push({
-                date: new Date(currentDate),
+                date: dayDate,
                 slots: daySlots,
             });
         }
-
-        // Move to the next day
-        currentDate.setDate(currentDate.getDate() + 1);
     }
     return daysWithSlots;
 };
 
 
-export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBookAppointment }) => {
+export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBookAppointment, doctors }) => {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
@@ -65,7 +62,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-    const timeSlotsByDay = useMemo(() => generateTimeSlots(), []);
+    const timeSlotsByDay = useMemo(() => generateTimeSlots(doctors), [doctors]);
     
     const selectedDaySlots = useMemo(() => {
         if (!selectedDate) return [];
@@ -154,7 +151,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                     
                     <div>
                         <h3 className="text-lg font-semibold text-blue-600 mb-4">2. Elige un Día</h3>
-                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             {timeSlotsByDay.map(({ date }) => {
                                 const isSelected = selectedDate?.toDateString() === date.toDateString();
                                 return (
@@ -168,9 +165,9 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                             : 'bg-slate-100 hover:bg-blue-100'
                                         }`}
                                     >
-                                        <p className={`text-sm font-bold uppercase ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
+                                        <p className={`text-sm font-bold uppercase ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { weekday: 'short' })}</p>
                                         <p className="text-5xl font-extrabold my-1">{date.getDate()}</p>
-                                        <p className={`text-sm font-semibold uppercase ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { month: 'long' })}</p>
+                                        <p className={`text-sm font-semibold uppercase ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { month: 'short' })}</p>
                                     </button>
                                 );
                             })}

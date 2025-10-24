@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 // FIX: Changed import to be a relative path.
 import { DentalIcon, PreventionIcon, FillingIcon, EndodonticsIcon, OrthodonticsIcon, OralSurgeryIcon, CosmeticDentistryIcon, TeamIcon, AppointmentIcon, EmergencyIcon, ClockIcon, GiftIcon, CloseIcon, CheckIcon } from './icons';
 import { AppointmentForm } from './AppointmentForm';
 // FIX: Changed import to be a relative path.
-import type { Appointment, AppSettings, Promotion } from '../types';
+import type { Appointment, AppSettings, Promotion, Doctor } from '../types';
 
 
 interface LandingPageProps {
@@ -11,6 +12,7 @@ interface LandingPageProps {
   settings: AppSettings;
   onNavigateToLogin: () => void;
   activePromotion: Promotion | null;
+  doctors: Doctor[];
 }
 
 const FeatureCard: React.FC<{icon: React.ReactNode, title: string, description: string}> = ({icon, title, description}) => (
@@ -89,7 +91,7 @@ const PromotionModal: React.FC<{
 );
 
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, settings, onNavigateToLogin, activePromotion }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, settings, onNavigateToLogin, activePromotion, doctors }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPromotion, setShowPromotion] = useState(false);
   
@@ -258,7 +260,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
         </footer>
 
         {showPromotion && activePromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} promotion={activePromotion} />}
-        {isModalOpen && <AppointmentForm onClose={() => setIsModalOpen(false)} onBookAppointment={onBookAppointment} />}
+        {isModalOpen && <AppointmentForm onClose={() => setIsModalOpen(false)} onBookAppointment={onBookAppointment} doctors={doctors} />}
     </div>
   );
 };
