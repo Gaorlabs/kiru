@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 // FIX: Changed import to be a relative path.
 import type { Appointment } from '../types';
@@ -64,7 +63,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
     
     return (
         <div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-200 mb-4">Agenda Semanal</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200 mb-4">Agenda Semanal</h3>
             <div className="flex flex-col lg:flex-row gap-6">
                 {/* Days Column */}
                 <div className="lg:w-1/3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-3">
@@ -79,13 +78,13 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
                                 onClick={() => setSelectedDate(day)}
                                 className={`p-4 rounded-xl text-center transition-all duration-200 transform hover:scale-105 ${
                                     isSelected 
-                                        ? 'bg-white dark:bg-slate-800 ring-2 ring-blue-500 shadow-lg' 
-                                        : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700/50'
+                                        ? 'bg-white dark:bg-gray-800 ring-2 ring-blue-500 shadow-lg' 
+                                        : 'bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                                 }`}
                             >
-                                <p className="text-sm font-bold uppercase text-slate-500 dark:text-slate-400">{day.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
+                                <p className="text-sm font-bold uppercase text-gray-500 dark:text-gray-400">{day.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
                                 <p className="text-4xl font-extrabold text-blue-600 dark:text-blue-400 my-1">{day.getDate()}</p>
-                                <p className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">{day.toLocaleDateString('es-ES', { month: 'short' })}</p>
+                                <p className="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400">{day.toLocaleDateString('es-ES', { month: 'short' })}</p>
                                 {appointmentCount > 0 && (
                                     <div className="mt-2 bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 rounded-full px-2 py-0.5 text-xs font-semibold">
                                         {appointmentCount} Cita{appointmentCount > 1 ? 's' : ''}
@@ -98,7 +97,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
 
                 {/* Time Slots Column */}
                 <div className="lg:w-2/3">
-                     <h4 className="text-lg font-semibold text-teal-600 dark:text-teal-400 mb-3 pb-2 border-b border-slate-300 dark:border-slate-600 capitalize">
+                     <h4 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-3 pb-2 border-b border-gray-300 dark:border-gray-600 capitalize">
                         Horarios para {selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </h4>
                     {timeSlots.length > 0 ? (
@@ -110,14 +109,14 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
                                         slot.isBooked 
                                             ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-500' 
                                             : slot.isPast 
-                                                ? 'bg-slate-100 dark:bg-slate-800/60 border-slate-400 text-slate-400 dark:text-slate-500' 
-                                                : 'bg-white dark:bg-slate-800 border-green-500'
+                                                ? 'bg-gray-100 dark:bg-gray-800/60 border-gray-400 text-gray-400 dark:text-gray-500' 
+                                                : 'bg-white dark:bg-gray-800 border-green-500'
                                     }`}
                                 >
-                                    <p className="font-bold text-slate-800 dark:text-slate-100">{formatTime(slot.start)} - {formatTime(slot.end)}</p>
+                                    <p className="font-bold text-gray-800 dark:text-gray-100">{formatTime(slot.start)} - {formatTime(slot.end)}</p>
                                     {slot.isBooked && slot.appointment ? (
                                         <div className="mt-2">
-                                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{slot.appointment.name}</p>
+                                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{slot.appointment.name}</p>
                                             <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">{DENTAL_SERVICES_MAP[slot.appointment.service] || slot.appointment.service}</p>
                                         </div>
                                     ) : slot.isPast ? (
@@ -129,11 +128,11 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
                             ))}
                         </div>
                     ) : (
-                         <div className="text-center p-6 bg-slate-100 dark:bg-slate-700/50 rounded-lg h-full flex flex-col justify-center items-center">
-                            <div className="w-16 h-16 text-slate-400 dark:text-slate-500 mb-4">
+                         <div className="text-center p-6 bg-gray-100 dark:bg-gray-700/50 rounded-lg h-full flex flex-col justify-center items-center">
+                            <div className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4">
                                 <CalendarIcon />
                             </div>
-                            <p className="text-slate-500 dark:text-slate-400">No hay horarios disponibles para este día.</p>
+                            <p className="text-gray-500 dark:text-gray-400">No hay horarios disponibles para este día.</p>
                         </div>
                     )}
                 </div>

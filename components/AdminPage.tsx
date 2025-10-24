@@ -78,6 +78,10 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     const [editingDoctor, setEditingDoctor] = useState<Doctor | Partial<Doctor> | null>(null);
     const [editingPromotion, setEditingPromotion] = useState<Promotion | Partial<Promotion> | null>(null);
     const [localSettings, setLocalSettings] = useState(props.settings);
+    
+    const [draggedItem, setDraggedItem] = useState<Appointment | null>(null);
+    const [dragOverStatus, setDragOverStatus] = useState<AppointmentStatus | null>(null);
+
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -111,6 +115,32 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
         setEditingPromotion(null);
     };
 
+    // Drag and Drop Handlers
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, appointment: Appointment) => {
+        setDraggedItem(appointment);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>, status: AppointmentStatus) => {
+        e.preventDefault();
+        if (draggedItem && draggedItem.status !== status) {
+            setDragOverStatus(status);
+        }
+    };
+
+    const handleDragLeave = () => {
+        setDragOverStatus(null);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>, status: AppointmentStatus) => {
+        e.preventDefault();
+        if (draggedItem && draggedItem.status !== status) {
+            handleAppointmentStatusChange(draggedItem.id, status);
+        }
+        setDraggedItem(null);
+        setDragOverStatus(null);
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
@@ -133,7 +163,13 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                         </div>
                         <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
                             {KANBAN_COLUMNS.map(status => (
-                                <div key={status} className="w-72 flex-shrink-0 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl p-3 flex flex-col">
+                                <div 
+                                    key={status} 
+                                    className={`w-72 flex-shrink-0 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl p-3 flex flex-col transition-colors ${dragOverStatus === status ? 'bg-blue-100 dark:bg-slate-700' : ''}`}
+                                    onDragOver={(e) => handleDragOver(e, status)}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={(e) => handleDrop(e, status)}
+                                >
                                     <div className="flex items-center mb-4">
                                         <span className={`w-3 h-3 rounded-full mr-2 ${statusConfig[status].color}`}></span>
                                         <h3 className="font-semibold text-slate-700 dark:text-slate-200">{statusConfig[status].title}</h3>
@@ -143,24 +179,22 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                                     </div>
                                     <div className="flex-1 space-y-3 overflow-y-auto pr-1">
                                         {props.appointments.filter(app => app.status === status).sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()).map(app => (
-                                            <div key={app.id} className="bg-white dark:bg-slate-700 p-4 rounded-lg shadow-md border border-slate-200 dark:border-slate-600">
+                                            <div 
+                                                key={app.id} 
+                                                draggable
+                                                onDragStart={(e) => handleDragStart(e, app)}
+                                                className={`bg-white dark:bg-slate-700 p-4 rounded-lg shadow-md border border-slate-200 dark:border-slate-600 cursor-grab active:cursor-grabbing ${draggedItem?.id === app.id ? 'opacity-50' : ''}`}
+                                            >
                                                 <p className="font-bold text-slate-800 dark:text-white">{app.name}</p>
                                                 <p className="text-sm text-slate-500 dark:text-slate-400">{DENTAL_SERVICES_MAP[app.service]}</p>
                                                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1">{new Date(app.dateTime).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
                                                 <div className="border-t border-slate-200 dark:border-slate-600 my-3"></div>
-                                                <div className="flex justify-between items-center">
+                                                <div className="flex justify-start items-center">
                                                     <div className="flex items-center space-x-1">
                                                         <button onClick={() => props.onViewOdontogram(app)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Ver Odontograma"><OdontogramIcon className="w-5 h-5" /></button>
                                                         <button onClick={() => setEditingAppointment(app)} className="p-1.5 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Editar Cita"><PencilIcon className="w-5 h-5" /></button>
                                                         <button onClick={() => props.onDeleteAppointment(app.id)} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Eliminar Cita"><TrashIcon className="w-5 h-5" /></button>
                                                     </div>
-                                                    <select 
-                                                        value={app.status} 
-                                                        onChange={(e) => handleAppointmentStatusChange(app.id, e.target.value as AppointmentStatus)}
-                                                        className="text-xs font-semibold bg-slate-100 dark:bg-slate-600 border-none rounded-md py-1 pl-2 pr-6 appearance-none focus:ring-2 focus:ring-blue-500"
-                                                    >
-                                                        {KANBAN_COLUMNS.map(s => <option key={s} value={s}>{statusConfig[s].title}</option>)}
-                                                    </select>
                                                 </div>
                                             </div>
                                         ))}

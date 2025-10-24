@@ -1,4 +1,3 @@
-
 import React from 'react';
 // FIX: Changed import to be a relative path.
 import type { Session, AppliedTreatment } from '../types';
@@ -28,7 +27,7 @@ const SessionCard: React.FC<{ session: Session; onToggleTreatmentStatus: (sessio
 
     const renderItems = (items: AppliedTreatment[], type: 'proposed' | 'completed') => {
         if (items.length === 0) {
-            return <p className="text-slate-500 dark:text-slate-400 px-2 text-sm">No hay tratamientos en esta sección.</p>;
+            return <p className="text-gray-500 dark:text-gray-400 px-2 text-sm">No hay tratamientos en esta sección.</p>;
         }
         
         const borderColor = type === 'proposed' ? 'border-red-500/50' : 'border-blue-500/50';
@@ -64,18 +63,18 @@ const SessionCard: React.FC<{ session: Session; onToggleTreatmentStatus: (sessio
 
 
                     return (
-                        <li key={item.id} className={`flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-700/50 rounded-md border-l-4 ${borderColor}`}>
+                        <li key={item.id} className={`flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md border-l-4 ${borderColor}`}>
                            <div className="flex items-center space-x-3">
                                 <div className="w-5 h-5">
                                      {actionButton}
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">{treatmentInfo.label}</p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
+                                    <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">{treatmentInfo.label}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
                                 </div>
                            </div>
                             <div className="text-right">
-                                <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">S/ {treatmentInfo.price.toFixed(2)}</p>
+                                <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">S/ {treatmentInfo.price.toFixed(2)}</p>
                             </div>
                         </li>
                     );
@@ -85,13 +84,13 @@ const SessionCard: React.FC<{ session: Session; onToggleTreatmentStatus: (sessio
     };
 
     return (
-        <div className="p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 mb-4">
-            <h4 className="text-lg font-semibold mb-3 text-slate-900 dark:text-slate-100">{session.name}</h4>
+        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+            <h4 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">{session.name}</h4>
             
             <div className="mb-2">
                 <h5 className="text-md font-semibold mb-2 text-red-500 dark:text-red-400">Propuestos</h5>
                 {renderItems(proposedItems, 'proposed')}
-                 <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between font-bold text-md text-slate-700 dark:text-slate-300">
+                 <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex justify-between font-bold text-md text-gray-700 dark:text-gray-300">
                     <span>Subtotal:</span>
                     <span className="text-red-500 dark:text-red-400">S/ {proposedTotal.toFixed(2)}</span>
                 </div>
@@ -100,7 +99,7 @@ const SessionCard: React.FC<{ session: Session; onToggleTreatmentStatus: (sessio
              <div className="mt-4">
                 <h5 className="text-md font-semibold mb-2 text-blue-500 dark:text-blue-400">Completados</h5>
                 {renderItems(completedItems, 'completed')}
-                 <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between font-bold text-md text-slate-700 dark:text-slate-300">
+                 <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex justify-between font-bold text-md text-gray-700 dark:text-gray-300">
                     <span>Subtotal:</span>
                     <span className="text-blue-500 dark:text-blue-400">S/ {completedTotal.toFixed(2)}</span>
                 </div>
@@ -120,25 +119,25 @@ export const TreatmentPlan: React.FC<TreatmentPlanProps> = ({ sessions, onAddSes
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-200">Plan de Tratamiento</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200">Plan de Tratamiento</h3>
                 <button 
                     onClick={onAddSession}
-                    className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors shadow"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors shadow"
                 >
                     + Nueva Sesión
                 </button>
             </div>
             
             {sessions.length === 0 ? (
-                <div className="text-center p-6 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
-                    <p className="text-slate-500 dark:text-slate-400">Añada una sesión para empezar a planificar.</p>
+                <div className="text-center p-6 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+                    <p className="text-gray-500 dark:text-gray-400">Añada una sesión para empezar a planificar.</p>
                 </div>
             ) : (
                 sessions.map(session => <SessionCard key={session.id} session={session} onToggleTreatmentStatus={onToggleTreatmentStatus} />)
             )}
             
             {sessions.length > 0 && (
-                 <div className="mt-6 pt-4 border-t-2 border-slate-300 dark:border-slate-700 flex justify-between font-bold text-xl text-slate-900 dark:text-slate-100">
+                 <div className="mt-6 pt-4 border-t-2 border-gray-300 dark:border-gray-700 flex justify-between font-bold text-xl text-gray-900 dark:text-gray-100">
                     <span>Total General:</span>
                     <span>S/ {grandTotal.toFixed(2)}</span>
                 </div>

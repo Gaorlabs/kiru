@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
-import { OdontogramApp } from './components/OdontogramApp';
+import { ConsultationRoom } from './components/ConsultationRoom';
 import type { Appointment, Doctor, Promotion, AppSettings } from './types';
 import { DENTAL_SERVICES_MAP } from './constants';
 
@@ -162,8 +162,8 @@ function App() {
     }
     
     if (page === 'odontogram' && isAuthenticated) {
-        return <OdontogramApp 
-            appointments={appointments} 
+        return <ConsultationRoom
+            allAppointments={appointments}
             isAuthenticated={isAuthenticated} 
             onNavigateToAdmin={handleNavigateToAdmin} 
             patient={selectedPatient} 
