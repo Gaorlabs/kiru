@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import type { Appointment, Doctor, Promotion, AppSettings } from '../types';
+import type { Appointment, Doctor, Promotion, AppSettings, AppointmentStatus } from '../types';
 import { DENTAL_SERVICES_MAP } from '../constants';
 import {
-    DashboardIcon, AppointmentIcon, UsersIcon, MegaphoneIcon, SettingsIcon, PlusIcon, PencilIcon, TrashIcon, BriefcaseIcon, DentalIcon, MoonIcon, SunIcon, OdontogramIcon
+    DashboardIcon, AppointmentIcon, UsersIcon, MegaphoneIcon, SettingsIcon, PlusIcon, PencilIcon, TrashIcon, BriefcaseIcon, DentalIcon, MoonIcon, SunIcon, OdontogramIcon, ChevronDownIcon
 } from './icons';
 import { AdminAppointmentModal } from './AdminAppointmentModal';
 import { AdminDoctorModal } from './AdminDoctorModal';
@@ -59,10 +59,19 @@ const TabButton: React.FC<{
     </button>
 );
 
+const statusConfig: Record<AppointmentStatus, { title: string; color: string; }> = {
+    requested: { title: 'Por Confirmar', color: 'bg-yellow-500' },
+    confirmed: { title: 'Confirmadas', color: 'bg-blue-500' },
+    waiting: { title: 'En Sala de Espera', color: 'bg-purple-500' },
+    completed: { title: 'Completadas', color: 'bg-green-500' },
+    canceled: { title: 'Canceladas', color: 'bg-red-500' },
+};
+const KANBAN_COLUMNS: AppointmentStatus[] = ['requested', 'confirmed', 'waiting', 'completed', 'canceled'];
+
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {
-    const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
-    const [theme, setTheme] = useState<Theme>('light');
+    const [activeTab, setActiveTab] = useState<AdminTab>('agenda');
+    const [theme, setTheme] = useState<Theme>('dark');
     
     const [editingAppointment, setEditingAppointment] = useState<Appointment | Partial<Appointment> | null>(null);
     const [editingDoctor, setEditingDoctor] = useState<Doctor | Partial<Doctor> | null>(null);
@@ -82,6 +91,13 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     const handleSaveAppointment = (data: Omit<Appointment, 'id'> & { id?: string }) => {
         props.onSaveAppointment(data);
         setEditingAppointment(null);
+    };
+
+    const handleAppointmentStatusChange = (appointmentId: string, status: AppointmentStatus) => {
+        const appointment = props.appointments.find(a => a.id === appointmentId);
+        if (appointment) {
+            props.onSaveAppointment({ ...appointment, status });
+        }
     };
     
     const handleSaveDoctor = (data: Omit<Doctor, 'id'> & { id?: string }) => {
@@ -109,51 +125,53 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                 );
             case 'agenda':
                  return (
-                    <div>
+                    <div className="h-full flex flex-col">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Agenda</h2>
+                            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Flujo de Citas</h2>
                             <button onClick={() => setEditingAppointment({})} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nueva Cita</span></button>
                         </div>
-                        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-x-auto border border-slate-200 dark:border-slate-700">
-                            <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
-                                <thead className="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-50 dark:bg-slate-700">
-                                    <tr>
-                                        <th scope="col" className="px-6 py-3">Paciente</th>
-                                        <th scope="col" className="px-6 py-3">Fecha y Hora</th>
-                                        <th scope="col" className="px-6 py-3">Servicio</th>
-                                        <th scope="col" className="px-6 py-3">Doctor</th>
-                                        <th scope="col" className="px-6 py-3">Estado</th>
-                                        <th scope="col" className="px-6 py-3">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {props.appointments.map(app => (
-                                        <tr key={app.id} className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600/50">
-                                            <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{app.name}</td>
-                                            <td className="px-6 py-4">{new Date(app.dateTime).toLocaleString()}</td>
-                                            <td className="px-6 py-4">{DENTAL_SERVICES_MAP[app.service]}</td>
-                                            <td className="px-6 py-4">{props.doctors.find(d => d.id === app.doctorId)?.name || 'N/A'}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${
-                                                    app.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 
-                                                    app.status === 'canceled' ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' :
-                                                    'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'}`}>{app.status}</span>
-                                            </td>
-                                            <td className="px-6 py-4 flex items-center space-x-2">
-                                                <button onClick={() => props.onViewOdontogram(app)} className="p-2 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-700 rounded-full transition-colors" title="Ver Odontograma"><OdontogramIcon className="w-5 h-5" /></button>
-                                                <button onClick={() => setEditingAppointment(app)} className="p-2 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-700 rounded-full transition-colors" title="Editar Cita"><PencilIcon className="w-5 h-5" /></button>
-                                                <button onClick={() => props.onDeleteAppointment(app.id)} className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-slate-700 rounded-full transition-colors" title="Eliminar Cita"><TrashIcon className="w-5 h-5" /></button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
+                            {KANBAN_COLUMNS.map(status => (
+                                <div key={status} className="w-72 flex-shrink-0 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl p-3 flex flex-col">
+                                    <div className="flex items-center mb-4">
+                                        <span className={`w-3 h-3 rounded-full mr-2 ${statusConfig[status].color}`}></span>
+                                        <h3 className="font-semibold text-slate-700 dark:text-slate-200">{statusConfig[status].title}</h3>
+                                        <span className="ml-auto text-sm font-bold bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full w-6 h-6 flex items-center justify-center">
+                                            {props.appointments.filter(a => a.status === status).length}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+                                        {props.appointments.filter(app => app.status === status).sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()).map(app => (
+                                            <div key={app.id} className="bg-white dark:bg-slate-700 p-4 rounded-lg shadow-md border border-slate-200 dark:border-slate-600">
+                                                <p className="font-bold text-slate-800 dark:text-white">{app.name}</p>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">{DENTAL_SERVICES_MAP[app.service]}</p>
+                                                <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1">{new Date(app.dateTime).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                                                <div className="border-t border-slate-200 dark:border-slate-600 my-3"></div>
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center space-x-1">
+                                                        <button onClick={() => props.onViewOdontogram(app)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Ver Odontograma"><OdontogramIcon className="w-5 h-5" /></button>
+                                                        <button onClick={() => setEditingAppointment(app)} className="p-1.5 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Editar Cita"><PencilIcon className="w-5 h-5" /></button>
+                                                        <button onClick={() => props.onDeleteAppointment(app.id)} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Eliminar Cita"><TrashIcon className="w-5 h-5" /></button>
+                                                    </div>
+                                                    <select 
+                                                        value={app.status} 
+                                                        onChange={(e) => handleAppointmentStatusChange(app.id, e.target.value as AppointmentStatus)}
+                                                        className="text-xs font-semibold bg-slate-100 dark:bg-slate-600 border-none rounded-md py-1 pl-2 pr-6 appearance-none focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                        {KANBAN_COLUMNS.map(s => <option key={s} value={s}>{statusConfig[s].title}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 );
             case 'patients': {
                  // FIX: Explicitly typed `patients` as `Appointment[]` to correct a TypeScript inference issue where `patient` in the `.map()` was being typed as `unknown`. This resolves errors related to accessing properties on `patient`.
-                 const patients: Appointment[] = Array.from(new Map(props.appointments.map(app => [app.name, app])).values());
+                 const patients: Appointment[] = Array.from(new Map(props.appointments.map(app => [app.email, app])).values());
                 return (
                     <div>
                         <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Pacientes</h2>
@@ -340,7 +358,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                     </button>
                 </div>
             </aside>
-            <main className="flex-1 p-8 overflow-y-auto">
+            <main className="flex-1 p-8 overflow-y-auto flex flex-col">
                 {renderContent()}
             </main>
             

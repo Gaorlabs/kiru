@@ -5,7 +5,7 @@ import { DENTAL_SERVICES } from '../constants';
 
 export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ appointment, doctors, onClose, onSave }) => {
     const [formData, setFormData] = useState<Omit<Appointment, 'id'> & { id?: string }>({
-        name: '', phone: '', email: '', service: '', dateTime: '', doctorId: '', status: 'confirmed'
+        name: '', phone: '', email: '', service: '', dateTime: '', doctorId: '', status: 'requested'
     });
 
     useEffect(() => {
@@ -15,12 +15,12 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ ap
             // FIX: Merged partial appointment prop with a full default object to ensure the object passed to setFormData satisfies the required state type. This resolves a TypeScript error where optional properties on the prop conflicted with required properties in the state.
             // FIX: Removed the duplicate `dateTime` property from the object initialization to fix the "An object literal cannot have multiple properties with the same name" error. The final `dateTime: localDateTime` correctly overrides any value from `...appointment`.
             setFormData({
-                name: '', phone: '', email: '', service: '', doctorId: '', status: 'confirmed',
+                name: '', phone: '', email: '', service: '', doctorId: '', status: 'requested',
                 ...appointment,
                 dateTime: localDateTime
             });
         } else {
-             setFormData({ name: '', phone: '', email: '', service: '', dateTime: '', doctorId: '', status: 'confirmed' });
+             setFormData({ name: '', phone: '', email: '', service: '', dateTime: '', doctorId: '', status: 'requested' });
         }
     }, [appointment]);
 
@@ -84,7 +84,9 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ ap
                      <div>
                         <label htmlFor="status" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Estado</label>
                         <select name="status" id="status" value={formData.status} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white">
+                            <option value="requested">Por Confirmar</option>
                             <option value="confirmed">Confirmada</option>
+                            <option value="waiting">En Sala de Espera</option>
                             <option value="completed">Completada</option>
                             <option value="canceled">Cancelada</option>
                         </select>

@@ -47,6 +47,9 @@ export interface Session {
     treatments: AppliedTreatment[];
 }
 
+export type AppointmentStatus = 'requested' | 'confirmed' | 'waiting' | 'completed' | 'canceled';
+
+
 export interface Appointment {
     id: string;
     name: string;
@@ -54,7 +57,7 @@ export interface Appointment {
     email: string;
     dateTime: string;
     service: string;
-    status: 'confirmed' | 'completed' | 'canceled';
+    status: AppointmentStatus;
     doctorId?: string;
 }
 

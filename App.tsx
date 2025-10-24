@@ -16,7 +16,9 @@ const MOCK_DOCTORS: Doctor[] = [
 const MOCK_APPOINTMENTS: Appointment[] = [
     { id: 'apt1', name: 'Juan Perez', phone: '987654321', email: 'juan.perez@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), service: 'orthodontics', status: 'confirmed', doctorId: 'doc1' },
     { id: 'apt2', name: 'Maria Lopez', phone: '912345678', email: 'maria.lopez@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), service: 'endodontics', status: 'confirmed', doctorId: 'doc2' },
-    { id: 'apt3', name: 'Pedro Ramirez', phone: '955555555', email: 'pedro.ramirez@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), service: 'cosmetic_dentistry', status: 'completed', doctorId: 'doc1' },
+    { id: 'apt3', name: 'Pedro Ramirez', phone: '955555555', email: 'pedro.ramirez@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), service: 'cosmetic_dentistry', status: 'completed', doctorId: 'doc1' },
+    { id: 'apt4', name: 'Laura Sanchez', phone: '933333333', email: 'laura.s@email.com', dateTime: new Date(new Date().setDate(new Date().getDate())).toISOString(), service: 'prevention', status: 'waiting', doctorId: 'doc3' },
+    { id: 'apt5', name: 'Carlos Gomez', phone: '922222222', email: 'carlos.g@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(), service: 'restorations', status: 'requested', doctorId: undefined },
 ];
 
 const MOCK_PROMOTIONS: Promotion[] = [
@@ -60,10 +62,10 @@ function App() {
         const newAppointment: Appointment = {
             ...appointmentData,
             id: crypto.randomUUID(),
-            status: 'confirmed',
+            status: 'requested',
         };
         setAppointments(prev => [...prev, newAppointment]);
-        alert(`¡Cita agendada para ${appointmentData.name}!\nServicio: ${DENTAL_SERVICES_MAP[appointmentData.service]}\nFecha y Hora: ${new Date(appointmentData.dateTime).toLocaleString()}`);
+        alert(`¡Solicitud de cita enviada para ${appointmentData.name}!\nServicio: ${DENTAL_SERVICES_MAP[appointmentData.service]}\nFecha y Hora: ${new Date(appointmentData.dateTime).toLocaleString()}\nNos pondremos en contacto para confirmar.`);
     };
     
     const handleViewOdontogram = (patient: Appointment) => {
@@ -83,7 +85,7 @@ function App() {
             if (data.id) {
                 return prev.map(a => a.id === data.id ? { ...a, ...data } as Appointment : a);
             }
-            return [...prev, { ...data, id: crypto.randomUUID(), status: data.status || 'confirmed' } as Appointment];
+            return [...prev, { ...data, id: crypto.randomUUID(), status: data.status || 'requested' } as Appointment];
         });
     };
     
