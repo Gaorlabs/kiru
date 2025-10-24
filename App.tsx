@@ -49,7 +49,7 @@ const MOCK_SETTINGS: AppSettings = {
     clinicAddress: 'Av. Sonrisas 123, Lima, Perú',
     clinicPhone: '(+51) 123 456 78',
     clinicEmail: 'info@kiru.com',
-    heroImageUrl: 'https://images.unsplash.com/photo-1588776814546-daab701a3512?q=80&w=1974&auto=format&fit=crop',
+    heroImageUrl: 'https://images.unsplash.com/photo-1533794299551-216541a7230b?q=80&w=1974&auto=format&fit=crop',
     loginImageUrl: 'https://images.unsplash.com/photo-1629904850781-2a6d71c1c739?q=80&w=1974&auto=format&fit=crop',
 };
 

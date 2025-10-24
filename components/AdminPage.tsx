@@ -197,8 +197,9 @@ const AdminDashboardView: React.FC<{
 
         const dailyTotals: Record<string, number> = last7Days.reduce((acc, day) => ({ ...acc, [day]: 0 }), {});
 
-        // FIX: Explicitly typed the `record` variable as `PatientRecord` to resolve TypeScript inference errors. This was causing a chain of type errors leading to arithmetic operation failures.
-        Object.values(patientRecords).forEach((record: PatientRecord) => {
+        // FIX: Replaced Object.values with Object.keys to iterate over patient records. This ensures proper type inference for the `record` object and its properties, preventing arithmetic errors.
+        Object.keys(patientRecords).forEach(patientId => {
+            const record = patientRecords[patientId];
             (record.payments || []).forEach(payment => {
                 const paymentDay = new Date(payment.date).toDateString();
                 if (dailyTotals[paymentDay] !== undefined) {
