@@ -45,6 +45,10 @@ export interface Session {
     name: string;
     status: 'pending' | 'completed';
     treatments: AppliedTreatment[];
+    date: string;
+    notes: string;
+    // FIX: Changed 'documents' to be an array of document objects to match its usage throughout the app.
+    documents: { id: string; name: string; type: 'pdf' | 'image' | 'doc' }[];
 }
 
 export type AppointmentStatus = 'requested' | 'confirmed' | 'waiting' | 'in_consultation' | 'completed' | 'canceled';
@@ -74,6 +78,14 @@ export interface AppSettings {
     clinicEmail: string;
     heroImageUrl: string;
     loginImageUrl: string;
+}
+
+export interface PatientRecord {
+    patientId: string;
+    permanentOdontogram: OdontogramState;
+    deciduousOdontogram: OdontogramState;
+    sessions: Session[];
+    medicalAlerts: string[];
 }
 
 export interface AdminAppointmentModalProps {

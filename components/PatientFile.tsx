@@ -1,10 +1,10 @@
 import React from 'react';
-import type { Appointment } from '../types';
+import type { Appointment, PatientRecord } from '../types';
 import { UserIcon, PhoneIcon, EmailIcon, CalendarIcon } from './icons';
 
 interface PatientFileProps {
     patient: Appointment | null;
-    allAppointments: Appointment[];
+    record: PatientRecord;
 }
 
 const InfoCard: React.FC<{ label: string; value: string; icon: React.ReactNode }> = ({ label, value, icon }) => (
@@ -17,12 +17,8 @@ const InfoCard: React.FC<{ label: string; value: string; icon: React.ReactNode }
     </div>
 );
 
-export const PatientFile: React.FC<PatientFileProps> = ({ patient, allAppointments }) => {
+export const PatientFile: React.FC<PatientFileProps> = ({ patient, record }) => {
     
-    const patientHistory = allAppointments
-        .filter(app => app.email === patient?.email)
-        .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
-
     if (!patient) {
         return (
             <div className="p-4 text-center text-gray-500 dark:text-gray-400">
@@ -45,21 +41,35 @@ export const PatientFile: React.FC<PatientFileProps> = ({ patient, allAppointmen
             
             <div>
                 <h3 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Alertas Médicas</h3>
-                <div className="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-lg border border-yellow-200 dark:border-yellow-800/50">
-                    Alergia a la penicilina.
-                </div>
+                {record.medicalAlerts.length > 0 ? (
+                     <div className="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-lg border border-yellow-200 dark:border-yellow-800/50">
+                        {record.medicalAlerts.join(', ')}
+                    </div>
+                ) : (
+                    <div className="p-3 text-sm bg-gray-100 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700">
+                        No hay alertas registradas.
+                    </div>
+                )}
             </div>
 
             <div>
-                <h3 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-3">Historial de Citas</h3>
-                <ul className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                    {patientHistory.map(app => (
-                        <li key={app.id} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">{new Date(app.dateTime).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Estado: <span className="font-medium capitalize">{app.status.replace('_', ' ')}</span></p>
-                        </li>
-                    ))}
-                </ul>
+                <h3 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-3">Historial de Sesiones</h3>
+                {record.sessions.length > 0 ? (
+                    <ul className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                        {record.sessions.map(session => (
+                            <li key={session.id} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">{session.name}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {new Date(session.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                     <div className="p-3 text-sm text-center bg-gray-100 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700">
+                        No hay sesiones previas.
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -3,8 +3,11 @@ import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
 import { ConsultationRoom } from './components/ConsultationRoom';
-import type { Appointment, Doctor, Promotion, AppSettings } from './types';
-import { DENTAL_SERVICES_MAP } from './constants';
+import type { Appointment, Doctor, Promotion, AppSettings, PatientRecord, OdontogramState } from './types';
+import { DENTAL_SERVICES_MAP, ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS } from './constants';
+
+const initialToothState = { surfaces: { buccal: [], lingual: [], occlusal: [], distal: [], mesial: [], root: [] }, whole: [], findings: [] };
+const createInitialOdontogram = (teeth: number[]): OdontogramState => teeth.reduce((acc, toothId) => ({ ...acc, [toothId]: structuredClone(initialToothState) }), {});
 
 // Mock data for initial state
 const MOCK_DOCTORS: Doctor[] = [
@@ -35,7 +38,26 @@ const MOCK_SETTINGS: AppSettings = {
     loginImageUrl: 'https://images.unsplash.com/photo-1629904850781-2a6d71c1c739?q=80&w=1974&auto=format&fit=crop',
 };
 
-type Page = 'landing' | 'login' | 'admin' | 'odontogram';
+const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
+    'apt1': { // Juan Perez
+        patientId: 'apt1',
+        permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
+        deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+        sessions: [
+            { id: 'sess1', name: 'Sesión 1', status: 'completed', treatments: [], date: new Date('2023-10-15').toISOString(), notes: 'Revisión inicial completa. Paciente presenta buena higiene bucal.', documents: [] }
+        ],
+        medicalAlerts: ['Hipertensión controlada.'],
+    },
+    'apt4': { // Laura Sanchez
+        patientId: 'apt4',
+        permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
+        deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+        sessions: [],
+        medicalAlerts: ['Alergia a la penicilina.'],
+    }
+};
+
+type Page = 'landing' | 'login' | 'admin' | 'consultation';
 
 function App() {
     const [page, setPage] = useState<Page>('landing');
@@ -44,7 +66,9 @@ function App() {
     const [doctors, setDoctors] = useState<Doctor[]>(MOCK_DOCTORS);
     const [promotions, setPromotions] = useState<Promotion[]>(MOCK_PROMOTIONS);
     const [settings, setSettings] = useState<AppSettings>(MOCK_SETTINGS);
+    const [patientRecords, setPatientRecords] = useState<Record<string, PatientRecord>>(MOCK_PATIENT_RECORDS);
     const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
+    const [selectedPatientRecord, setSelectedPatientRecord] = useState<PatientRecord | null>(null);
 
     const handleLogin = (success: boolean) => {
         if (success) {
@@ -68,14 +92,38 @@ function App() {
         alert(`¡Solicitud de cita enviada para ${appointmentData.name}!\nServicio: ${DENTAL_SERVICES_MAP[appointmentData.service]}\nFecha y Hora: ${new Date(appointmentData.dateTime).toLocaleString()}\nNos pondremos en contacto para confirmar.`);
     };
     
-    const handleViewOdontogram = (patient: Appointment) => {
+    const handleOpenClinicalRecord = (patient: Appointment) => {
+        const record = patientRecords[patient.id];
+        if (record) {
+            setSelectedPatientRecord(record);
+        } else {
+            // Create a new record for a new patient
+            const newRecord: PatientRecord = {
+                patientId: patient.id,
+                permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
+                deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+                sessions: [],
+                medicalAlerts: [],
+            };
+            setPatientRecords(prev => ({...prev, [patient.id]: newRecord}));
+            setSelectedPatientRecord(newRecord);
+        }
         setSelectedPatient(patient);
-        setPage('odontogram');
+        setPage('consultation');
     };
 
     const handleNavigateToAdmin = () => {
         setPage('admin');
         setSelectedPatient(null);
+        setSelectedPatientRecord(null);
+    };
+    
+    const handleSavePatientRecord = (record: PatientRecord) => {
+        setPatientRecords(prev => ({
+            ...prev,
+            [record.patientId]: record
+        }));
+        alert('Ficha clínica guardada con éxito.');
     };
 
     // --- CRUD Handlers ---
@@ -157,16 +205,18 @@ function App() {
             onTogglePromotionStatus={togglePromotionStatus}
             setSettings={setSettings}
             onLogout={handleLogout}
-            onViewOdontogram={handleViewOdontogram}
+            onOpenClinicalRecord={handleOpenClinicalRecord}
         />;
     }
     
-    if (page === 'odontogram' && isAuthenticated) {
+    if (page === 'consultation' && isAuthenticated && selectedPatient && selectedPatientRecord) {
         return <ConsultationRoom
+            patient={selectedPatient}
+            patientRecord={selectedPatientRecord}
             allAppointments={appointments}
+            onSave={handleSavePatientRecord}
             isAuthenticated={isAuthenticated} 
-            onNavigateToAdmin={handleNavigateToAdmin} 
-            patient={selectedPatient} 
+            onNavigateToAdmin={handleNavigateToAdmin}
         />;
     }
     

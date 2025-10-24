@@ -25,7 +25,7 @@ interface AdminPageProps {
     onTogglePromotionStatus: (id: string) => void;
     setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
     onLogout: () => void;
-    onViewOdontogram: (patient: Appointment) => void;
+    onOpenClinicalRecord: (patient: Appointment) => void;
 }
 
 const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode }> = ({ title, value, icon }) => (
@@ -191,7 +191,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                                                 <div className="border-t border-slate-200 dark:border-slate-600 my-3"></div>
                                                 <div className="flex justify-start items-center">
                                                     <div className="flex items-center space-x-1">
-                                                        <button onClick={() => props.onViewOdontogram(app)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Ver Odontograma"><OdontogramIcon className="w-5 h-5" /></button>
+                                                        <button onClick={() => props.onOpenClinicalRecord(app)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Abrir Ficha Clínica"><OdontogramIcon className="w-5 h-5" /></button>
                                                         <button onClick={() => setEditingAppointment(app)} className="p-1.5 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Editar Cita"><PencilIcon className="w-5 h-5" /></button>
                                                         <button onClick={() => props.onDeleteAppointment(app.id)} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600 rounded-full transition-colors" title="Eliminar Cita"><TrashIcon className="w-5 h-5" /></button>
                                                     </div>
@@ -227,9 +227,9 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                                             <td className="px-6 py-4">{patient.phone}</td>
                                             <td className="px-6 py-4">{patient.email}</td>
                                             <td className="px-6 py-4">
-                                                <button onClick={() => props.onViewOdontogram(patient)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold flex items-center space-x-2" title="Ver Odontograma">
-                                                    <OdontogramIcon className="w-5 h-5" />
-                                                    <span>Ver Odontograma</span>
+                                                <button onClick={() => props.onOpenClinicalRecord(patient)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold flex items-center space-x-2" title="Abrir Ficha Clínica">
+                                                    <BriefcaseIcon className="w-5 h-5" />
+                                                    <span>Abrir Ficha Clínica</span>
                                                 </button>
                                             </td>
                                         </tr>
