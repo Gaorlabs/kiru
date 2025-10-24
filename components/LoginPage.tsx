@@ -19,7 +19,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onNavigateToLandi
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (username === 'admin' && password === 'kiru2024') {
+        if (username === 'admin' && password === 'admin') {
             onLogin(true);
         } else {
             setError('Usuario o contraseña incorrectos.');
