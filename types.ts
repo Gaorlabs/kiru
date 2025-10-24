@@ -1,11 +1,13 @@
+
 import React from 'react';
 
 export type ToothSurfaceName = 'buccal' | 'lingual' | 'occlusal' | 'distal' | 'mesial' | 'root';
 export type TreatmentStatus = 'proposed' | 'completed';
 export type TreatmentApplication = 'surface' | 'whole_tooth' | 'root';
 
-export type ToothCondition = 'caries' | 'filling' | 'endodontics' | 'crown' | 'implant';
-export type WholeToothCondition = 'extraction' | 'missing' | 'unerupted';
+// FIX: Added new treatment IDs to the type definitions to resolve type errors in `constants.tsx`.
+export type ToothCondition = 'caries' | 'filling' | 'endodontics' | 'crown' | 'implant' | 'sealant' | 'pulpotomy' | 'post-and-core';
+export type WholeToothCondition = 'extraction' | 'missing' | 'unerupted' | 'removable-prosthesis';
 
 export interface DentalTreatment {
     id: ToothCondition | WholeToothCondition;
@@ -48,6 +50,7 @@ export interface Session {
     date: string;
     notes: string;
     documents: { id: string; name: string; type: 'pdf' | 'image' | 'doc' }[];
+    scheduledDate?: string;
 }
 
 export type AppointmentStatus = 'requested' | 'confirmed' | 'waiting' | 'in_consultation' | 'completed' | 'canceled';
@@ -95,6 +98,13 @@ export interface ConsentForm {
     status: 'pending' | 'signed';
 }
 
+export interface Payment {
+    id: string;
+    date: string;
+    amount: number;
+    method: string;
+}
+
 export interface PatientRecord {
     patientId: string;
     permanentOdontogram: OdontogramState;
@@ -103,6 +113,7 @@ export interface PatientRecord {
     medicalAlerts: string[];
     prescriptions: Prescription[];
     consents: ConsentForm[];
+    payments: Payment[];
 }
 
 export interface AdminAppointmentModalProps {

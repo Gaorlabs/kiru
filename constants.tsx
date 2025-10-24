@@ -2,15 +2,19 @@
 
 import React from 'react';
 import type { DentalTreatment } from './types';
-import { CariesIcon, CrownIcon, EndodonticsIcon, FillingIcon, HealthyIcon, ImplantIcon, MissingIcon, UneruptedIcon, ExtractionIcon } from './components/icons';
+import { CariesIcon, CrownIcon, EndodonticsIcon, FillingIcon, HealthyIcon, ImplantIcon, MissingIcon, UneruptedIcon, ExtractionIcon, PreventionIcon, RemovableProsthesisIcon, PulpotomyIcon, PostAndCoreIcon } from './components/icons';
 
 export const DENTAL_TREATMENTS: DentalTreatment[] = [
     { id: 'caries', label: 'Caries', category: 'Patología', price: 80, appliesTo: 'surface', icon: <CariesIcon /> },
     { id: 'extraction', label: 'Extracción', category: 'Cirugía', price: 150, appliesTo: 'whole_tooth', icon: <ExtractionIcon /> },
     { id: 'filling', label: 'Obturación', category: 'Operatoria', price: 120, appliesTo: 'surface', icon: <FillingIcon /> },
+    { id: 'sealant', label: 'Sellador', category: 'Operatoria', price: 60, appliesTo: 'surface', icon: <PreventionIcon /> },
     { id: 'endodontics', label: 'Endodoncia', category: 'Endodoncia', price: 450, appliesTo: 'root', icon: <EndodonticsIcon /> },
+    { id: 'pulpotomy', label: 'Pulpotomía', category: 'Endodoncia', price: 250, appliesTo: 'root', icon: <PulpotomyIcon /> },
     { id: 'crown', label: 'Corona', category: 'Rehabilitación', price: 1000, appliesTo: 'surface', icon: <CrownIcon /> },
     { id: 'implant', label: 'Implante', category: 'Rehabilitación', price: 3000, appliesTo: 'root', icon: <ImplantIcon /> },
+    { id: 'post-and-core', label: 'Perno y Muñón', category: 'Rehabilitación', price: 300, appliesTo: 'root', icon: <PostAndCoreIcon /> },
+    { id: 'removable-prosthesis', label: 'Prótesis Removible', category: 'Rehabilitación', price: 1200, appliesTo: 'whole_tooth', icon: <RemovableProsthesisIcon /> },
     { id: 'missing', label: 'Ausente', category: 'Otros', price: 0, appliesTo: 'whole_tooth', icon: <MissingIcon /> },
     { id: 'unerupted', label: 'No Erupcionado', category: 'Otros', price: 0, appliesTo: 'whole_tooth', icon: <UneruptedIcon /> },
 ];

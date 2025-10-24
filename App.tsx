@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
@@ -49,6 +50,7 @@ const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
         medicalAlerts: ['Hipertensión controlada.'],
         prescriptions: [],
         consents: [],
+        payments: [],
     },
     'apt4': { // Laura Sanchez
         patientId: 'apt4',
@@ -58,6 +60,7 @@ const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
         medicalAlerts: ['Alergia a la penicilina.'],
         prescriptions: [],
         consents: [],
+        payments: [],
     }
 };
 
@@ -121,6 +124,7 @@ function App() {
                 ...record,
                 prescriptions: record.prescriptions || [],
                 consents: record.consents || [],
+                payments: record.payments || [],
             };
         }
         
@@ -132,6 +136,7 @@ function App() {
             medicalAlerts: [],
             prescriptions: [],
             consents: [],
+            payments: [],
         };
         
         // This part needs to be handled carefully to avoid infinite loops if it triggers a re-render.

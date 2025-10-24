@@ -1,82 +1,67 @@
-import React, { useState } from 'react';
-// FIX: Changed import to be a relative path.
-import type { ClinicalFinding, Session } from '../types';
+
+import React from 'react';
+import type { ClinicalFinding } from '../types';
 import { TREATMENTS_MAP } from '../constants';
+import { TrashIcon } from './icons';
 
 interface ClinicalFindingsProps {
     findings: ClinicalFinding[];
-    sessions: Session[];
-    onAssignToSession: (finding: ClinicalFinding, sessionId: string) => void;
+    onDeleteFinding: (findingId: string) => void;
 }
 
-const FindingItem: React.FC<{ finding: ClinicalFinding; sessions: Session[]; onAssignToSession: (finding: ClinicalFinding, sessionId: string) => void; }> = ({ finding, sessions, onAssignToSession }) => {
-    const [selectedSessionId, setSelectedSessionId] = useState<string>('');
+const FindingItem: React.FC<{ finding: ClinicalFinding; onDeleteFinding: (findingId: string) => void; }> = ({ finding, onDeleteFinding }) => {
     const treatmentInfo = TREATMENTS_MAP[finding.condition];
     
     if (!treatmentInfo) return null;
 
-    let description = `Diente: ${finding.toothId}`;
-    if (treatmentInfo.appliesTo !== 'whole_tooth') {
-        description += ` - Sup: ${finding.surface}`;
-    }
-
-    const handleAssign = () => {
-        if (selectedSessionId) {
-            onAssignToSession(finding, selectedSessionId);
-        }
-    }
-
     return (
-        <li className="p-3 bg-red-500/10 dark:bg-red-900/20 rounded-lg border-l-4 border-red-500/50 space-y-2">
-            <div>
-                <p className="font-semibold text-gray-800 dark:text-gray-200">{treatmentInfo.label}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
-            </div>
-            {sessions.length > 0 ? (
-                <div className="flex items-center space-x-2">
-                    <select 
-                        value={selectedSessionId}
-                        onChange={(e) => setSelectedSessionId(e.target.value)}
-                        className="flex-grow p-1 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                    >
-                        <option value="" disabled>Asignar a sesión...</option>
-                        {sessions.map(session => (
-                            <option key={session.id} value={session.id}>{session.name}</option>
-                        ))}
-                    </select>
-                    <button 
-                        onClick={handleAssign}
-                        disabled={!selectedSessionId}
-                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-2 rounded-md text-sm transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600"
-                    >
-                        Planificar
-                    </button>
-                </div>
-            ) : (
-                <p className="text-xs text-gray-500 dark:text-gray-500">Cree una sesión en el Plan de Tratamiento para continuar.</p>
-            )}
-        </li>
+        <tr className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+            <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{treatmentInfo.label}</td>
+            <td className="px-4 py-3">{finding.toothId}</td>
+            <td className="px-4 py-3 capitalize">{finding.surface}</td>
+            <td className="px-4 py-3 text-center">
+                 <button 
+                    onClick={() => onDeleteFinding(finding.id)}
+                    className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-slate-600/50 rounded-full transition-colors" title="Eliminar Hallazgo">
+                    <TrashIcon className="w-4 h-4" />
+                </button>
+            </td>
+        </tr>
     );
 }
 
-export const ClinicalFindings: React.FC<ClinicalFindingsProps> = ({ findings, sessions, onAssignToSession }) => {
+export const ClinicalFindings: React.FC<ClinicalFindingsProps> = ({ findings, onDeleteFinding }) => {
+    const sortedFindings = [...findings].sort((a,b) => a.toothId - b.toothId);
+    
     return (
         <div>
-            {findings.length === 0 ? (
-                 <div className="text-center p-6 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
-                    <p className="text-gray-500 dark:text-gray-400">Seleccione un tratamiento y un diente para registrar un hallazgo.</p>
+            {sortedFindings.length === 0 ? (
+                 <div className="text-center p-6 bg-slate-100 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p className="text-slate-500 dark:text-slate-400">No hay hallazgos registrados.</p>
+                     <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Haga clic en un diente para registrar un nuevo hallazgo.</p>
                 </div>
             ) : (
-                <ul className="space-y-3">
-                    {findings.map(finding => (
-                        <FindingItem 
-                            key={finding.id} 
-                            finding={finding}
-                            sessions={sessions} 
-                            onAssignToSession={onAssignToSession}
-                        />
-                    ))}
-                </ul>
+                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden border border-slate-200 dark:border-slate-700">
+                    <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                        <thead className="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-50 dark:bg-slate-700">
+                             <tr>
+                                <th scope="col" className="px-4 py-2">Hallazgo</th>
+                                <th scope="col" className="px-4 py-2">Diente</th>
+                                <th scope="col" className="px-4 py-2">Superficie</th>
+                                <th scope="col" className="px-4 py-2 text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                             {sortedFindings.map(finding => (
+                                <FindingItem 
+                                    key={finding.id} 
+                                    finding={finding}
+                                    onDeleteFinding={onDeleteFinding}
+                                />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </div>
     );
