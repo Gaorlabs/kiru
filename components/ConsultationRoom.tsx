@@ -2,29 +2,33 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Odontogram } from './Odontogram';
 import { Toolbar } from './Toolbar';
 import { TreatmentPlan } from './TreatmentPlan';
-import type { OdontogramState, ToothCondition, ToothSurfaceName, WholeToothCondition, ToothState, AppliedTreatment, Session, ClinicalFinding, Appointment, PatientRecord } from '../types';
+import type { OdontogramState, ToothCondition, ToothSurfaceName, WholeToothCondition, ToothState, AppliedTreatment, Session, ClinicalFinding, Appointment, PatientRecord, Prescription, ConsentForm } from '../types';
 import { ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS, DENTAL_TREATMENTS, QUADRANTS_PERMANENT, QUADRANTS_DECIDUOUS } from '../constants';
-import { DentalIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon, OdontogramIcon, BriefcaseIcon } from './icons';
+import { DentalIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon, OdontogramIcon, BriefcaseIcon, ChevronLeftIcon, ChevronRightIcon, FileTextIcon, ClipboardListIcon, DollarSignIcon } from './icons';
 import { ClinicalFindings } from './ClinicalFindings';
 import { StatusBar } from './StatusBar';
 import { PatientFile } from './PatientFile';
 import { ClinicalHistory } from './ClinicalHistory';
+import { Prescriptions } from './Prescriptions';
+import { Consents } from './Consents';
+import { Accounts } from './Accounts';
 
 type OdontogramType = 'permanent' | 'deciduous';
 type Theme = 'light' | 'dark';
-type MainView = 'odontogram' | 'plan' | 'history';
+type MainView = 'odontogram' | 'plan' | 'history' | 'prescriptions' | 'consents' | 'accounts';
 
 interface ConsultationRoomProps {
-    allAppointments: Appointment[];
-    isAuthenticated: boolean;
-    onNavigateToAdmin: () => void;
-    patient: Appointment | null;
+    patient: Appointment;
     patientRecord: PatientRecord;
     onSave: (record: PatientRecord) => void;
+    onNavigateToAdmin: () => void;
+    onNavigateToPatient: (direction: 'next' | 'previous') => void;
+    isFirstPatient: boolean;
+    isLastPatient: boolean;
 }
 
 
-export function ConsultationRoom({ allAppointments, isAuthenticated, onNavigateToAdmin, patient, patientRecord, onSave }: ConsultationRoomProps) {
+export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToAdmin, onNavigateToPatient, isFirstPatient, isLastPatient }: ConsultationRoomProps) {
     const [record, setRecord] = useState(patientRecord);
     const [theme, setTheme] = useState<Theme>('light');
     const [activeView, setActiveView] = useState<MainView>('odontogram');
@@ -205,13 +209,21 @@ export function ConsultationRoom({ allAppointments, isAuthenticated, onNavigateT
         }))
     };
     
+    const handleUpdatePrescriptions = (prescriptions: Prescription[]) => {
+        setRecord(prev => ({ ...prev, prescriptions }));
+    };
+
+    const handleUpdateConsents = (consents: ConsentForm[]) => {
+        setRecord(prev => ({ ...prev, consents }));
+    };
+    
     const selectedTreatment = DENTAL_TREATMENTS.find(t => t.id === selectedTreatmentId) || null;
     const quadrants = isPermanent ? QUADRANTS_PERMANENT : QUADRANTS_DECIDUOUS;
     
     const TabButton = ({ view, label, icon }: { view: MainView; label: string; icon: React.ReactNode }) => (
         <button
             onClick={() => setActiveView(view)}
-            className={`flex items-center space-x-2 px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
+            className={`flex items-center space-x-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors ${
                 activeView === view
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -226,19 +238,18 @@ export function ConsultationRoom({ allAppointments, isAuthenticated, onNavigateT
         <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
             <header className="bg-white dark:bg-gray-800 py-2 px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 z-10 shadow-sm">
                 <div className="flex items-center gap-4">
+                     <button
+                        onClick={onNavigateToAdmin}
+                        className="flex items-center space-x-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5"/>
+                        <span>Panel</span>
+                    </button>
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 text-blue-600 dark:text-blue-400"><DentalIcon /></div>
-                        <h1 className="text-xl font-bold">Ficha Clínica Digital</h1>
+                        <button onClick={() => onNavigateToPatient('previous')} disabled={isFirstPatient} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"><ChevronLeftIcon /></button>
+                        <span className="font-semibold text-lg">{patient?.name}</span>
+                        <button onClick={() => onNavigateToPatient('next')} disabled={isLastPatient} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"><ChevronRightIcon /></button>
                     </div>
-                    {isAuthenticated && (
-                        <button
-                            onClick={onNavigateToAdmin}
-                            className="flex items-center space-x-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                            <ArrowLeftIcon className="w-5 h-5"/>
-                            <span>Panel Principal</span>
-                        </button>
-                    )}
                 </div>
                 <div className="flex items-center space-x-3">
                      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} title={theme === 'light' ? 'Activar tema oscuro' : 'Activar tema claro'} className="flex items-center justify-center w-9 h-9 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-full transition-colors">
@@ -257,10 +268,13 @@ export function ConsultationRoom({ allAppointments, isAuthenticated, onNavigateT
                 
                 <main className="flex-1 flex flex-col p-4 overflow-hidden">
                     <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
-                        <nav className="flex space-x-2">
+                        <nav className="flex space-x-1">
                             <TabButton view="odontogram" label="Odontograma" icon={<OdontogramIcon className="w-5 h-5"/>} />
-                            <TabButton view="plan" label="Plan de Tratamiento" icon={<CalendarIcon className="w-5 h-5"/>} />
-                            <TabButton view="history" label="Historial Clínico" icon={<BriefcaseIcon className="w-5 h-5"/>} />
+                            <TabButton view="plan" label="Plan Tratamiento" icon={<CalendarIcon className="w-5 h-5"/>} />
+                            <TabButton view="history" label="Historial" icon={<BriefcaseIcon className="w-5 h-5"/>} />
+                            <TabButton view="prescriptions" label="Recetas" icon={<FileTextIcon className="w-5 h-5"/>} />
+                            <TabButton view="consents" label="Consentimientos" icon={<ClipboardListIcon className="w-5 h-5"/>} />
+                            <TabButton view="accounts" label="Cuentas" icon={<DollarSignIcon className="w-5 h-5"/>} />
                         </nav>
                     </div>
 
@@ -284,16 +298,11 @@ export function ConsultationRoom({ allAppointments, isAuthenticated, onNavigateT
                                 <StatusBar activeTooth={activeTooth} selectedTreatment={selectedTreatment} />
                             </div>
                         )}
-                         {activeView === 'plan' && (
-                            <TreatmentPlan 
-                                sessions={record.sessions} 
-                                onAddSession={handleAddSession} 
-                                onToggleTreatmentStatus={handleToggleTreatmentStatus}
-                            />
-                         )}
-                         {activeView === 'history' && (
-                            <ClinicalHistory sessions={record.sessions} onUpdateSession={handleUpdateSession} />
-                         )}
+                         {activeView === 'plan' && <TreatmentPlan sessions={record.sessions} onAddSession={handleAddSession} onToggleTreatmentStatus={handleToggleTreatmentStatus}/>}
+                         {activeView === 'history' && <ClinicalHistory sessions={record.sessions} onUpdateSession={handleUpdateSession} />}
+                         {activeView === 'prescriptions' && <Prescriptions prescriptions={record.prescriptions} onUpdate={handleUpdatePrescriptions} patientName={patient.name} />}
+                         {activeView === 'consents' && <Consents consents={record.consents} onUpdate={handleUpdateConsents} />}
+                         {activeView === 'accounts' && <Accounts sessions={record.sessions} patientName={patient?.name || ''} />}
                     </div>
                 </main>
 

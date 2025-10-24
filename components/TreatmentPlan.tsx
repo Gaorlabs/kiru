@@ -3,7 +3,7 @@ import React from 'react';
 import type { Session, AppliedTreatment } from '../types';
 import { TREATMENTS_MAP } from '../constants';
 // FIX: Changed import to be a relative path.
-import { CheckIcon, UndoIcon } from './icons';
+import { CheckIcon, UndoIcon, PlusIcon } from './icons';
 
 interface TreatmentPlanProps {
     sessions: Session[];
@@ -30,7 +30,7 @@ const SessionCard: React.FC<{ session: Session; onToggleTreatmentStatus: (sessio
             return <p className="text-gray-500 dark:text-gray-400 px-2 text-sm">No hay tratamientos en esta sección.</p>;
         }
         
-        const borderColor = type === 'proposed' ? 'border-red-500/50' : 'border-blue-500/50';
+        const borderColor = type === 'proposed' ? 'border-yellow-500/50' : 'border-green-500/50';
 
         return (
              <ul className="space-y-2">
@@ -88,20 +88,20 @@ const SessionCard: React.FC<{ session: Session; onToggleTreatmentStatus: (sessio
             <h4 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">{session.name}</h4>
             
             <div className="mb-2">
-                <h5 className="text-md font-semibold mb-2 text-red-500 dark:text-red-400">Propuestos</h5>
+                <h5 className="text-md font-semibold mb-2 text-yellow-600 dark:text-yellow-400">Propuestos</h5>
                 {renderItems(proposedItems, 'proposed')}
                  <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex justify-between font-bold text-md text-gray-700 dark:text-gray-300">
                     <span>Subtotal:</span>
-                    <span className="text-red-500 dark:text-red-400">S/ {proposedTotal.toFixed(2)}</span>
+                    <span className="text-yellow-600 dark:text-yellow-400">S/ {proposedTotal.toFixed(2)}</span>
                 </div>
             </div>
 
              <div className="mt-4">
-                <h5 className="text-md font-semibold mb-2 text-blue-500 dark:text-blue-400">Completados</h5>
+                <h5 className="text-md font-semibold mb-2 text-green-600 dark:text-green-400">Completados</h5>
                 {renderItems(completedItems, 'completed')}
                  <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex justify-between font-bold text-md text-gray-700 dark:text-gray-300">
                     <span>Subtotal:</span>
-                    <span className="text-blue-500 dark:text-blue-400">S/ {completedTotal.toFixed(2)}</span>
+                    <span className="text-green-600 dark:text-green-400">S/ {completedTotal.toFixed(2)}</span>
                 </div>
             </div>
         </div>
@@ -122,9 +122,10 @@ export const TreatmentPlan: React.FC<TreatmentPlanProps> = ({ sessions, onAddSes
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200">Plan de Tratamiento</h3>
                 <button 
                     onClick={onAddSession}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-sm transition-colors shadow"
+                    className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors shadow flex items-center space-x-2"
                 >
-                    + Nueva Sesión
+                    <PlusIcon className="w-5 h-5"/>
+                    <span>Nueva Sesión</span>
                 </button>
             </div>
             
@@ -137,9 +138,11 @@ export const TreatmentPlan: React.FC<TreatmentPlanProps> = ({ sessions, onAddSes
             )}
             
             {sessions.length > 0 && (
-                 <div className="mt-6 pt-4 border-t-2 border-gray-300 dark:border-gray-700 flex justify-between font-bold text-xl text-gray-900 dark:text-gray-100">
-                    <span>Total General:</span>
-                    <span>S/ {grandTotal.toFixed(2)}</span>
+                 <div className="mt-6 p-4 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div className="flex justify-between font-bold text-xl text-gray-900 dark:text-gray-100">
+                        <span>Total General:</span>
+                        <span>S/ {grandTotal.toFixed(2)}</span>
+                    </div>
                 </div>
             )}
         </div>

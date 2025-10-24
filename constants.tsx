@@ -1,8 +1,7 @@
 
+
 import React from 'react';
-// FIX: Changed import to be a relative path.
 import type { DentalTreatment } from './types';
-// FIX: Changed import to be a relative path.
 import { CariesIcon, CrownIcon, EndodonticsIcon, FillingIcon, HealthyIcon, ImplantIcon, MissingIcon, UneruptedIcon, ExtractionIcon } from './components/icons';
 
 export const DENTAL_TREATMENTS: DentalTreatment[] = [
@@ -72,4 +71,23 @@ export const ALL_TEETH_DECIDUOUS = [
     ...QUADRANTS_DECIDUOUS.UPPER_LEFT,
     ...QUADRANTS_DECIDUOUS.LOWER_RIGHT.slice().reverse(),
     ...QUADRANTS_DECIDUOUS.LOWER_LEFT.slice().reverse(),
+];
+
+export const CONSENT_TEMPLATES = [
+    {
+        id: 'extraction',
+        title: 'Consentimiento para Extracción Dental',
+    },
+    {
+        id: 'endodontics',
+        title: 'Consentimiento para Endodoncia',
+    },
+    {
+        id: 'implant',
+        title: 'Consentimiento para Implante Dental',
+    },
+    {
+        id: 'cosmetic',
+        title: 'Consentimiento para Procedimiento Cosmético',
+    },
 ];

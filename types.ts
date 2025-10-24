@@ -47,7 +47,6 @@ export interface Session {
     treatments: AppliedTreatment[];
     date: string;
     notes: string;
-    // FIX: Changed 'documents' to be an array of document objects to match its usage throughout the app.
     documents: { id: string; name: string; type: 'pdf' | 'image' | 'doc' }[];
 }
 
@@ -80,12 +79,30 @@ export interface AppSettings {
     loginImageUrl: string;
 }
 
+export interface Prescription {
+    id: string;
+    date: string;
+    medication: string;
+    dosage: string;
+    instructions: string;
+}
+
+export interface ConsentForm {
+    id: string;
+    templateId: string;
+    title: string;
+    dateSigned: string | null;
+    status: 'pending' | 'signed';
+}
+
 export interface PatientRecord {
     patientId: string;
     permanentOdontogram: OdontogramState;
     deciduousOdontogram: OdontogramState;
     sessions: Session[];
     medicalAlerts: string[];
+    prescriptions: Prescription[];
+    consents: ConsentForm[];
 }
 
 export interface AdminAppointmentModalProps {

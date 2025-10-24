@@ -30,7 +30,7 @@ interface AdminPageProps {
 
 const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode }> = ({ title, value, icon }) => (
     <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 flex items-center space-x-4">
-        <div className="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full text-blue-600 dark:text-blue-400">
+        <div className="bg-pink-100 dark:bg-pink-900/50 p-3 rounded-full text-pink-600 dark:text-pink-400">
             {icon}
         </div>
         <div>
@@ -50,7 +50,7 @@ const TabButton: React.FC<{
         onClick={onClick}
         className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
             isActive
-                ? 'bg-blue-600 text-white shadow-lg'
+                ? 'bg-pink-600 text-white shadow-lg'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50'
         }`}
     >
@@ -159,7 +159,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                     <div className="h-full flex flex-col">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Flujo de Citas</h2>
-                            <button onClick={() => setEditingAppointment({})} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nueva Cita</span></button>
+                            <button onClick={() => setEditingAppointment({})} className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nueva Cita</span></button>
                         </div>
                         <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
                             {KANBAN_COLUMNS.map(status => (
@@ -205,8 +205,12 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                     </div>
                 );
             case 'patients': {
-                 // FIX: Explicitly typed `patients` as `Appointment[]` to correct a TypeScript inference issue where `patient` in the `.map()` was being typed as `unknown`. This resolves errors related to accessing properties on `patient`.
-                 const patients: Appointment[] = Array.from(new Map(props.appointments.map(app => [app.email, app])).values());
+                 // FIX: Used Object.keys().map() to extract patient data, ensuring proper type inference for the 'patients' array where Object.values() was failing.
+                 const patientMap = props.appointments.reduce((acc, app) => {
+                    acc[app.email] = app;
+                    return acc;
+                 }, {} as Record<string, Appointment>);
+                 const patients = Object.keys(patientMap).map(key => patientMap[key]);
                 return (
                     <div>
                         <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Pacientes</h2>
@@ -245,7 +249,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                      <div>
                          <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Doctores</h2>
-                            <button onClick={() => setEditingDoctor({})} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nuevo Doctor</span></button>
+                            <button onClick={() => setEditingDoctor({})} className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nuevo Doctor</span></button>
                         </div>
                          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-x-auto border border-slate-200 dark:border-slate-700">
                             <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
@@ -277,7 +281,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                      <div>
                          <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Promociones</h2>
-                            <button onClick={() => setEditingPromotion({})} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nueva Promoción</span></button>
+                            <button onClick={() => setEditingPromotion({})} className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><PlusIcon className="w-5 h-5" /><span>Nueva Promoción</span></button>
                         </div>
                         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-x-auto border border-slate-200 dark:border-slate-700">
                            <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
@@ -357,7 +361,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                                     <input type="text" name="loginImageUrl" id="loginImageUrl" value={localSettings.loginImageUrl} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
                                 </div>
                                 <div className="pt-2 text-right">
-                                     <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Guardar Cambios</button>
+                                     <button type="submit" className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-lg">Guardar Cambios</button>
                                 </div>
                             </form>
                         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
@@ -47,6 +47,8 @@ const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
             { id: 'sess1', name: 'Sesión 1', status: 'completed', treatments: [], date: new Date('2023-10-15').toISOString(), notes: 'Revisión inicial completa. Paciente presenta buena higiene bucal.', documents: [] }
         ],
         medicalAlerts: ['Hipertensión controlada.'],
+        prescriptions: [],
+        consents: [],
     },
     'apt4': { // Laura Sanchez
         patientId: 'apt4',
@@ -54,6 +56,8 @@ const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
         deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
         sessions: [],
         medicalAlerts: ['Alergia a la penicilina.'],
+        prescriptions: [],
+        consents: [],
     }
 };
 
@@ -67,8 +71,13 @@ function App() {
     const [promotions, setPromotions] = useState<Promotion[]>(MOCK_PROMOTIONS);
     const [settings, setSettings] = useState<AppSettings>(MOCK_SETTINGS);
     const [patientRecords, setPatientRecords] = useState<Record<string, PatientRecord>>(MOCK_PATIENT_RECORDS);
-    const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
-    const [selectedPatientRecord, setSelectedPatientRecord] = useState<PatientRecord | null>(null);
+    
+    const [currentPatientIndex, setCurrentPatientIndex] = useState<number | null>(null);
+
+    const sortedAppointments = useMemo(() => 
+        [...appointments].sort((a,b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()),
+        [appointments]
+    );
 
     const handleLogin = (success: boolean) => {
         if (success) {
@@ -93,29 +102,56 @@ function App() {
     };
     
     const handleOpenClinicalRecord = (patient: Appointment) => {
-        const record = patientRecords[patient.id];
-        if (record) {
-            setSelectedPatientRecord(record);
-        } else {
-            // Create a new record for a new patient
-            const newRecord: PatientRecord = {
-                patientId: patient.id,
-                permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
-                deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
-                sessions: [],
-                medicalAlerts: [],
-            };
-            setPatientRecords(prev => ({...prev, [patient.id]: newRecord}));
-            setSelectedPatientRecord(newRecord);
-        }
-        setSelectedPatient(patient);
+        const patientIndex = sortedAppointments.findIndex(p => p.id === patient.id);
+        setCurrentPatientIndex(patientIndex);
         setPage('consultation');
     };
+    
+    const currentPatient = useMemo(() => {
+        if (currentPatientIndex === null || !sortedAppointments[currentPatientIndex]) return null;
+        return sortedAppointments[currentPatientIndex];
+    }, [currentPatientIndex, sortedAppointments]);
+
+    const currentPatientRecord = useMemo(() => {
+        if (!currentPatient) return null;
+        
+        const record = patientRecords[currentPatient.id];
+        if (record) {
+             return {
+                ...record,
+                prescriptions: record.prescriptions || [],
+                consents: record.consents || [],
+            };
+        }
+        
+        const newRecord: PatientRecord = {
+            patientId: currentPatient.id,
+            permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
+            deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+            sessions: [],
+            medicalAlerts: [],
+            prescriptions: [],
+            consents: [],
+        };
+        
+        // This part needs to be handled carefully to avoid infinite loops if it triggers a re-render.
+        // We can use a callback with setPatientRecords.
+        setPatientRecords(prev => ({...prev, [currentPatient.id]: newRecord}));
+        return newRecord;
+    }, [currentPatient, patientRecords]);
+
 
     const handleNavigateToAdmin = () => {
         setPage('admin');
-        setSelectedPatient(null);
-        setSelectedPatientRecord(null);
+        setCurrentPatientIndex(null);
+    };
+
+     const handleNavigateToPatient = (direction: 'next' | 'previous') => {
+        if (currentPatientIndex === null) return;
+        const newIndex = direction === 'next' ? currentPatientIndex + 1 : currentPatientIndex - 1;
+        if (newIndex >= 0 && newIndex < sortedAppointments.length) {
+            setCurrentPatientIndex(newIndex);
+        }
     };
     
     const handleSavePatientRecord = (record: PatientRecord) => {
@@ -209,17 +245,23 @@ function App() {
         />;
     }
     
-    if (page === 'consultation' && isAuthenticated && selectedPatient && selectedPatientRecord) {
+    if (page === 'consultation' && isAuthenticated && currentPatient && currentPatientRecord) {
         return <ConsultationRoom
-            patient={selectedPatient}
-            patientRecord={selectedPatientRecord}
-            allAppointments={appointments}
+            patient={currentPatient}
+            patientRecord={currentPatientRecord}
             onSave={handleSavePatientRecord}
-            isAuthenticated={isAuthenticated} 
             onNavigateToAdmin={handleNavigateToAdmin}
+            onNavigateToPatient={handleNavigateToPatient}
+            isFirstPatient={currentPatientIndex === 0}
+            isLastPatient={currentPatientIndex === sortedAppointments.length - 1}
         />;
     }
     
+    // Fallback or loading state
+    if (page === 'consultation' && isAuthenticated && currentPatientIndex !== null && !currentPatientRecord) {
+        return <div className="flex h-screen items-center justify-center bg-gray-100">Cargando ficha del paciente...</div>;
+    }
+
     return null;
 }
 
