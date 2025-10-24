@@ -147,9 +147,172 @@ const AdminAccountsView: React.FC<{
     );
 };
 
+const AdminDashboardView: React.FC<{
+    appointments: Appointment[];
+    patientRecords: Record<string, PatientRecord>;
+}> = ({ appointments, patientRecords }) => {
+
+    const {
+        todaysAppointmentsCount,
+        activePatientsCount,
+        totalProposedValue,
+        totalRevenue
+    } = useMemo(() => {
+        const today = new Date().toDateString();
+        const todaysAppointments = appointments.filter(a => new Date(a.dateTime).toDateString() === today);
+        const uniquePatients = new Set(appointments.map(a => a.email));
+
+        let proposedValue = 0;
+        let revenue = 0;
+        
+        // FIX: Explicitly typed the `record` variable as `PatientRecord` to resolve TypeScript inference errors.
+        Object.values(patientRecords).forEach((record: PatientRecord) => {
+            (record.sessions || []).forEach(session => {
+                session.treatments.forEach(treatment => {
+                    const price = TREATMENTS_MAP[treatment.treatmentId]?.price || 0;
+                    if (treatment.status === 'proposed') {
+                        proposedValue += price;
+                    }
+                });
+            });
+            (record.payments || []).forEach(payment => {
+                revenue += payment.amount;
+            });
+        });
+
+        return {
+            todaysAppointmentsCount: todaysAppointments.length,
+            activePatientsCount: uniquePatients.size,
+            totalProposedValue: proposedValue,
+            totalRevenue: revenue,
+        };
+    }, [appointments, patientRecords]);
+    
+     const weeklyRevenue = useMemo(() => {
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            return d.toDateString();
+        }).reverse();
+
+        const dailyTotals: Record<string, number> = last7Days.reduce((acc, day) => ({ ...acc, [day]: 0 }), {});
+
+        // FIX: Explicitly typed the `record` variable as `PatientRecord` to resolve TypeScript inference errors. This was causing a chain of type errors leading to arithmetic operation failures.
+        Object.values(patientRecords).forEach((record: PatientRecord) => {
+            (record.payments || []).forEach(payment => {
+                const paymentDay = new Date(payment.date).toDateString();
+                if (dailyTotals[paymentDay] !== undefined) {
+                    dailyTotals[paymentDay] += payment.amount;
+                }
+            });
+        });
+        
+        return last7Days.map(day => ({
+            day: new Date(day).toLocaleDateString('es-ES', { weekday: 'short' }),
+            total: dailyTotals[day]
+        }));
+    }, [patientRecords]);
+
+    const maxRevenue = Math.max(...weeklyRevenue.map(d => d.total), 1);
+
+    const popularServices = useMemo(() => {
+        const serviceCounts = appointments.reduce((acc, app) => {
+            acc[app.service] = (acc[app.service] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return Object.entries(serviceCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 5)
+            .map(([serviceId, count]) => ({
+                name: DENTAL_SERVICES_MAP[serviceId] || 'Desconocido',
+                count
+            }));
+    }, [appointments]);
+
+    // FIX: Pre-calculate max count to avoid division by zero or undefined, resolving arithmetic operation type errors.
+    const maxPopularServiceCount = popularServices.length > 0 ? popularServices[0].count : 1;
+
+    const todaysAppointmentList = useMemo(() => {
+        return appointments
+            .filter(a => new Date(a.dateTime).toDateString() === new Date().toDateString())
+            .sort((a,b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+    }, [appointments]);
+
+
+    return (
+        <div>
+            <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Dashboard</h2>
+            {/* KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                 <StatCard title="Valor de Planes Propuestos" value={`S/ ${totalProposedValue.toFixed(2)}`} icon={<BriefcaseIcon />} />
+                 <StatCard title="Ingresos Totales" value={`S/ ${totalRevenue.toFixed(2)}`} icon={<DollarSignIcon />} />
+                 <StatCard title="Pacientes Activos" value={activePatientsCount} icon={<UsersIcon />} />
+                 <StatCard title="Citas para Hoy" value={todaysAppointmentsCount} icon={<AppointmentIcon />} />
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Weekly Revenue & Popular Services */}
+                <div className="lg:col-span-2 space-y-6">
+                     {/* Weekly Revenue Chart */}
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+                        <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Ingresos de la Semana</h3>
+                        <div className="flex justify-between items-end h-64 space-x-2">
+                             {weeklyRevenue.map(({ day, total }) => (
+                                <div key={day} className="flex-1 flex flex-col items-center justify-end">
+                                    <div className="text-xs font-bold text-slate-500 dark:text-slate-400">S/{total.toFixed(0)}</div>
+                                    <div 
+                                        className="w-full bg-blue-500 rounded-t-md mt-1 transition-all duration-500 hover:bg-blue-600"
+                                        style={{ height: `${(total / maxRevenue) * 100}%`}}
+                                        title={`S/ ${total.toFixed(2)}`}
+                                    ></div>
+                                    <div className="text-sm font-semibold text-slate-600 dark:text-slate-300 mt-2">{day}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Popular Services */}
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+                        <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Servicios Populares</h3>
+                        <div className="space-y-4">
+                            {popularServices.map(({name, count}) => (
+                                <div key={name}>
+                                    <div className="flex justify-between text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                                        <span>{name}</span>
+                                        <span>{count} citas</span>
+                                    </div>
+                                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
+                                        <div className="bg-pink-500 h-2.5 rounded-full" style={{width: `${(count / maxPopularServiceCount) * 100}%`}}></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Today's Agenda */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Agenda del Día</h3>
+                     <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                        {todaysAppointmentList.length > 0 ? todaysAppointmentList.map(app => (
+                            <div key={app.id} className={`p-3 rounded-lg border-l-4 ${APPOINTMENT_STATUS_CONFIG[app.status].borderColor} ${APPOINTMENT_STATUS_CONFIG[app.status].color}`}>
+                                <p className={`font-bold text-sm ${APPOINTMENT_STATUS_CONFIG[app.status].textColor}`}>{app.name}</p>
+                                <p className={`text-xs ${APPOINTMENT_STATUS_CONFIG[app.status].textColor}`}>{new Date(app.dateTime).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'})} - {DENTAL_SERVICES_MAP[app.service]}</p>
+                            </div>
+                        )) : (
+                            <p className="text-center text-slate-500 dark:text-slate-400 py-8">No hay citas para hoy.</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export const AdminPage: React.FC<AdminPageProps> = (props) => {
-    const [activeTab, setActiveTab] = useState<AdminTab>('agenda');
+    const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
     const [theme, setTheme] = useState<Theme>('dark');
     const [agendaView, setAgendaView] = useState<'kanban' | 'calendar'>('kanban');
     
@@ -225,16 +388,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
-                return (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Dashboard</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                             <StatCard title="Citas para Hoy" value={props.appointments.filter(a => new Date(a.dateTime).toDateString() === new Date().toDateString()).length} icon={<AppointmentIcon />} />
-                             <StatCard title="Pacientes Totales" value={props.appointments.length} icon={<UsersIcon />} />
-                             <StatCard title="Promociones Activas" value={props.promotions.filter(p => p.isActive).length} icon={<MegaphoneIcon />} />
-                        </div>
-                    </div>
-                );
+                return <AdminDashboardView appointments={props.appointments} patientRecords={props.patientRecords} />;
             case 'agenda':
                  return (
                     <div className="h-full flex flex-col">
@@ -483,7 +637,7 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
     };
 
     return (
-        <div className={`flex h-screen bg-slate-100 dark:bg-slate-900 font-sans transition-colors`}>
+        <div className={`flex h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors`}>
             <aside className="w-64 bg-white dark:bg-slate-800 p-4 flex flex-col border-r border-slate-200 dark:border-slate-700">
                  <div className="flex items-center space-x-2 mb-8 px-2">
                     <div className="w-9 h-9 text-blue-600 dark:text-blue-400"><DentalIcon /></div>
