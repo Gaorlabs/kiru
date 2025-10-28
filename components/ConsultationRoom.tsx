@@ -1,50 +1,40 @@
-
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Odontogram } from './Odontogram';
 import { Toolbar } from './Toolbar';
 import { TreatmentPlan } from './TreatmentPlan';
-import type { OdontogramState, ToothCondition, ToothSurfaceName, WholeToothCondition, ToothState, AppliedTreatment, Session, ClinicalFinding, Appointment, PatientRecord, Prescription, ConsentForm, Payment } from '../types';
+import type { OdontogramState, ToothCondition, ToothSurfaceName, WholeToothCondition, ToothState, AppliedTreatment, Session, ClinicalFinding, Appointment, PatientRecord } from '../types';
 import { ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS, DENTAL_TREATMENTS, QUADRANTS_PERMANENT, QUADRANTS_DECIDUOUS } from '../constants';
-import { DentalIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon, OdontogramIcon, BriefcaseIcon, ChevronLeftIcon, ChevronRightIcon, FileTextIcon, ClipboardListIcon, DollarSignIcon, PlusIcon } from './icons';
+import { DentalIcon, SaveIcon, MoonIcon, SunIcon, CalendarIcon, ArrowLeftIcon, OdontogramIcon, BriefcaseIcon } from './icons';
 import { ClinicalFindings } from './ClinicalFindings';
 import { StatusBar } from './StatusBar';
 import { PatientFile } from './PatientFile';
 import { ClinicalHistory } from './ClinicalHistory';
-import { Prescriptions } from './Prescriptions';
-import { Consents } from './Consents';
-import { Accounts } from './Accounts';
 
 type OdontogramType = 'permanent' | 'deciduous';
 type Theme = 'light' | 'dark';
-type MainView = 'odontogram' | 'plan' | 'history' | 'prescriptions' | 'consents' | 'accounts';
+type MainView = 'odontogram' | 'plan' | 'history';
 
 interface ConsultationRoomProps {
-    patient: Appointment;
+    allAppointments: Appointment[];
+    isAuthenticated: boolean;
+    onNavigateToAdmin: () => void;
+    patient: Appointment | null;
     patientRecord: PatientRecord;
     onSave: (record: PatientRecord) => void;
-    onNavigateToAdmin: () => void;
-    onNavigateToPatient: (direction: 'next' | 'previous') => void;
-    isFirstPatient: boolean;
-    isLastPatient: boolean;
-    onSavePayment: (paymentData: { patientId: string; amount: number; method: string; date: string; id?: string }) => void;
-    onDeletePayment: (paymentId: string, patientId: string) => void;
-    initialTab?: MainView;
 }
 
 
-export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToAdmin, onNavigateToPatient, isFirstPatient, isLastPatient, onSavePayment, onDeletePayment, initialTab }: ConsultationRoomProps) {
+export function ConsultationRoom({ allAppointments, isAuthenticated, onNavigateToAdmin, patient, patientRecord, onSave }: ConsultationRoomProps) {
     const [record, setRecord] = useState(patientRecord);
-    const [theme, setTheme] = useState<Theme>('dark');
-    const [activeView, setActiveView] = useState<MainView>(initialTab || 'odontogram');
+    const [theme, setTheme] = useState<Theme>('light');
+    const [activeView, setActiveView] = useState<MainView>('odontogram');
     const [odontogramType, setOdontogramType] = useState<OdontogramType>('permanent');
+    const [selectedTreatmentId, setSelectedTreatmentId] = useState<ToothCondition | WholeToothCondition | null>(null);
     const [activeTooth, setActiveTooth] = useState<{ toothId: number; surface: ToothSurfaceName | 'whole' } | null>(null);
-    const [isTreatmentModalOpen, setIsTreatmentModalOpen] = useState(false);
-    const [editingFinding, setEditingFinding] = useState<ClinicalFinding | null>(null);
     
     useEffect(() => {
         setRecord(patientRecord);
-        setActiveView(initialTab || 'odontogram');
-    }, [patientRecord, initialTab]);
+    }, [patientRecord]);
 
     useEffect(() => {
         document.documentElement.classList.remove('dark', 'light');
@@ -71,173 +61,75 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
         return [...permanentFindings, ...deciduousFindings];
     }, [record.permanentOdontogram, record.deciduousOdontogram]);
 
-    const handleDeleteFinding = (findingId: string) => {
-        setRecord(prev => {
-            const newRecord = structuredClone(prev);
-            let found = false;
-
-            for (const toothId in newRecord.permanentOdontogram) {
-                const tooth = newRecord.permanentOdontogram[toothId];
-                const initialLength = tooth.findings.length;
-                tooth.findings = tooth.findings.filter(f => f.id !== findingId);
-                if (tooth.findings.length < initialLength) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                for (const toothId in newRecord.deciduousOdontogram) {
-                    const tooth = newRecord.deciduousOdontogram[toothId];
-                    const initialLength = tooth.findings.length;
-                    tooth.findings = tooth.findings.filter(f => f.id !== findingId);
-                    if (tooth.findings.length < initialLength) {
-                        break;
-                    }
-                }
-            }
-            return newRecord;
-        });
-    };
-    
-    // FIX: Refactored function to use an immutable update pattern, which resolves a type inference error on the 'tooth' object.
-    const addFinding = useCallback((treatmentId: ToothCondition | WholeToothCondition, toothInfo: { toothId: number; surface: ToothSurfaceName | 'whole' }) => {
-        const treatmentInfo = DENTAL_TREATMENTS.find(t => t.id === treatmentId);
+    const handleAddFinding = useCallback(() => {
+        if (!selectedTreatmentId || !activeTooth) return;
+        
+        const treatmentInfo = DENTAL_TREATMENTS.find(t => t.id === selectedTreatmentId);
         if (!treatmentInfo) return;
 
         setOdontogramState(prevState => {
-            const { toothId, surface } = toothInfo;
-            const currentTooth = prevState[toothId];
-
-            if (!currentTooth) return prevState;
+            const newState = structuredClone(prevState);
+            const { toothId, surface } = activeTooth;
+            const tooth = newState[toothId];
 
             const newFinding: ClinicalFinding = {
                 id: crypto.randomUUID(),
                 toothId: toothId,
                 surface: surface,
-                condition: treatmentId,
+                condition: selectedTreatmentId,
             };
             
-            const alreadyExists = currentTooth.findings.some(f => f.toothId === toothId && f.surface === surface && f.condition === treatmentId);
-            if (alreadyExists) {
-                return prevState;
+            const alreadyExists = tooth.findings.some(f => f.toothId === toothId && f.surface === surface && f.condition === selectedTreatmentId);
+            if (!alreadyExists) {
+                tooth.findings.push(newFinding);
             }
-            
-            const updatedTooth: ToothState = {
-                ...currentTooth,
-                findings: [...currentTooth.findings, newFinding],
-            };
 
-            return {
-                ...prevState,
-                [toothId]: updatedTooth,
-            };
+            return newState;
         });
 
-    }, [setOdontogramState]);
-    
-     const updateFinding = (findingId: string, newCondition: ToothCondition | WholeToothCondition) => {
+    }, [selectedTreatmentId, activeTooth, setOdontogramState]);
+
+    const handleAddSession = () => {
+        const newSession: Session = {
+            id: crypto.randomUUID(),
+            name: `Sesión ${record.sessions.length + 1}`,
+            status: 'pending',
+            treatments: [],
+            date: new Date().toISOString(),
+            notes: '',
+            documents: [],
+        };
+        setRecord(prev => ({...prev, sessions: [...prev.sessions, newSession]}));
+    };
+
+    const handleAssignFindingToSession = (finding: ClinicalFinding, sessionId: string) => {
+        const treatmentInfo = DENTAL_TREATMENTS.find(t => t.id === finding.condition);
+        if (!treatmentInfo) return;
+
+        const newTreatment: AppliedTreatment = {
+            id: crypto.randomUUID(),
+            treatmentId: finding.condition,
+            toothId: finding.toothId,
+            surface: finding.surface,
+            status: 'proposed',
+            sessionId: sessionId,
+        };
+        
+        const isFindingPermanent = ALL_TEETH_PERMANENT.includes(finding.toothId);
+        const targetOdontogramKey = isFindingPermanent ? 'permanentOdontogram' : 'deciduousOdontogram';
+
         setRecord(prev => {
             const newRecord = structuredClone(prev);
-            let found = false;
-            
-            const findAndUpdate = (odontogram: OdontogramState) => {
-                for (const toothId in odontogram) {
-                    const tooth = odontogram[toothId];
-                    const findingIndex = tooth.findings.findIndex(f => f.id === findingId);
-                    if (findingIndex > -1) {
-                        tooth.findings[findingIndex].condition = newCondition;
-                        return true;
-                    }
-                }
-                return false;
+            // Add treatment to session
+            const session = newRecord.sessions.find(s => s.id === sessionId);
+            if (session) {
+                session.treatments.push(newTreatment);
             }
-
-            if (findAndUpdate(newRecord.permanentOdontogram)) {
-                found = true;
-            }
-            if (!found) {
-                findAndUpdate(newRecord.deciduousOdontogram);
-            }
-            
+            // Remove finding from odontogram
+            const tooth = newRecord[targetOdontogramKey][finding.toothId];
+            tooth.findings = tooth.findings.filter(f => f.id !== finding.id);
             return newRecord;
         });
-    };
-
-     const handleToothClick = (toothInfo: { toothId: number; surface: ToothSurfaceName | 'whole' }) => {
-        setActiveTooth(toothInfo);
-        setIsTreatmentModalOpen(true);
-    };
-    
-    const handleEditFindingClick = (finding: ClinicalFinding) => {
-        setEditingFinding(finding);
-        setActiveTooth({ toothId: finding.toothId, surface: finding.surface });
-        setIsTreatmentModalOpen(true);
-    };
-
-    const handleSelectTreatmentFromModal = (treatmentId: ToothCondition | WholeToothCondition) => {
-        if (editingFinding) {
-            updateFinding(editingFinding.id, treatmentId);
-        } else if (activeTooth) {
-            addFinding(treatmentId, activeTooth);
-        }
-        setIsTreatmentModalOpen(false);
-        setActiveTooth(null);
-        setEditingFinding(null);
-    };
-    
-    const handleSavePlan = (proposedSessions: { name: string; scheduledDate?: string; findingIds: string[] }[]) => {
-        const newSessions: Session[] = [];
-        const assignedFindingIds = new Set<string>();
-
-        for (const proposed of proposedSessions) {
-            const sessionId = crypto.randomUUID();
-            const treatments: AppliedTreatment[] = [];
-
-            for (const findingId of proposed.findingIds) {
-                const finding = allFindings.find(f => f.id === findingId);
-                if (finding) {
-                    treatments.push({
-                        id: crypto.randomUUID(),
-                        treatmentId: finding.condition,
-                        toothId: finding.toothId,
-                        surface: finding.surface,
-                        status: 'proposed',
-                        sessionId: sessionId,
-                    });
-                    assignedFindingIds.add(findingId);
-                }
-            }
-
-            newSessions.push({
-                id: sessionId,
-                name: proposed.name,
-                status: 'pending',
-                date: new Date().toISOString(),
-                scheduledDate: proposed.scheduledDate,
-                treatments: treatments,
-                notes: '',
-                documents: [],
-            });
-        }
-        
-        setRecord(prev => {
-            const newRecord = structuredClone(prev);
-            newRecord.sessions = newSessions;
-
-            // FIX: Explicitly type `tooth` as `ToothState` to resolve a TypeScript inference issue where `Object.values` returns `unknown[]`.
-            Object.values(newRecord.permanentOdontogram).forEach((tooth: ToothState) => {
-                tooth.findings = tooth.findings.filter(f => !assignedFindingIds.has(f.id));
-            });
-            // FIX: Explicitly type `tooth` as `ToothState` to resolve a TypeScript inference issue where `Object.values` returns `unknown[]`.
-            Object.values(newRecord.deciduousOdontogram).forEach((tooth: ToothState) => {
-                tooth.findings = tooth.findings.filter(f => !assignedFindingIds.has(f.id));
-            });
-            
-            return newRecord;
-        });
-        
-        alert('Plan de tratamiento guardado.');
     };
     
     const handleToggleTreatmentStatus = (sessionId: string, treatmentId: string) => {
@@ -313,20 +205,13 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
         }))
     };
     
-    const handleUpdatePrescriptions = (prescriptions: Prescription[]) => {
-        setRecord(prev => ({ ...prev, prescriptions }));
-    };
-
-    const handleUpdateConsents = (consents: ConsentForm[]) => {
-        setRecord(prev => ({ ...prev, consents }));
-    };
-    
+    const selectedTreatment = DENTAL_TREATMENTS.find(t => t.id === selectedTreatmentId) || null;
     const quadrants = isPermanent ? QUADRANTS_PERMANENT : QUADRANTS_DECIDUOUS;
     
     const TabButton = ({ view, label, icon }: { view: MainView; label: string; icon: React.ReactNode }) => (
         <button
             onClick={() => setActiveView(view)}
-            className={`flex items-center space-x-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors ${
+            className={`flex items-center space-x-2 px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
                 activeView === view
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -341,18 +226,19 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
         <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
             <header className="bg-white dark:bg-gray-800 py-2 px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 z-10 shadow-sm">
                 <div className="flex items-center gap-4">
-                     <button
-                        onClick={onNavigateToAdmin}
-                        className="flex items-center space-x-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                        <ArrowLeftIcon className="w-5 h-5"/>
-                        <span>Panel</span>
-                    </button>
                     <div className="flex items-center gap-2">
-                        <button onClick={() => onNavigateToPatient('previous')} disabled={isFirstPatient} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"><ChevronLeftIcon /></button>
-                        <span className="font-semibold text-lg">{patient?.name}</span>
-                        <button onClick={() => onNavigateToPatient('next')} disabled={isLastPatient} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"><ChevronRightIcon /></button>
+                        <div className="w-8 h-8 text-blue-600 dark:text-blue-400"><DentalIcon /></div>
+                        <h1 className="text-xl font-bold">Ficha Clínica Digital</h1>
                     </div>
+                    {isAuthenticated && (
+                        <button
+                            onClick={onNavigateToAdmin}
+                            className="flex items-center space-x-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            <ArrowLeftIcon className="w-5 h-5"/>
+                            <span>Panel Principal</span>
+                        </button>
+                    )}
                 </div>
                 <div className="flex items-center space-x-3">
                      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} title={theme === 'light' ? 'Activar tema oscuro' : 'Activar tema claro'} className="flex items-center justify-center w-9 h-9 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-full transition-colors">
@@ -371,77 +257,69 @@ export function ConsultationRoom({ patient, patientRecord, onSave, onNavigateToA
                 
                 <main className="flex-1 flex flex-col p-4 overflow-hidden">
                     <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
-                        <nav className="flex space-x-1">
+                        <nav className="flex space-x-2">
                             <TabButton view="odontogram" label="Odontograma" icon={<OdontogramIcon className="w-5 h-5"/>} />
-                            <TabButton view="plan" label="Plan Tratamiento" icon={<CalendarIcon className="w-5 h-5"/>} />
-                            <TabButton view="history" label="Historial" icon={<BriefcaseIcon className="w-5 h-5"/>} />
-                            <TabButton view="prescriptions" label="Recetas" icon={<FileTextIcon className="w-5 h-5"/>} />
-                            <TabButton view="consents" label="Consentimientos" icon={<ClipboardListIcon className="w-5 h-5"/>} />
-                            <TabButton view="accounts" label="Cuentas" icon={<DollarSignIcon className="w-5 h-5"/>} />
+                            <TabButton view="plan" label="Plan de Tratamiento" icon={<CalendarIcon className="w-5 h-5"/>} />
+                            <TabButton view="history" label="Historial Clínico" icon={<BriefcaseIcon className="w-5 h-5"/>} />
                         </nav>
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-1">
                         {activeView === 'odontogram' && (
-                           <div className="flex flex-col h-full overflow-hidden">
-                                <div className="flex-shrink-0">
-                                    <div className="flex items-center justify-center mb-4">
-                                        <div className="bg-gray-200 dark:bg-gray-700 p-1 rounded-lg">
-                                            <button onClick={() => setOdontogramType('permanent')} className={`px-4 py-1 rounded-md text-sm font-semibold transition-colors ${odontogramType === 'permanent' ? 'bg-white dark:bg-gray-100 text-gray-800 shadow' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>Permanente</button>
-                                            <button onClick={() => setOdontogramType('deciduous')} className={`px-4 py-1 rounded-md text-sm font-semibold transition-colors ${odontogramType === 'deciduous' ? 'bg-white dark:bg-gray-100 text-gray-800 shadow' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>Temporal</button>
-                                        </div>
+                            <div className="flex flex-col h-full">
+                                <div className="flex items-center justify-center mb-4">
+                                    <div className="bg-gray-200 dark:bg-gray-700 p-1 rounded-lg">
+                                        <button onClick={() => setOdontogramType('permanent')} className={`px-4 py-1 rounded-md text-sm font-semibold transition-colors ${odontogramType === 'permanent' ? 'bg-white dark:bg-gray-100 text-gray-800 shadow' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>Permanente</button>
+                                        <button onClick={() => setOdontogramType('deciduous')} className={`px-4 py-1 rounded-md text-sm font-semibold transition-colors ${odontogramType === 'deciduous' ? 'bg-white dark:bg-gray-100 text-gray-800 shadow' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>Temporal</button>
                                     </div>
-                                    <div className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex-1 flex flex-col items-center justify-center overflow-auto">
-                                        <Odontogram
-                                            quadrants={quadrants}
-                                            odontogramState={odontogramState}
-                                            onToothClick={handleToothClick}
-                                            activeToothInfo={activeTooth}
-                                        />
-                                    </div>
-                                    <StatusBar activeTooth={activeTooth} />
                                 </div>
-                                <div className="flex-1 mt-4 overflow-y-auto">
-                                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">Hallazgos Clínicos Registrados</h3>
-                                    <ClinicalFindings 
-                                        findings={allFindings}
-                                        onDeleteFinding={handleDeleteFinding}
-                                        onEditFinding={handleEditFindingClick}
+                                <div className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex-1 flex flex-col items-center justify-center overflow-auto">
+                                    <Odontogram
+                                        quadrants={quadrants}
+                                        odontogramState={odontogramState}
+                                        onToothClick={setActiveTooth}
+                                        activeToothInfo={activeTooth}
                                     />
-                                     {allFindings.length > 0 && record.sessions.length === 0 && (
-                                        <div className="mt-6 text-center">
-                                            <button
-                                                onClick={() => setActiveView('plan')}
-                                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2 mx-auto shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-0.5"
-                                            >
-                                                <PlusIcon className="w-5 h-5" />
-                                                <span>Crear Plan de Tratamiento</span>
-                                            </button>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Crea una cotización y organiza los tratamientos en sesiones para el paciente.</p>
-                                        </div>
-                                    )}
                                 </div>
+                                <StatusBar activeTooth={activeTooth} selectedTreatment={selectedTreatment} />
                             </div>
                         )}
-                         {activeView === 'plan' && <TreatmentPlan sessions={record.sessions} findings={allFindings} onSavePlan={handleSavePlan} onToggleTreatmentStatus={handleToggleTreatmentStatus}/>}
-                         {activeView === 'history' && <ClinicalHistory sessions={record.sessions} onUpdateSession={handleUpdateSession} />}
-                         {activeView === 'prescriptions' && <Prescriptions prescriptions={record.prescriptions} onUpdate={handleUpdatePrescriptions} patientName={patient.name} />}
-                         {activeView === 'consents' && <Consents consents={record.consents} onUpdate={handleUpdateConsents} />}
-                         {activeView === 'accounts' && <Accounts sessions={record.sessions} patientId={record.patientId} payments={record.payments} onSavePayment={onSavePayment} onDeletePayment={onDeletePayment} patientName={patient.name}/>}
+                         {activeView === 'plan' && (
+                            <TreatmentPlan 
+                                sessions={record.sessions} 
+                                onAddSession={handleAddSession} 
+                                onToggleTreatmentStatus={handleToggleTreatmentStatus}
+                            />
+                         )}
+                         {activeView === 'history' && (
+                            <ClinicalHistory sessions={record.sessions} onUpdateSession={handleUpdateSession} />
+                         )}
                     </div>
                 </main>
 
-                {isTreatmentModalOpen && (
-                    <Toolbar
-                        target={activeTooth}
-                        onClose={() => {
-                            setIsTreatmentModalOpen(false);
-                            setActiveTooth(null);
-                            setEditingFinding(null);
-                        }}
-                        onSelectTreatment={handleSelectTreatmentFromModal}
-                    />
-                )}
+                <aside className="w-96 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 p-4 overflow-y-auto space-y-6">
+                    <div>
+                        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">Simbología y Diagnóstico</h3>
+                        <Toolbar selectedTreatmentId={selectedTreatmentId} onSelectTreatment={setSelectedTreatmentId} />
+                        {selectedTreatment && activeTooth && (
+                            <div className="mt-4">
+                                <button onClick={handleAddFinding} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
+                                    Añadir Hallazgo: {selectedTreatment.label}
+                                </button>
+                                <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-1">en Diente {activeTooth.toothId}, Sup. {activeTooth.surface}</p>
+                            </div>
+                        )}
+                    </div>
+                    <hr className="border-gray-200 dark:border-gray-700"/>
+                    <div>
+                        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">Hallazgos Clínicos</h3>
+                        <ClinicalFindings 
+                            findings={allFindings}
+                            sessions={record.sessions}
+                            onAssignToSession={handleAssignFindingToSession}
+                        />
+                    </div>
+                </aside>
             </div>
         </div>
     );

@@ -1,10 +1,9 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
 import { ConsultationRoom } from './components/ConsultationRoom';
-import type { Appointment, Doctor, Promotion, AppSettings, PatientRecord, OdontogramState, Payment } from './types';
+import type { Appointment, Doctor, Promotion, AppSettings, PatientRecord, OdontogramState } from './types';
 import { DENTAL_SERVICES_MAP, ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS } from './constants';
 
 const initialToothState = { surfaces: { buccal: [], lingual: [], occlusal: [], distal: [], mesial: [], root: [] }, whole: [], findings: [] };
@@ -12,30 +11,16 @@ const createInitialOdontogram = (teeth: number[]): OdontogramState => teeth.redu
 
 // Mock data for initial state
 const MOCK_DOCTORS: Doctor[] = [
-    { id: 'doc1', name: 'Dr. Ana García', specialty: 'Ortodoncia', availability: {
-        'Monday': ['09:00', '10:00', '11:00', '14:00', '15:00'],
-        'Wednesday': ['09:00', '10:00', '11:00', '12:00'],
-        'Friday': ['09:00', '10:00', '14:00', '15:00', '16:00'],
-    } },
-    { id: 'doc2', name: 'Dr. Carlos Martinez', specialty: 'Endodoncia', availability: {
-        'Tuesday': ['10:00', '11:00', '12:00', '15:00', '16:00', '17:00'],
-        'Thursday': ['09:00', '10:00', '11:00', '14:00'],
-    } },
-    { id: 'doc3', name: 'Dr. Sofia Rodriguez', specialty: 'Cirugía Bucal', availability: {
-        'Monday': ['15:00', '16:00', '17:00'],
-        'Tuesday': ['09:00', '10:00'],
-        'Wednesday': ['15:00', '16:00', '17:00'],
-        'Thursday': ['15:00', '16:00'],
-        'Friday': ['11:00', '12:00'],
-    } },
+    { id: 'doc1', name: 'Dr. Ana García', specialty: 'Ortodoncia' },
+    { id: 'doc2', name: 'Dr. Carlos Martinez', specialty: 'Endodoncia' },
+    { id: 'doc3', name: 'Dr. Sofia Rodriguez', specialty: 'Cirugía Bucal' },
 ];
 
 const MOCK_APPOINTMENTS: Appointment[] = [
     { id: 'apt1', name: 'Juan Perez', phone: '987654321', email: 'juan.perez@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), service: 'orthodontics', status: 'confirmed', doctorId: 'doc1' },
     { id: 'apt2', name: 'Maria Lopez', phone: '912345678', email: 'maria.lopez@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), service: 'endodontics', status: 'confirmed', doctorId: 'doc2' },
     { id: 'apt3', name: 'Pedro Ramirez', phone: '955555555', email: 'pedro.ramirez@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), service: 'cosmetic_dentistry', status: 'completed', doctorId: 'doc1' },
-    // FIX: Corrected an appointment object that was missing the required `status` property and had an invalid `service` value. The `service` was changed to 'emergency' and `status` was set to 'waiting'.
-    { id: 'apt4', name: 'Laura Sanchez', phone: '933333333', email: 'laura.s@email.com', dateTime: new Date(new Date().setDate(new Date().getDate())).toISOString(), service: 'emergency', status: 'waiting', doctorId: 'doc3' },
+    { id: 'apt4', name: 'Laura Sanchez', phone: '933333333', email: 'laura.s@email.com', dateTime: new Date(new Date().setDate(new Date().getDate())).toISOString(), service: 'prevention', status: 'waiting', doctorId: 'doc3' },
     { id: 'apt5', name: 'Carlos Gomez', phone: '922222222', email: 'carlos.g@email.com', dateTime: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(), service: 'restorations', status: 'requested', doctorId: undefined },
 ];
 
@@ -49,7 +34,7 @@ const MOCK_SETTINGS: AppSettings = {
     clinicAddress: 'Av. Sonrisas 123, Lima, Perú',
     clinicPhone: '(+51) 123 456 78',
     clinicEmail: 'info@kiru.com',
-    heroImageUrl: 'https://images.unsplash.com/photo-1533794299551-216541a7230b?q=80&w=1974&auto=format&fit=crop',
+    heroImageUrl: 'https://images.unsplash.com/photo-1588776814546-daab701a3512?q=80&w=1974&auto=format&fit=crop',
     loginImageUrl: 'https://images.unsplash.com/photo-1629904850781-2a6d71c1c739?q=80&w=1974&auto=format&fit=crop',
 };
 
@@ -59,14 +44,9 @@ const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
         permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
         deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
         sessions: [
-            { id: 'sess1', name: 'Sesión 1', status: 'completed', treatments: [
-                { id: 'treat1', treatmentId: 'filling', toothId: 16, surface: 'occlusal', status: 'completed', sessionId: 'sess1' }
-            ], date: new Date('2023-10-15').toISOString(), notes: 'Revisión inicial completa. Paciente presenta buena higiene bucal.', documents: [] }
+            { id: 'sess1', name: 'Sesión 1', status: 'completed', treatments: [], date: new Date('2023-10-15').toISOString(), notes: 'Revisión inicial completa. Paciente presenta buena higiene bucal.', documents: [] }
         ],
         medicalAlerts: ['Hipertensión controlada.'],
-        prescriptions: [],
-        consents: [],
-        payments: [{ id: 'pay1', date: new Date('2023-10-15').toISOString(), amount: 120, method: 'Efectivo' }],
     },
     'apt4': { // Laura Sanchez
         patientId: 'apt4',
@@ -74,15 +54,10 @@ const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
         deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
         sessions: [],
         medicalAlerts: ['Alergia a la penicilina.'],
-        prescriptions: [],
-        consents: [],
-        payments: [],
     }
 };
 
 type Page = 'landing' | 'login' | 'admin' | 'consultation';
-type MainView = 'odontogram' | 'plan' | 'history' | 'prescriptions' | 'consents' | 'accounts';
-
 
 function App() {
     const [page, setPage] = useState<Page>('landing');
@@ -92,15 +67,8 @@ function App() {
     const [promotions, setPromotions] = useState<Promotion[]>(MOCK_PROMOTIONS);
     const [settings, setSettings] = useState<AppSettings>(MOCK_SETTINGS);
     const [patientRecords, setPatientRecords] = useState<Record<string, PatientRecord>>(MOCK_PATIENT_RECORDS);
-    
-    const [currentPatientIndex, setCurrentPatientIndex] = useState<number | null>(null);
-    const [initialTabForConsultation, setInitialTabForConsultation] = useState<MainView | undefined>();
-
-
-    const sortedAppointments = useMemo(() => 
-        [...appointments].sort((a,b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()),
-        [appointments]
-    );
+    const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
+    const [selectedPatientRecord, setSelectedPatientRecord] = useState<PatientRecord | null>(null);
 
     const handleLogin = (success: boolean) => {
         if (success) {
@@ -124,60 +92,30 @@ function App() {
         alert(`¡Solicitud de cita enviada para ${appointmentData.name}!\nServicio: ${DENTAL_SERVICES_MAP[appointmentData.service]}\nFecha y Hora: ${new Date(appointmentData.dateTime).toLocaleString()}\nNos pondremos en contacto para confirmar.`);
     };
     
-    const handleOpenClinicalRecord = (patient: Appointment, targetTab?: MainView) => {
-        const patientIndex = sortedAppointments.findIndex(p => p.id === patient.id);
-        setCurrentPatientIndex(patientIndex);
-        setInitialTabForConsultation(targetTab);
+    const handleOpenClinicalRecord = (patient: Appointment) => {
+        const record = patientRecords[patient.id];
+        if (record) {
+            setSelectedPatientRecord(record);
+        } else {
+            // Create a new record for a new patient
+            const newRecord: PatientRecord = {
+                patientId: patient.id,
+                permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
+                deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+                sessions: [],
+                medicalAlerts: [],
+            };
+            setPatientRecords(prev => ({...prev, [patient.id]: newRecord}));
+            setSelectedPatientRecord(newRecord);
+        }
+        setSelectedPatient(patient);
         setPage('consultation');
     };
-    
-    const currentPatient = useMemo(() => {
-        if (currentPatientIndex === null || !sortedAppointments[currentPatientIndex]) return null;
-        return sortedAppointments[currentPatientIndex];
-    }, [currentPatientIndex, sortedAppointments]);
-
-    const currentPatientRecord = useMemo(() => {
-        if (!currentPatient) return null;
-        
-        const record = patientRecords[currentPatient.id];
-        if (record) {
-             return {
-                ...record,
-                prescriptions: record.prescriptions || [],
-                consents: record.consents || [],
-                payments: record.payments || [],
-            };
-        }
-        
-        const newRecord: PatientRecord = {
-            patientId: currentPatient.id,
-            permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
-            deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
-            sessions: [],
-            medicalAlerts: [],
-            prescriptions: [],
-            consents: [],
-            payments: [],
-        };
-        
-        // This part needs to be handled carefully to avoid infinite loops if it triggers a re-render.
-        // We can use a callback with setPatientRecords.
-        setPatientRecords(prev => ({...prev, [currentPatient.id]: newRecord}));
-        return newRecord;
-    }, [currentPatient, patientRecords]);
-
 
     const handleNavigateToAdmin = () => {
         setPage('admin');
-        setCurrentPatientIndex(null);
-    };
-
-     const handleNavigateToPatient = (direction: 'next' | 'previous') => {
-        if (currentPatientIndex === null) return;
-        const newIndex = direction === 'next' ? currentPatientIndex + 1 : currentPatientIndex - 1;
-        if (newIndex >= 0 && newIndex < sortedAppointments.length) {
-            setCurrentPatientIndex(newIndex);
-        }
+        setSelectedPatient(null);
+        setSelectedPatientRecord(null);
     };
     
     const handleSavePatientRecord = (record: PatientRecord) => {
@@ -210,7 +148,7 @@ function App() {
             if (data.id) {
                 return prev.map(d => d.id === data.id ? { ...d, ...data } as Doctor : d);
             }
-            return [...prev, { ...data, id: crypto.randomUUID(), availability: data.availability || {} } as Doctor];
+            return [...prev, { ...data, id: crypto.randomUUID() } as Doctor];
         });
     };
 
@@ -241,56 +179,11 @@ function App() {
             setPromotions(prev => prev.filter(p => p.id !== id));
         }
     };
-
-    const handleSavePayment = (paymentData: { patientId: string; amount: number; method: string; date: string; id?: string }) => {
-        setPatientRecords(prev => {
-            const newRecords = structuredClone(prev);
-            const patientRecord = newRecords[paymentData.patientId];
-            if (!patientRecord) {
-                alert("Error: No se encontró la ficha del paciente.");
-                return prev;
-            }
-
-            if (paymentData.id) { // Editing existing payment
-                const paymentIndex = patientRecord.payments.findIndex(p => p.id === paymentData.id);
-                if (paymentIndex > -1) {
-                    patientRecord.payments[paymentIndex] = {
-                        ...patientRecord.payments[paymentIndex],
-                        amount: paymentData.amount,
-                        method: paymentData.method,
-                        date: paymentData.date,
-                    };
-                }
-            } else { // Adding new payment
-                const newPayment: Payment = {
-                    id: crypto.randomUUID(),
-                    date: paymentData.date,
-                    amount: paymentData.amount,
-                    method: paymentData.method,
-                };
-                if (!patientRecord.payments) patientRecord.payments = [];
-                patientRecord.payments.push(newPayment);
-            }
-            return newRecords;
-        });
-    };
-
-    const handleDeletePayment = (paymentId: string, patientId: string) => {
-        if (!window.confirm('¿Está seguro de que desea eliminar este pago?')) return;
-        setPatientRecords(prev => {
-            const newRecords = structuredClone(prev);
-            const patientRecord = newRecords[patientId];
-            if (!patientRecord) return prev;
-
-            patientRecord.payments = patientRecord.payments.filter(p => p.id !== paymentId);
-            return newRecords;
-        });
-    };
     
     const activePromotion = promotions.find(p => p.isActive) || null;
 
     if (page === 'landing') {
-        return <LandingPage onBookAppointment={handleBookAppointment} settings={settings} onNavigateToLogin={() => setPage('login')} activePromotion={activePromotion} doctors={doctors} />;
+        return <LandingPage onBookAppointment={handleBookAppointment} settings={settings} onNavigateToLogin={() => setPage('login')} activePromotion={activePromotion} />;
     }
 
     if (page === 'login') {
@@ -303,7 +196,6 @@ function App() {
             doctors={doctors}
             promotions={promotions}
             settings={settings}
-            patientRecords={patientRecords}
             onSaveAppointment={handleSaveAppointment}
             onDeleteAppointment={handleDeleteAppointment}
             onSaveDoctor={handleSaveDoctor}
@@ -317,26 +209,17 @@ function App() {
         />;
     }
     
-    if (page === 'consultation' && isAuthenticated && currentPatient && currentPatientRecord) {
+    if (page === 'consultation' && isAuthenticated && selectedPatient && selectedPatientRecord) {
         return <ConsultationRoom
-            patient={currentPatient}
-            patientRecord={currentPatientRecord}
+            patient={selectedPatient}
+            patientRecord={selectedPatientRecord}
+            allAppointments={appointments}
             onSave={handleSavePatientRecord}
+            isAuthenticated={isAuthenticated} 
             onNavigateToAdmin={handleNavigateToAdmin}
-            onNavigateToPatient={handleNavigateToPatient}
-            isFirstPatient={currentPatientIndex === 0}
-            isLastPatient={currentPatientIndex === sortedAppointments.length - 1}
-            onSavePayment={handleSavePayment}
-            onDeletePayment={handleDeletePayment}
-            initialTab={initialTabForConsultation}
         />;
     }
     
-    // Fallback or loading state
-    if (page === 'consultation' && isAuthenticated && currentPatientIndex !== null && !currentPatientRecord) {
-        return <div className="flex h-screen items-center justify-center bg-gray-100">Cargando ficha del paciente...</div>;
-    }
-
     return null;
 }
 
