@@ -78,15 +78,15 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
                                 onClick={() => setSelectedDate(day)}
                                 className={`p-4 rounded-xl text-center transition-all duration-200 transform hover:scale-105 ${
                                     isSelected 
-                                        ? 'bg-white dark:bg-gray-800 ring-2 ring-blue-500 shadow-lg' 
+                                        ? 'bg-white dark:bg-gray-800 ring-2 ring-brand-500 shadow-lg' 
                                         : 'bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50'
                                 }`}
                             >
                                 <p className="text-sm font-bold uppercase text-gray-500 dark:text-gray-400">{day.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
-                                <p className="text-4xl font-extrabold text-blue-600 dark:text-blue-400 my-1">{day.getDate()}</p>
+                                <p className="text-4xl font-extrabold text-brand-600 dark:text-brand-400 my-1">{day.getDate()}</p>
                                 <p className="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400">{day.toLocaleDateString('es-ES', { month: 'short' })}</p>
                                 {appointmentCount > 0 && (
-                                    <div className="mt-2 bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 rounded-full px-2 py-0.5 text-xs font-semibold">
+                                    <div className="mt-2 bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 rounded-full px-2 py-0.5 text-xs font-semibold">
                                         {appointmentCount} Cita{appointmentCount > 1 ? 's' : ''}
                                     </div>
                                 )}
@@ -97,7 +97,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
 
                 {/* Time Slots Column */}
                 <div className="lg:w-2/3">
-                     <h4 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-3 pb-2 border-b border-gray-300 dark:border-gray-600 capitalize">
+                     <h4 className="text-lg font-semibold text-brand-600 dark:text-brand-400 mb-3 pb-2 border-b border-gray-300 dark:border-gray-600 capitalize">
                         Horarios para {selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </h4>
                     {timeSlots.length > 0 ? (
@@ -107,7 +107,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
                                     key={slot.start.toISOString()}
                                     className={`p-4 rounded-lg border-l-4 ${
                                         slot.isBooked 
-                                            ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-500' 
+                                            ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-500' 
                                             : slot.isPast 
                                                 ? 'bg-gray-100 dark:bg-gray-800/60 border-gray-400 text-gray-400 dark:text-gray-500' 
                                                 : 'bg-white dark:bg-gray-800 border-green-500'
@@ -117,7 +117,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ appointments }) => {
                                     {slot.isBooked && slot.appointment ? (
                                         <div className="mt-2">
                                             <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{slot.appointment.name}</p>
-                                            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">{DENTAL_SERVICES_MAP[slot.appointment.service] || slot.appointment.service}</p>
+                                            <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">{DENTAL_SERVICES_MAP[slot.appointment.service] || slot.appointment.service}</p>
                                         </div>
                                     ) : slot.isPast ? (
                                          <p className="text-sm font-semibold mt-2">No disponible</p>

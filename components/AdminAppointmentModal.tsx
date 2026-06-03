@@ -61,7 +61,7 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ ap
                     </div>
                      <div>
                         <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
-                        <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                        <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
                     </div>
                      <div>
                         <label htmlFor="dateTime" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Fecha y Hora</label>
@@ -90,6 +90,24 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ ap
                             <option value="in_consultation">En Consulta</option>
                             <option value="completed">Completada</option>
                             <option value="canceled">Cancelada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor="paymentStatus" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Estado de Pago</label>
+                        <select name="paymentStatus" id="paymentStatus" value={formData.paymentStatus || 'pendiente'} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="confirmado">Confirmado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor="paymentMethod" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Método de Pago</label>
+                        <select name="paymentMethod" id="paymentMethod" value={formData.paymentMethod || 'pendiente'} onChange={handleChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="yape">Yape</option>
+                            <option value="plin">Plin</option>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="visa">Visa/Mastercard</option>
+                            <option value="transferencia">Transferencia</option>
                         </select>
                     </div>
                 </form>

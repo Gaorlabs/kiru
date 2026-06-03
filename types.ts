@@ -1,58 +1,9 @@
 import React from 'react';
 
-export type ToothSurfaceName = 'buccal' | 'lingual' | 'occlusal' | 'distal' | 'mesial' | 'root';
-export type TreatmentStatus = 'proposed' | 'completed';
-export type TreatmentApplication = 'surface' | 'whole_tooth' | 'root';
-
-export type ToothCondition = 'caries' | 'filling' | 'endodontics' | 'crown' | 'implant';
-export type WholeToothCondition = 'extraction' | 'missing' | 'unerupted';
-
-export interface DentalTreatment {
-    id: ToothCondition | WholeToothCondition;
-    label: string;
-    category: string;
-    price: number;
-    appliesTo: TreatmentApplication;
-    icon: React.ReactNode;
-}
-
-export interface AppliedTreatment {
-    id: string;
-    treatmentId: ToothCondition | WholeToothCondition;
-    toothId: number;
-    surface: ToothSurfaceName | 'whole';
-    status: TreatmentStatus;
-    sessionId: string;
-}
-
-export interface ClinicalFinding {
-    id: string;
-    toothId: number;
-    surface: ToothSurfaceName | 'whole';
-    condition: ToothCondition | WholeToothCondition;
-}
-
-export interface ToothState {
-    surfaces: Record<ToothSurfaceName, AppliedTreatment[]>;
-    whole: AppliedTreatment[];
-    findings: ClinicalFinding[];
-}
-
-export type OdontogramState = Record<number, ToothState>;
-
-export interface Session {
-    id: string;
-    name: string;
-    status: 'pending' | 'completed';
-    treatments: AppliedTreatment[];
-    date: string;
-    notes: string;
-    // FIX: Changed 'documents' to be an array of document objects to match its usage throughout the app.
-    documents: { id: string; name: string; type: 'pdf' | 'image' | 'doc' }[];
-}
-
 export type AppointmentStatus = 'requested' | 'confirmed' | 'waiting' | 'in_consultation' | 'completed' | 'canceled';
 
+export type PaymentMethod = 'yape' | 'plin' | 'efectivo' | 'visa' | 'transferencia' | 'pendiente';
+export type PaymentStatus = 'pendiente' | 'confirmado';
 
 export interface Appointment {
     id: string;
@@ -63,6 +14,8 @@ export interface Appointment {
     service: string;
     status: AppointmentStatus;
     doctorId?: string;
+    paymentMethod?: PaymentMethod;
+    paymentStatus?: PaymentStatus;
 }
 
 export interface Doctor {
@@ -80,12 +33,71 @@ export interface AppSettings {
     loginImageUrl: string;
 }
 
+export type ClinicalSessionUrgency = 'rutina' | 'urgencia' | 'emergencia';
+
+export interface OdontogramData {
+  [toothNum: number]: {
+    O: string;
+    V: string;
+    M: string;
+    D: string;
+    P: string;
+  };
+}
+
+export interface ClinicalSession {
+    id: string;
+    date: string;
+    doctorId?: string;
+    
+    // Paso 1
+    motivoConsulta: string;
+    urgency: ClinicalSessionUrgency;
+    painScale: number;
+  
+    // Paso 2
+    odontograma: OdontogramData;
+    examenObservaciones: string;
+  
+    // Paso 3
+    cie10: string;
+    diagnosticoDesc: string;
+    adjuntoUrl: string;
+  
+    // Paso 4
+    piezasTratadas: string;
+    superficiesTratadas: string;
+    procedimientos: string[];
+    material: string;
+    anestesia: string;
+    tratamientoObs: string;
+  
+    // Paso 5
+    indicaciones: string;
+    receta: string;
+    proximaCitaFecha: string;
+    proximaCitaMotivo: string;
+    montoCobrado: number;
+    metodoPago: PaymentMethod;
+}
+
+export interface TreatmentPlanItem {
+    id: string;
+    pieza: string;
+    procedimiento: string;
+    estado: 'pendiente' | 'en_curso' | 'completado';
+    costoEstimado: number;
+}
+
 export interface PatientRecord {
     patientId: string;
-    permanentOdontogram: OdontogramState;
-    deciduousOdontogram: OdontogramState;
-    sessions: Session[];
-    medicalAlerts: string[];
+    name: string;
+    phone: string;
+    email: string;
+    medicalAlerts: string;
+    dentalHistory: string;
+    treatmentPlan: TreatmentPlanItem[];
+    sessions: ClinicalSession[];
 }
 
 export interface AdminAppointmentModalProps {

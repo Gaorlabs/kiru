@@ -188,6 +188,17 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                                                 <p className="font-bold text-slate-800 dark:text-white">{app.name}</p>
                                                 <p className="text-sm text-slate-500 dark:text-slate-400">{DENTAL_SERVICES_MAP[app.service]}</p>
                                                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1">{new Date(app.dateTime).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                                                
+                                                {app.paymentStatus === 'confirmado' ? (
+                                                    <div className="mt-2 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded-md inline-block uppercase my-1">
+                                                        Pago: {app.paymentMethod}
+                                                    </div>
+                                                ) : (
+                                                    <div className="mt-2 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-1 rounded-md inline-block uppercase my-1">
+                                                        Pago: Pendiente
+                                                    </div>
+                                                )}
+
                                                 <div className="border-t border-slate-200 dark:border-slate-600 my-3"></div>
                                                 <div className="flex justify-start items-center">
                                                     <div className="flex items-center space-x-1">

@@ -3,13 +3,9 @@ import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { AdminPage } from './components/AdminPage';
 import { ConsultationRoom } from './components/ConsultationRoom';
-import type { Appointment, Doctor, Promotion, AppSettings, PatientRecord, OdontogramState } from './types';
-import { DENTAL_SERVICES_MAP, ALL_TEETH_PERMANENT, ALL_TEETH_DECIDUOUS } from './constants';
+import type { Appointment, Doctor, Promotion, AppSettings, PatientRecord } from './types';
+import { DENTAL_SERVICES_MAP } from './constants';
 
-const initialToothState = { surfaces: { buccal: [], lingual: [], occlusal: [], distal: [], mesial: [], root: [] }, whole: [], findings: [] };
-const createInitialOdontogram = (teeth: number[]): OdontogramState => teeth.reduce((acc, toothId) => ({ ...acc, [toothId]: structuredClone(initialToothState) }), {});
-
-// Mock data for initial state
 const MOCK_DOCTORS: Doctor[] = [
     { id: 'doc1', name: 'Dr. Ana García', specialty: 'Ortodoncia' },
     { id: 'doc2', name: 'Dr. Carlos Martinez', specialty: 'Endodoncia' },
@@ -41,19 +37,32 @@ const MOCK_SETTINGS: AppSettings = {
 const MOCK_PATIENT_RECORDS: Record<string, PatientRecord> = {
     'apt1': { // Juan Perez
         patientId: 'apt1',
-        permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
-        deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+        name: 'Juan Perez',
+        phone: '987654321',
+        email: 'juan.perez@email.com',
+        medicalAlerts: 'Hipertensión controlada.',
+        dentalHistory: '',
         sessions: [
-            { id: 'sess1', name: 'Sesión 1', status: 'completed', treatments: [], date: new Date('2023-10-15').toISOString(), notes: 'Revisión inicial completa. Paciente presenta buena higiene bucal.', documents: [] }
+            {
+                id: 'sess1', date: new Date('2023-10-15').toISOString(), doctorId: 'doc1',
+                motivoConsulta: 'Revisión inicial', urgency: 'rutina', painScale: 0,
+                odontograma: {}, examenObservaciones: 'Paciente presenta buena higiene bucal.',
+                cie10: 'Z01.2', diagnosticoDesc: 'Examen odontológico', adjuntoUrl: '',
+                piezasTratadas: '', superficiesTratadas: '', procedimientos: ['Profilaxis'], material: '', anestesia: '', tratamientoObs: '',
+                indicaciones: 'Cepillarse los dientes 3 veces al día.', receta: '', proximaCitaFecha: '', proximaCitaMotivo: '', montoCobrado: 50, metodoPago: 'efectivo'
+            }
         ],
-        medicalAlerts: ['Hipertensión controlada.'],
+        treatmentPlan: []
     },
     'apt4': { // Laura Sanchez
         patientId: 'apt4',
-        permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
-        deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+        name: 'Laura Sanchez',
+        phone: '933333333',
+        email: 'laura.s@email.com',
+        medicalAlerts: 'Alergia a la penicilina.',
+        dentalHistory: '',
         sessions: [],
-        medicalAlerts: ['Alergia a la penicilina.'],
+        treatmentPlan: []
     }
 };
 
@@ -87,9 +96,10 @@ function App() {
             ...appointmentData,
             id: crypto.randomUUID(),
             status: 'requested',
+            paymentStatus: 'pendiente',
+            paymentMethod: 'pendiente',
         };
         setAppointments(prev => [...prev, newAppointment]);
-        alert(`¡Solicitud de cita enviada para ${appointmentData.name}!\nServicio: ${DENTAL_SERVICES_MAP[appointmentData.service]}\nFecha y Hora: ${new Date(appointmentData.dateTime).toLocaleString()}\nNos pondremos en contacto para confirmar.`);
     };
     
     const handleOpenClinicalRecord = (patient: Appointment) => {
@@ -100,10 +110,13 @@ function App() {
             // Create a new record for a new patient
             const newRecord: PatientRecord = {
                 patientId: patient.id,
-                permanentOdontogram: createInitialOdontogram(ALL_TEETH_PERMANENT),
-                deciduousOdontogram: createInitialOdontogram(ALL_TEETH_DECIDUOUS),
+                name: patient.name,
+                phone: patient.phone,
+                email: patient.email,
                 sessions: [],
-                medicalAlerts: [],
+                treatmentPlan: [],
+                medicalAlerts: '',
+                dentalHistory: ''
             };
             setPatientRecords(prev => ({...prev, [patient.id]: newRecord}));
             setSelectedPatientRecord(newRecord);

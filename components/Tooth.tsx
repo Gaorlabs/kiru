@@ -65,8 +65,8 @@ const SvgGradients = () => (
             <stop offset="100%" stopColor="#DC2626" />
         </linearGradient>
         <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#60A5FA" />
-            <stop offset="100%" stopColor="#2563EB" />
+            <stop offset="0%" stopColor="#28B593" />
+            <stop offset="100%" stopColor="#1A7A5E" />
         </linearGradient>
     </defs>
 );

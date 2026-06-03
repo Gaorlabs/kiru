@@ -1,10 +1,11 @@
 import React from 'react';
 import type { Appointment, PatientRecord } from '../types';
-import { UserIcon, PhoneIcon, EmailIcon, CalendarIcon } from './icons';
+import { PhoneIcon, EmailIcon } from './icons';
 
 interface PatientFileProps {
     patient: Appointment | null;
     record: PatientRecord;
+    onUpdateRecord: (updated: Partial<PatientRecord>) => void;
 }
 
 const InfoCard: React.FC<{ label: string; value: string; icon: React.ReactNode }> = ({ label, value, icon }) => (
@@ -17,7 +18,7 @@ const InfoCard: React.FC<{ label: string; value: string; icon: React.ReactNode }
     </div>
 );
 
-export const PatientFile: React.FC<PatientFileProps> = ({ patient, record }) => {
+export const PatientFile: React.FC<PatientFileProps> = ({ patient, record, onUpdateRecord }) => {
     
     if (!patient) {
         return (
@@ -30,46 +31,37 @@ export const PatientFile: React.FC<PatientFileProps> = ({ patient, record }) => 
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{patient.name}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">ID Paciente: {patient.id}</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{record.name}</h2>
+                <div className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                    ID: {record.patientId}
+                </div>
             </div>
 
-            <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-4 border border-gray-200 dark:border-gray-700">
-                <InfoCard label="Teléfono" value={patient.phone} icon={<PhoneIcon />} />
-                <InfoCard label="Email" value={patient.email} icon={<EmailIcon />} />
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg space-y-4">
+                <InfoCard label="Teléfono" value={record.phone} icon={<PhoneIcon />} />
+                <InfoCard label="Email" value={record.email} icon={<EmailIcon />} />
             </div>
             
             <div>
-                <h3 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Alertas Médicas</h3>
-                {record.medicalAlerts.length > 0 ? (
-                     <div className="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-lg border border-yellow-200 dark:border-yellow-800/50">
-                        {record.medicalAlerts.join(', ')}
-                    </div>
-                ) : (
-                    <div className="p-3 text-sm bg-gray-100 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700">
-                        No hay alertas registradas.
-                    </div>
-                )}
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">Alertas Médicas</h3>
+                <textarea
+                    value={record.medicalAlerts}
+                    onChange={(e) => onUpdateRecord({ medicalAlerts: e.target.value })}
+                    className="w-full text-sm p-3 rounded-lg border border-red-200 bg-red-50 text-red-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-red-900/10 dark:border-red-900/50 dark:text-red-200"
+                    placeholder="Ej. Alergia a Penicilina, Hipertensión..."
+                    rows={3}
+                />
             </div>
 
             <div>
-                <h3 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-3">Historial de Sesiones</h3>
-                {record.sessions.length > 0 ? (
-                    <ul className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                        {record.sessions.map(session => (
-                            <li key={session.id} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                                <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">{session.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {new Date(session.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                </p>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                     <div className="p-3 text-sm text-center bg-gray-100 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700">
-                        No hay sesiones previas.
-                    </div>
-                )}
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">Antecedentes Odontológicos</h3>
+                <textarea
+                    value={record.dentalHistory}
+                    onChange={(e) => onUpdateRecord({ dentalHistory: e.target.value })}
+                    className="w-full text-sm p-3 rounded-lg border border-gray-200 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                    placeholder="Historia de tratamientos previos relevantes..."
+                    rows={4}
+                />
             </div>
         </div>
     );
