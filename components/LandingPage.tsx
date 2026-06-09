@@ -248,17 +248,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
 
   return (
     <div className="bg-slate-50 text-slate-800 font-sans">
-      <header className="absolute top-0 left-0 right-0 z-50 p-4">
+      <header className="absolute top-0 left-0 right-0 z-50 p-2 sm:p-4">
         <div className="container mx-auto">
             <motion.nav 
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="bg-white/95 backdrop-blur-sm rounded-full shadow-md px-6 py-2.5 flex justify-between items-center"
+              className="bg-white/95 backdrop-blur-sm rounded-full shadow-md px-4 sm:px-6 py-2 flex justify-between items-center"
             >
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 text-brand-600"><DentalIcon /></div>
-                <h1 className="text-xl font-bold text-brand-900">Kiru</h1>
+              <div className="flex items-center space-x-1.5 sm:space-x-2">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 text-brand-600"><DentalIcon /></div>
+                <h1 className="text-lg sm:text-xl font-bold text-brand-900">Kiru</h1>
               </div>
               <div className="hidden md:flex items-center space-x-8">
                 <a href="#home" className="text-gray-600 hover:text-brand-600 transition-colors font-medium text-sm">Inicio</a>
@@ -266,7 +266,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                 <a href="#services" className="text-gray-600 hover:text-brand-600 transition-colors font-medium text-sm">Servicios</a>
                 <a href="#contact" className="text-gray-600 hover:text-brand-600 transition-colors font-medium text-sm">Contacto</a>
               </div>
-              <button onClick={() => setIsModalOpen(true)} className="hidden md:block bg-brand-500 text-white px-4 py-1.5 text-sm rounded-full hover:bg-brand-600 font-semibold shadow-md transition-all transform hover:scale-105 hover:shadow-brand-500/30">
+              <button 
+                onClick={() => setIsModalOpen(true)} 
+                className="bg-brand-500 text-white px-3 sm:px-4 py-1.5 text-xs sm:text-sm rounded-full hover:bg-brand-600 font-semibold shadow-md transition-all transform hover:scale-105 hover:shadow-brand-500/30"
+              >
                 Agenda tu Cita
               </button>
             </motion.nav>
@@ -277,7 +280,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
         <section id="home" className="bg-brand-900 text-white overflow-hidden relative">
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-900/90 to-transparent"></div>
-            <div className="container mx-auto px-6 pt-28 pb-16 flex flex-col md:flex-row items-center relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12 sm:pb-16 flex flex-col md:flex-row items-center relative z-10">
               <motion.div 
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -287,7 +290,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                 <h2 className="text-3xl lg:text-5xl font-bold mb-3 leading-tight text-white tracking-tight">
                     Tu Sonrisa, <br/><span className="text-brand-300">Nuestra Pasión.</span>
                 </h2>
-                <p className="mb-6 text-brand-100 max-w-lg mx-auto md:mx-0 text-base leading-relaxed">
+                <p className="mb-6 text-brand-100 max-w-lg mx-auto md:mx-0 text-sm sm:text-base leading-relaxed">
                  Descubre una experiencia dental diferente. En Kiru, combinamos tecnología de punta con un trato cálido y personalizado para que te sientas como en casa.
                 </p>
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
@@ -295,7 +298,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsModalOpen(true)} 
-                    className="bg-brand-500 text-white px-8 py-3 text-base rounded-full hover:bg-brand-400 font-semibold shadow-lg shadow-brand-500/30 transition-colors duration-300"
+                    className="bg-brand-500 text-white px-6 sm:px-8 py-3 text-sm sm:text-base rounded-full hover:bg-brand-400 font-semibold shadow-lg shadow-brand-500/30 transition-colors duration-300"
                   >
                     Agendar Cita Ahora
                   </motion.button>
@@ -303,7 +306,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     href="#about" 
-                    className="border-2 border-brand-300/30 text-brand-50 px-8 py-3 text-base rounded-full hover:bg-white hover:text-brand-900 font-semibold transition-colors duration-300 text-center backdrop-blur-sm"
+                    className="border-2 border-brand-300/30 text-brand-50 px-6 sm:px-8 py-3 text-sm sm:text-base rounded-full hover:bg-white hover:text-brand-900 font-semibold transition-colors duration-300 text-center backdrop-blur-sm"
                   >
                     Saber Más
                   </motion.a>
@@ -313,24 +316,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                 initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 transition={{ duration: 1, delay: 0.4, type: "spring" }}
-                className="md:w-1/2 mt-12 md:mt-0 flex justify-center items-center z-10 relative"
+                className="md:w-1/2 mt-10 md:mt-0 flex justify-center items-center z-10 relative"
               >
                 <div className="absolute -inset-4 bg-gradient-to-r from-brand-400 to-brand-300 opacity-30 blur-2xl rounded-full"></div>
-                <img className="rounded-3xl shadow-2xl max-w-md w-full h-[400px] object-cover relative z-10 border-4 border-white/10" src={settings.heroImageUrl} alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
+                <img className="rounded-3xl shadow-2xl max-w-md w-full h-[250px] sm:h-[350px] md:h-[400px] object-cover relative z-10 border-4 border-white/10" src={settings.heroImageUrl} alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
               </motion.div>
             </div>
         </section>
         
-        <section id="features" className="py-16 bg-brand-50/50">
-            <div className="container mx-auto px-6">
+        <section id="features" className="py-12 sm:py-16 bg-brand-50/50">
+            <div className="container mx-auto px-4 sm:px-6">
                  <motion.div 
                     initial="hidden"
                     whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
+                    viewport={{ once: true, margin: "-40px" }}
                     variants={{
                       visible: { transition: { staggerChildren: 0.1 } }
                     }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
                  >
                     <FeatureCard
                         icon={<AppointmentIcon />}
@@ -353,39 +356,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
 
         <SmiliesSlider />
 
-        <section id="about" className="bg-white py-24">
-            <div className="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+        <section id="about" className="bg-white py-12 sm:py-24">
+            <div className="container mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center gap-8 md:gap-12">
                 <motion.div 
                     initial={{ opacity: 0, x: -50 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
+                    viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.6 }}
                     className="md:w-1/2"
                 >
                     <div className="relative group overflow-hidden rounded-3xl border-4 border-slate-100 shadow-2xl">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300 z-10"></div>
                         <img 
-                            className="w-full h-[400px] object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                            className="w-full h-[250px] sm:h-[350px] md:h-[400px] object-cover transform group-hover:scale-105 transition-transform duration-700" 
                             src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=1200&auto=format&fit=crop" 
                             alt="Instalaciones de Kiru Dental" 
                             referrerPolicy="no-referrer"
                         />
-                        <div className="absolute bottom-6 left-6 right-6 z-20 text-white">
-                            <span className="bg-brand-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">Tecnología de Vanguardia</span>
-                            <h4 className="text-xl font-bold font-sans">Nuestras Instalaciones</h4>
-                            <p className="text-white/80 text-sm">Ambientes modernos y esterilizados para tu total comodidad y tranquilidad.</p>
+                        <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20 text-white text-left">
+                            <span className="bg-brand-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 inline-block">Tecnología de Vanguardia</span>
+                            <h4 className="text-lg sm:text-xl font-bold font-sans">Nuestras Instalaciones</h4>
+                            <p className="text-white/80 text-xs sm:text-sm">Ambientes modernos y esterilizados para tu total comodidad y tranquilidad.</p>
                         </div>
                     </div>
                 </motion.div>
                 <motion.div 
                     initial={{ opacity: 0, x: 50 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
+                    viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.6 }}
                     className="md:w-1/2 text-center md:text-left"
                 >
                     <h2 className="text-2xl lg:text-3xl font-bold text-brand-900 mb-3">Bienvenido a la Familia Kiru</h2>
-                    <p className="text-brand-700/80 text-sm mb-5 leading-relaxed">
+                    <p className="text-brand-700/80 text-xs sm:text-sm mb-5 leading-relaxed">
                         En Kiru Dental, representamos todo lo que la odontología moderna debería ser. Hemos mejorado la temida cita con el dentista y la hemos transformado en una experiencia relajante y de confianza. Nuestro equipo de profesionales está dedicado no solo a la salud de tu boca, sino también a tu comodidad y bienestar general.
                     </p>
                     <a href="#contact" className="text-brand-600 hover:text-brand-700 font-semibold transition-colors flex items-center justify-center md:justify-start gap-2">
@@ -395,25 +398,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
             </div>
         </section>
 
-        <section id="services" className="bg-brand-50/50 py-24">
-          <div className="container mx-auto px-6">
+        <section id="services" className="bg-brand-50/50 py-12 sm:py-24">
+          <div className="container mx-auto px-4 sm:px-6">
              <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                className="text-center mb-12"
+                viewport={{ once: true, margin: "-40px" }}
+                className="text-center mb-10 sm:mb-12"
              >
                 <h2 className="text-2xl lg:text-3xl font-bold text-brand-900">Nuestros Servicios Odontológicos</h2>
-                <p className="text-brand-700/80 text-sm mt-2 max-w-2xl mx-auto">Nuestro objetivo es tratar y prevenir enfermedades que afectan a dientes, encías y mandíbula, contribuyendo a una sonrisa saludable y a tu bienestar general.</p>
+                <p className="text-brand-700/80 text-xs sm:text-sm mt-2 max-w-2xl mx-auto">Nuestro objetivo es tratar y prevenir enfermedades que afectan a dientes, encías y mandíbula, contribuyendo a una sonrisa saludable y a tu bienestar general.</p>
             </motion.div>
             <motion.div 
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, margin: "-100px" }}
+                viewport={{ once: true, margin: "-40px" }}
                 variants={{
                   visible: { transition: { staggerChildren: 0.1 } }
                 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10"
             >
                 <ServiceCard 
                     imageUrl="https://images.unsplash.com/photo-1598256989800-fe5f95da9787?q=80&w=600&auto=format&fit=crop"

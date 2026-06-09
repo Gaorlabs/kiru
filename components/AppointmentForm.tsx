@@ -242,58 +242,58 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
     }
 
     return (
-        <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm sm:p-6 overflow-y-auto">
             <motion.div 
                 initial={{ scale: 0.9, opacity: 0, y: 30 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-                className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative overflow-hidden"
+                className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] flex flex-col relative overflow-hidden"
             >
-                <div className="sticky top-0 bg-white/95 backdrop-blur-sm px-6 py-4 md:px-8 md:py-6 border-b border-brand-100 flex justify-between items-center z-20">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 text-brand-600 bg-brand-50 p-2 rounded-full"><AppointmentIcon /></div>
-                        <h2 className="text-2xl md:text-3xl font-extrabold text-brand-900">Agendar Cita</h2>
+                <div className="sticky top-0 bg-white/95 backdrop-blur-sm px-4 py-3.5 sm:px-6 sm:py-4 md:px-8 md:py-6 border-b border-brand-100 flex justify-between items-center z-20">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 text-brand-600 bg-brand-50 p-1.5 sm:p-2 rounded-full"><AppointmentIcon /></div>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-brand-900">Agendar Cita</h2>
                     </div>
-                    <button onClick={onClose} className="text-slate-400 hover:text-brand-900 transition-colors p-2 hover:bg-brand-50 rounded-full">
+                    <button onClick={onClose} className="text-slate-400 hover:text-brand-900 transition-colors p-1.5 hover:bg-brand-50 rounded-full">
                         <CloseIcon />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
                      <motion.div
                          initial={{ x: -20, opacity: 0 }}
                          animate={{ x: 0, opacity: 1 }}
                          transition={{ delay: 0.1 }}
                      >
-                        <h3 className="text-xl font-bold text-brand-700 mb-6 flex items-center border-b border-brand-100 pb-2">
-                            <span className="bg-brand-100 text-brand-700 w-8 h-8 rounded-full flex justify-center items-center mr-3 text-sm">1</span>
+                        <h3 className="text-lg sm:text-xl font-bold text-brand-700 mb-4 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
+                            <span className="bg-brand-100 text-brand-700 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex justify-center items-center mr-2 sm:mr-3 text-xs sm:text-sm">1</span>
                             Tus Datos Personales
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-4 sm:gap-y-6">
                             {/* Name Field */}
                             <div>
-                                <label htmlFor="name" className="block text-sm font-semibold text-brand-800 mb-2">Nombre Completo</label>
+                                <label htmlFor="name" className="block text-xs sm:text-sm font-semibold text-brand-800 mb-1.5 sm:mb-2">Nombre Completo</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-400 w-10">
                                         <UserIcon />
                                     </div>
-                                    <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. Ana Torres" />
+                                    <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 sm:py-3.5 pl-11 pr-4 text-sm sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. Ana Torres" />
                                 </div>
                             </div>
                             {/* Phone Field */}
                             <div>
-                                <label htmlFor="phone" className="block text-sm font-semibold text-brand-800 mb-2">Teléfono</label>
+                                <label htmlFor="phone" className="block text-xs sm:text-sm font-semibold text-brand-800 mb-1.5 sm:mb-2">Teléfono</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-400 w-10">
                                         <PhoneIcon />
                                     </div>
-                                    <input type="tel" id="phone" value={phone} onChange={e => setPhone(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. 987 654 321"/>
+                                    <input type="tel" id="phone" value={phone} onChange={e => setPhone(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 sm:py-3.5 pl-11 pr-4 text-sm sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. 987 654 321"/>
                                 </div>
                             </div>
 
                             {/* Service Field */}
                             <div className="md:col-span-2">
-                                <label htmlFor="service" className="block text-sm font-semibold text-brand-800 mb-2">Tipo de Servicio</label>
+                                <label htmlFor="service" className="block text-xs sm:text-sm font-semibold text-brand-800 mb-1.5 sm:mb-2">Tipo de Servicio</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-400 w-10">
                                         <ServiceIcon />
@@ -303,7 +303,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                         value={service} 
                                         onChange={e => setService(e.target.value)} 
                                         required 
-                                        className="appearance-none block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-10 text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium"
+                                        className="appearance-none block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 sm:py-3.5 pl-11 pr-10 text-sm sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium"
                                     >
                                         <option value="" disabled>Seleccione el motivo de su visita</option>
                                         {DENTAL_SERVICES.map(s => (
@@ -316,18 +316,18 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
+                     </motion.div>
                     
-                    <motion.div
-                         initial={{ x: -20, opacity: 0 }}
-                         animate={{ x: 0, opacity: 1 }}
-                         transition={{ delay: 0.2 }}
-                    >
-                        <h3 className="text-xl font-bold text-brand-700 mb-6 flex items-center border-b border-brand-100 pb-2">
-                            <span className="bg-brand-100 text-brand-700 w-8 h-8 rounded-full flex justify-center items-center mr-3 text-sm">2</span>
+                     <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                     >
+                        <h3 className="text-lg sm:text-xl font-bold text-brand-700 mb-4 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
+                            <span className="bg-brand-100 text-brand-700 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex justify-center items-center mr-2 sm:mr-3 text-xs sm:text-sm">2</span>
                             Elige un Día
                         </h3>
-                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                         <div className="grid grid-cols-3 gap-2 sm:gap-4">
                             {timeSlotsByDay.map(({ date }, index) => {
                                 const isSelected = selectedDate?.toDateString() === date.toDateString();
                                 return (
@@ -337,20 +337,20 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                         type="button"
                                         key={date.toISOString()}
                                         onClick={() => { setSelectedDate(date); setSelectedSlot(null); }}
-                                        className={`p-4 rounded-2xl text-center border-2 transition-all duration-300 cursor-pointer ${
+                                        className={`p-2.5 sm:p-4 rounded-2xl text-center border-2 transition-all duration-300 cursor-pointer ${
                                             isSelected
-                                            ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-600/30 ring-4 ring-brand-100'
+                                            ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-600/30'
                                             : 'bg-slate-50 border-transparent hover:border-brand-300 hover:bg-brand-50'
                                         }`}
                                     >
-                                        <p className={`text-sm font-bold uppercase tracking-wider mb-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { weekday: 'long' })}</p>
-                                        <p className={`text-5xl font-black my-2 ${isSelected ? 'text-white' : 'text-brand-900'}`}>{date.getDate()}</p>
-                                        <p className={`text-sm font-bold uppercase mt-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { month: 'long' })}</p>
+                                        <p className={`text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-wider mb-0.5 sm:mb-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '')}</p>
+                                        <p className={`text-2xl sm:text-4xl md:text-5xl font-black my-1 sm:my-2 ${isSelected ? 'text-white' : 'text-brand-900'}`}>{date.getDate()}</p>
+                                        <p className={`text-[10px] sm:text-xs md:text-sm font-bold uppercase mt-0.5 sm:mt-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}</p>
                                     </motion.button>
                                 );
                             })}
                         </div>
-                    </motion.div>
+                     </motion.div>
 
                     <div className={`transition-all duration-500 ease-in-out ${selectedDate ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
                         {selectedDate && (
@@ -359,8 +359,8 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                  animate={{ x: 0, opacity: 1 }}
                                  transition={{ delay: 0.3 }}
                             >
-                                <h3 className="text-xl font-bold text-brand-700 mb-6 flex items-center border-b border-brand-100 pb-2">
-                                    <span className="bg-brand-100 text-brand-700 w-8 h-8 rounded-full flex justify-center items-center mr-3 text-sm">3</span>
+                                <h3 className="text-lg sm:text-xl font-bold text-brand-700 mb-4 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
+                                    <span className="bg-brand-100 text-brand-700 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex justify-center items-center mr-2 sm:mr-3 text-xs sm:text-sm">3</span>
                                     Elige un Horario
                                 </h3>
                                 {selectedDaySlots.length > 0 ? (
