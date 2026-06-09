@@ -256,55 +256,55 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                 transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
                 className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[96vh] sm:max-h-[90vh] flex flex-col relative overflow-hidden"
             >
-                <div className="sticky top-0 bg-white/95 backdrop-blur-sm px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-6 border-b border-brand-100 flex justify-between items-center z-20">
+                <div className="sticky top-0 bg-white/95 backdrop-blur-sm px-4 py-2.5 sm:px-6 sm:py-4 md:px-8 md:py-6 border-b border-brand-100 flex justify-between items-center z-20">
                     <div className="flex items-center space-x-2 sm:space-x-3">
-                        <div className="w-7 h-7 sm:w-10 sm:h-10 text-brand-600 bg-brand-50 p-1 sm:p-2 rounded-full"><AppointmentIcon /></div>
-                        <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-brand-900">Agendar Cita</h2>
+                        <div className="w-6.5 h-6.5 sm:w-10 sm:h-10 text-brand-600 bg-brand-50 p-1 sm:p-2 rounded-full"><AppointmentIcon /></div>
+                        <h2 className="text-base sm:text-2xl md:text-3xl font-extrabold text-brand-900">Agendar Cita</h2>
                     </div>
                     <button 
                         onClick={onClose} 
                         className="text-slate-600 hover:text-slate-950 transition-all p-1.5 sm:p-2 bg-slate-100 hover:bg-slate-200 rounded-full border border-slate-300 shadow-sm hover:scale-110 cursor-pointer flex items-center justify-center"
                         aria-label="Cerrar formulario"
                     >
-                        <CloseIcon className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+                        <CloseIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 md:p-8 space-y-4 sm:space-y-6 md:space-y-8">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 space-y-3.5 sm:space-y-6 md:space-y-8">
                      <motion.div
                          initial={{ x: -20, opacity: 0 }}
                          animate={{ x: 0, opacity: 1 }}
                          transition={{ delay: 0.1 }}
                      >
-                        <h3 className="text-sm sm:text-xl font-bold text-brand-700 mb-3 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
+                        <h3 className="text-xs sm:text-xl font-bold text-brand-700 mb-2.5 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
                             <span className="bg-brand-100 text-brand-700 w-5 h-5 sm:w-8 sm:h-8 rounded-full flex justify-center items-center mr-1.5 sm:mr-3 text-[10px] sm:text-sm">1</span>
                             Tus Datos Personales
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-3 sm:gap-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-2.5 sm:gap-y-6">
                             {/* Name Field */}
                             <div>
-                                <label htmlFor="name" className="block text-[11px] sm:text-sm font-semibold text-brand-800 mb-1 sm:mb-2">Nombre Completo</label>
+                                <label htmlFor="name" className="block text-[10px] sm:text-sm font-semibold text-brand-800 mb-1">Nombre Completo</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-400 w-10">
                                         <UserIcon />
                                     </div>
-                                    <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2 sm:py-3.5 pl-11 pr-4 text-xs sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. Ana Torres" />
+                                    <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 sm:py-3 pl-11 pr-4 text-xs sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. Ana Torres" />
                                 </div>
                             </div>
                             {/* Phone Field */}
                             <div>
-                                <label htmlFor="phone" className="block text-[11px] sm:text-sm font-semibold text-brand-800 mb-1 sm:mb-2">Teléfono</label>
+                                <label htmlFor="phone" className="block text-[10px] sm:text-sm font-semibold text-brand-800 mb-1">Teléfono</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-400 w-10">
                                         <PhoneIcon />
                                     </div>
-                                    <input type="tel" id="phone" value={phone} onChange={e => setPhone(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2 sm:py-3.5 pl-11 pr-4 text-xs sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. 987 654 321"/>
+                                    <input type="tel" id="phone" value={phone} onChange={e => setPhone(e.target.value)} required className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 sm:py-3 pl-11 pr-4 text-xs sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium placeholder:text-slate-400" placeholder="Ej. 987 654 321"/>
                                 </div>
                             </div>
 
                             {/* Service Field */}
                             <div className="md:col-span-2">
-                                <label htmlFor="service" className="block text-[11px] sm:text-sm font-semibold text-brand-800 mb-1 sm:mb-2">Tipo de Servicio</label>
+                                <label htmlFor="service" className="block text-[10px] sm:text-sm font-semibold text-brand-800 mb-1">Tipo de Servicio</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-400 w-10">
                                         <ServiceIcon />
@@ -314,7 +314,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                         value={service} 
                                         onChange={e => setService(e.target.value)} 
                                         required 
-                                        className="appearance-none block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 sm:py-3.5 pl-11 pr-10 text-xs sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium"
+                                        className="appearance-none block w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 sm:py-3 pl-11 pr-10 text-xs sm:text-base text-brand-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all font-medium"
                                     >
                                         <option value="" disabled>Seleccione el motivo de su visita</option>
                                         {DENTAL_SERVICES.map(s => (
@@ -334,7 +334,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ delay: 0.2 }}
                      >
-                        <h3 className="text-sm sm:text-xl font-bold text-brand-700 mb-3 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
+                        <h3 className="text-xs sm:text-xl font-bold text-brand-700 mb-2.5 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
                             <span className="bg-brand-100 text-brand-700 w-5 h-5 sm:w-8 sm:h-8 rounded-full flex justify-center items-center mr-1.5 sm:mr-3 text-[10px] sm:text-sm">2</span>
                             Elige un Día
                         </h3>
@@ -348,15 +348,15 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                         type="button"
                                         key={date.toISOString()}
                                         onClick={() => { setSelectedDate(date); setSelectedSlot(null); }}
-                                        className={`p-2 sm:p-4 rounded-xl sm:rounded-2xl text-center border-2 transition-all duration-300 cursor-pointer ${
+                                        className={`p-1.5 sm:p-4 rounded-xl sm:rounded-2xl text-center border-2 transition-all duration-300 cursor-pointer ${
                                             isSelected
                                             ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-600/30'
                                             : 'bg-slate-50 border-transparent hover:border-brand-300 hover:bg-brand-50'
                                         }`}
                                     >
-                                        <p className={`text-[9px] sm:text-xs md:text-sm font-bold uppercase tracking-wider mb-0.5 sm:mb-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '')}</p>
-                                        <p className={`text-xl sm:text-4xl md:text-5xl font-black my-0.5 sm:my-2 ${isSelected ? 'text-white' : 'text-brand-900'}`}>{date.getDate()}</p>
-                                        <p className={`text-[9px] sm:text-xs md:text-sm font-bold uppercase mt-0.5 sm:mt-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}</p>
+                                        <p className={`text-[8.5px] sm:text-xs md:text-sm font-bold uppercase tracking-wider mb-0.5 sm:mb-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '')}</p>
+                                        <p className={`text-lg sm:text-4xl md:text-5xl font-black my-0.5 sm:my-2 ${isSelected ? 'text-white' : 'text-brand-900'}`}>{date.getDate()}</p>
+                                        <p className={`text-[8.5px] sm:text-xs md:text-sm font-bold uppercase mt-0.5 sm:mt-1 ${isSelected ? 'text-brand-100' : 'text-slate-500'}`}>{date.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}</p>
                                     </motion.button>
                                 );
                             })}
@@ -370,12 +370,12 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                   animate={{ x: 0, opacity: 1 }}
                                   transition={{ delay: 0.3 }}
                              >
-                                <h3 className="text-sm sm:text-xl font-bold text-brand-700 mb-3 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
+                                <h3 className="text-xs sm:text-xl font-bold text-brand-700 mb-2.5 sm:mb-6 flex items-center border-b border-brand-100 pb-2">
                                     <span className="bg-brand-100 text-brand-700 w-5 h-5 sm:w-8 sm:h-8 rounded-full flex justify-center items-center mr-1.5 sm:mr-3 text-[10px] sm:text-sm">3</span>
                                     Elige un Horario
                                 </h3>
                                 {selectedDaySlots.length > 0 ? (
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                                         {selectedDaySlots.map(slot => (
                                             <motion.button 
                                                 whileHover={{ scale: 1.05 }}
@@ -383,7 +383,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                                 type="button"
                                                 key={slot.toISOString()}
                                                 onClick={() => setSelectedSlot(slot.toISOString())}
-                                                className={`py-2 px-1 rounded-lg border text-xs sm:text-sm md:text-base font-bold transition-all duration-200 ${
+                                                className={`py-1.5 px-0.5 rounded-lg border text-xs sm:text-sm md:text-base font-bold transition-all duration-200 ${
                                                     selectedSlot === slot.toISOString() 
                                                     ? 'bg-brand-50 border-brand-500 text-brand-700 shadow-sm ring-2 ring-brand-500 ring-offset-2' 
                                                     : 'bg-white border-slate-200 text-slate-700 hover:border-brand-300 hover:bg-slate-50'
@@ -394,7 +394,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-center text-slate-500 bg-slate-100 p-3 rounded-lg text-xs">No quedan horarios disponibles para este día.</p>
+                                    <p className="text-center text-slate-500 bg-slate-100 p-3 rounded-lg text-[11px]">No quedan horarios disponibles para este día.</p>
                                 )}
                              </motion.div>
                          )}
@@ -405,7 +405,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="p-4 sm:p-6 md:p-8 bg-slate-50 border-t border-slate-100 mt-auto"
+                    className="p-3 sm:p-6 md:p-8 bg-slate-50 border-t border-slate-100 mt-auto"
                 >
                     <motion.button 
                         whileHover={{ scale: 1.02 }}
@@ -413,7 +413,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
                         type="submit"
                         onClick={handleSubmit}
                         disabled={!selectedSlot || !name || !phone || !service}
-                        className="w-full bg-brand-600 text-white px-5 sm:px-8 py-3.5 sm:py-4 rounded-xl hover:bg-brand-700 font-bold shadow-lg shadow-brand-600/20 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500 disabled:cursor-not-allowed transition-all text-sm sm:text-lg tracking-wide"
+                        className="w-full bg-brand-600 text-white px-4 py-3 sm:py-4 rounded-xl hover:bg-brand-700 font-bold shadow-lg shadow-brand-600/20 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500 disabled:cursor-not-allowed transition-all text-xs sm:text-lg tracking-wide cursor-pointer"
                     >
                         Confirmar Cita
                     </motion.button>
