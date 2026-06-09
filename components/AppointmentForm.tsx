@@ -133,12 +133,12 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
             }
         };
         return (
-            <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm sm:p-6 overflow-y-auto">
+            <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm overflow-hidden">
                 <motion.div 
                     initial={{ scale: 0.9, opacity: 0, y: 30 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-                    className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col relative overflow-hidden"
+                    className="bg-white rounded-3xl shadow-2xl w-full max-w-sm max-h-[88vh] flex flex-col relative overflow-y-auto"
                 >
                     <div className="p-5 sm:p-8 text-center bg-gradient-to-br from-brand-50 to-white">
                         <button 
@@ -215,12 +215,12 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
 
     if (step === 'final') {
         return (
-            <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm sm:p-6 overflow-y-auto">
+            <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm overflow-hidden">
                 <motion.div 
                     initial={{ scale: 0.9, opacity: 0, y: 30 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-                    className="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col relative overflow-hidden"
+                    className="bg-white rounded-3xl shadow-2xl w-full max-w-sm max-h-[88vh] flex flex-col relative overflow-y-auto"
                 >
                     <div className="p-5 sm:p-8 text-center bg-gradient-to-br from-brand-50 to-white">
                         <button 
@@ -249,12 +249,12 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({ onClose, onBoo
     }
 
     return (
-        <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm overflow-hidden">
             <motion.div 
                 initial={{ scale: 0.9, opacity: 0, y: 30 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-                className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[96vh] sm:max-h-[90vh] flex flex-col relative overflow-hidden"
+                className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[88vh] sm:max-h-[90vh] flex flex-col relative overflow-hidden"
             >
                 <div className="sticky top-0 bg-white/95 backdrop-blur-sm px-4 py-2.5 sm:px-6 sm:py-4 md:px-8 md:py-6 border-b border-brand-100 flex justify-between items-center z-20">
                     <div className="flex items-center space-x-2 sm:space-x-3">
