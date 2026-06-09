@@ -62,39 +62,39 @@ const PromotionModal: React.FC<{
     onBook: () => void;
     promotion: Promotion;
 }> = ({onClose, onBook, promotion}) => (
-    <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm overflow-hidden">
+    <div className="fixed inset-0 bg-brand-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-hidden">
         <motion.div 
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[88vh] md:max-h-[85vh] overflow-hidden"
+            className="relative w-[94vw] sm:w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden mx-auto"
         >
              <button 
                 onClick={onClose} 
-                className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 text-white hover:text-red-200 transition-all z-50 bg-slate-900/90 hover:bg-slate-900 rounded-full p-2 sm:p-3 shadow-2xl hover:scale-110 border border-slate-700/50 flex items-center justify-center cursor-pointer"
+                className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 text-white hover:text-red-200 transition-all z-50 bg-slate-900/90 hover:bg-slate-900 rounded-full p-2.5 sm:p-3 shadow-2xl hover:scale-110 border border-slate-700/50 flex items-center justify-center cursor-pointer"
                 aria-label="Cerrar promoción"
             >
-                <CloseIcon className="w-4.5 h-4.5 sm:w-6 sm:h-6 stroke-[3]" />
+                <CloseIcon className="w-5 h-5 sm:w-6 sm:h-6 stroke-[3]" />
             </button>
             <div className="overflow-y-auto flex-1">
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
                     <div className="w-full h-32 sm:h-56 md:h-full bg-cover bg-center min-h-[120px] md:min-h-[400px]" style={{backgroundImage: `url('${promotion.imageUrl}')`}}>
                     </div>
-                    <div className="p-4 sm:p-8 md:p-10 flex flex-col justify-center bg-brand-50 text-brand-900">
+                    <div className="p-5 sm:p-8 md:p-10 flex flex-col justify-center bg-brand-50 text-brand-900">
                         <motion.div 
                             initial={{ rotate: -15, scale: 0.8 }}
                             animate={{ rotate: 0, scale: 1 }}
                             transition={{ delay: 0.2, type: "spring" }}
-                            className="w-8 h-8 sm:w-14 sm:h-14 mb-2 sm:mb-6 text-brand-500 bg-white p-1.5 sm:p-3 rounded-2xl shadow-sm self-start"
+                            className="w-10 h-10 sm:w-14 sm:h-14 mb-3 sm:mb-6 text-brand-500 bg-white p-2 sm:p-3 rounded-2xl shadow-sm self-start"
                         >
                             <GiftIcon />
                         </motion.div>
-                        <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold mb-1 md:mb-3 text-brand-800 leading-tight">{promotion.title}</h2>
-                        <p className="text-xs sm:text-base md:text-lg font-medium mb-2.5 sm:mb-6 text-brand-700/90" dangerouslySetInnerHTML={{ __html: promotion.subtitle.replace('GRATIS', '<span class="text-brand-600 font-black">GRATIS</span>') }} />
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-1.5 md:mb-3 text-brand-800 leading-tight">{promotion.title}</h2>
+                        <p className="text-sm sm:text-base md:text-lg font-bold mb-3 sm:mb-6 text-brand-700/90" dangerouslySetInnerHTML={{ __html: promotion.subtitle.replace('GRATIS', '<span class="text-brand-600 font-extrabold">GRATIS</span>') }} />
 
-                        <div className="text-left mb-3 md:mb-6 bg-white/60 p-3 sm:p-6 rounded-2xl border border-white">
-                            <ul className="space-y-1 sm:space-y-4 text-brand-800 font-medium text-[11px] sm:text-base">
+                        <div className="text-left mb-4 md:mb-6 bg-white/60 p-4 sm:p-6 rounded-2xl border border-white">
+                            <ul className="space-y-2 sm:space-y-4 text-brand-800 font-bold text-xs sm:text-base">
                                {promotion.details.split('\n').map((detail, index) => (
                                     <motion.li 
                                         initial={{ opacity: 0, x: -20 }}
@@ -103,15 +103,15 @@ const PromotionModal: React.FC<{
                                         key={index} 
                                         className="flex items-start"
                                     >
-                                        <span className="text-brand-500 mr-2 mt-0.5 w-3.5 h-3.5 sm:w-5 sm:h-5 flex-shrink-0"><CheckIcon /></span>
+                                        <span className="text-brand-500 mr-2 mt-0.5 w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"><CheckIcon /></span>
                                         <span>{detail}</span>
                                     </motion.li>
-                               ))}
+                                ))}
                             </ul>
                         </div>
 
-                        <p className="text-[10px] sm:text-sm font-bold text-brand-600/80 mb-2.5 sm:mb-6 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></span>
+                        <p className="text-xs sm:text-sm font-bold text-brand-600/90 mb-3.5 sm:mb-6 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
                             ¡Cupos muy limitados!
                         </p>
 
@@ -122,7 +122,7 @@ const PromotionModal: React.FC<{
                                 onBook();
                                 onClose();
                             }} 
-                            className="bg-brand-600 text-white px-5 py-2.5 sm:py-4 rounded-full hover:bg-brand-500 font-bold shadow-lg shadow-brand-600/20 transition-all duration-300 w-full text-xs sm:text-base md:text-lg cursor-pointer"
+                            className="bg-brand-600 text-white px-5 py-3.5 sm:py-4 rounded-full hover:bg-brand-500 font-extrabold shadow-lg shadow-brand-600/20 transition-all duration-300 w-full text-sm sm:text-base md:text-lg cursor-pointer"
                         >
                             {promotion.ctaText}
                         </motion.button>
@@ -238,7 +238,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
 
     const timer = setTimeout(() => {
       setShowPromotion(true);
-    }, 1500);
+    }, 200);
     return () => clearTimeout(timer);
   }, [activePromotion]);
 
