@@ -431,7 +431,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     description="Tratamientos de conducto para salvar dientes severamente dañados, aliviando el dolor y preservando la pieza."
                 />
                  <ServiceCard 
-                    imageUrl="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=600&auto=format&fit=crop"
+                    imageUrl="/ortodoncia_smile.png"
                     title="Ortodoncia"
                     description="Corrección de la posición de los dientes y la mordida para una sonrisa funcional y estéticamente agradable."
                 />
@@ -441,7 +441,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     description="Procedimientos quirúrgicos, incluyendo la extracción de muelas del juicio, realizados por expertos."
                 />
                  <ServiceCard 
-                    imageUrl="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=600&auto=format&fit=crop"
+                    imageUrl="/estetica_dental_smile.png"
                     title="Estética Dental"
                     description="Mejora la apariencia de tu sonrisa con blanqueamientos, carillas y otros tratamientos cosméticos dentales."
                 />
