@@ -7,6 +7,7 @@ import {
 import { AdminAppointmentModal } from './AdminAppointmentModal';
 import { AdminDoctorModal } from './AdminDoctorModal';
 import { AdminPromotionModal } from './AdminPromotionModal';
+import { isSupabaseConfigured } from '../supabase';
 
 type AdminTab = 'dashboard' | 'agenda' | 'patients' | 'doctors' | 'promotions' | 'settings';
 type Theme = 'light' | 'dark';
@@ -338,39 +339,96 @@ export const AdminPage: React.FC<AdminPageProps> = (props) => {
                     alert('Configuración guardada!');
                 };
 
+                const supabaseConfigured = isSupabaseConfigured();
+
                 return (
                     <div>
                         <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Configuración</h2>
-                        <div className="bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md border border-slate-200 dark:border-slate-700 max-w-2xl">
-                            <form onSubmit={handleSettingsSave} className="space-y-6">
-                                <div>
-                                    <label htmlFor="clinicName" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Nombre de la Clínica</label>
-                                    <input type="text" name="clinicName" id="clinicName" value={localSettings.clinicName} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                            {/* General Clinic Settings */}
+                            <div className="bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md border border-slate-200 dark:border-slate-700">
+                                <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-white border-b pb-2">Ajustes Generales</h3>
+                                <form onSubmit={handleSettingsSave} className="space-y-6">
+                                    <div>
+                                        <label htmlFor="clinicName" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Nombre de la Clínica</label>
+                                        <input type="text" name="clinicName" id="clinicName" value={localSettings.clinicName} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="clinicAddress" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Dirección</label>
+                                        <input type="text" name="clinicAddress" id="clinicAddress" value={localSettings.clinicAddress} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="clinicPhone" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Teléfono</label>
+                                        <input type="text" name="clinicPhone" id="clinicPhone" value={localSettings.clinicPhone} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="clinicEmail" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+                                        <input type="email" name="clinicEmail" id="clinicEmail" value={localSettings.clinicEmail} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="heroImageUrl" className="block text-sm font-medium text-slate-700 dark:text-slate-300">URL Imagen Principal (Landing)</label>
+                                        <input type="text" name="heroImageUrl" id="heroImageUrl" value={localSettings.heroImageUrl} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="loginImageUrl" className="block text-sm font-medium text-slate-700 dark:text-slate-300">URL Imagen (Login)</label>
+                                        <input type="text" name="loginImageUrl" id="loginImageUrl" value={localSettings.loginImageUrl} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div className="pt-2 text-right">
+                                         <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Guardar Cambios</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {/* Database Persistence Status & Supabase Info */}
+                            <div className="bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md border border-slate-200 dark:border-slate-700 space-y-6">
+                                <h3 className="text-lg font-bold text-slate-800 dark:text-white border-b pb-2 flex items-center justify-between">
+                                    <span>Persistencia de Datos</span>
+                                    {supabaseConfigured ? (
+                                        <span className="flex items-center text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-2.5 py-1 rounded-full font-bold">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                                            Supabase Conectado
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 px-2.5 py-1 rounded-full font-bold">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span>
+                                            Modo Local (localStorage)
+                                        </span>
+                                    )}
+                                </h3>
+
+                                <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 leading-relaxed text-sm text-slate-600 dark:text-slate-300 space-y-3">
+                                    {supabaseConfigured ? (
+                                        <p>
+                                            🚀 <strong>¡Excelente!</strong> El sistema está conectado directamente a tu base de datos de <strong>Supabase</strong>. Toda la información de citas, doctores, promociones y fichas clínicas se está guardando automáticamente en la nube.
+                                        </p>
+                                    ) : (
+                                        <>
+                                            <p>
+                                                📁 El sistema está operando en <strong>Modo Local Autónomo (localStorage)</strong>. Todos tus cambios, citas confirmadas, historias médicas y configuraciones de la clínica se guardan de forma persistente y segura en este navegador.
+                                            </p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                * El almacenamiento local es ideal para pruebas y desarrollo. Es 100% compatible para publicar tu consultorio estáticamente en minutos vía <strong>GitHub Pages o Vercel</strong> de manera gratuita.
+                                            </p>
+                                        </>
+                                    )}
                                 </div>
-                                <div>
-                                    <label htmlFor="clinicAddress" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Dirección</label>
-                                    <input type="text" name="clinicAddress" id="clinicAddress" value={localSettings.clinicAddress} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
+
+                                <div className="space-y-4">
+                                    <h4 className="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wider">¿Cómo conectar con Supabase al publicar en Vercel/GitHub?</h4>
+                                    <ol className="list-decimal list-inside space-y-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                        <li>Crea un proyecto en <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Supabase</a> de forma gratuita.</li>
+                                        <li>Dirígete a la pestaña de <strong>Project Settings &gt; API</strong>.</li>
+                                        <li>Copia tu <code>Project URL</code> y tu <code>anon public API key</code>.</li>
+                                        <li>Al desplegar en <strong>Vercel</strong>, agrega estas dos variables en "Environment Variables" de tu proyecto:
+                                            <ul className="list-disc list-inside pl-4 mt-1 space-y-1 text-slate-500 font-mono">
+                                                <li>VITE_SUPABASE_URL = (tu url)</li>
+                                                <li>VITE_SUPABASE_ANON_KEY = (tu anon key)</li>
+                                            </ul>
+                                        </li>
+                                        <li>Para inicializar tu base de datos, abre el editor de consultas SQL (SQL Editor) en Supabase y copia/pega el script de creación de tablas detallado en el archivo del proyecto <code>/supabase.ts</code>.</li>
+                                    </ol>
                                 </div>
-                                <div>
-                                    <label htmlFor="clinicPhone" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Teléfono</label>
-                                    <input type="text" name="clinicPhone" id="clinicPhone" value={localSettings.clinicPhone} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
-                                </div>
-                                <div>
-                                    <label htmlFor="clinicEmail" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
-                                    <input type="email" name="clinicEmail" id="clinicEmail" value={localSettings.clinicEmail} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
-                                </div>
-                                <div>
-                                    <label htmlFor="heroImageUrl" className="block text-sm font-medium text-slate-700 dark:text-slate-300">URL Imagen Principal (Landing)</label>
-                                    <input type="text" name="heroImageUrl" id="heroImageUrl" value={localSettings.heroImageUrl} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
-                                </div>
-                                <div>
-                                    <label htmlFor="loginImageUrl" className="block text-sm font-medium text-slate-700 dark:text-slate-300">URL Imagen (Login)</label>
-                                    <input type="text" name="loginImageUrl" id="loginImageUrl" value={localSettings.loginImageUrl} onChange={handleSettingsChange} className="mt-1 block w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white" />
-                                </div>
-                                <div className="pt-2 text-right">
-                                     <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Guardar Cambios</button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 );

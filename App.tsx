@@ -71,13 +71,81 @@ type Page = 'landing' | 'login' | 'admin' | 'consultation';
 function App() {
     const [page, setPage] = useState<Page>('landing');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [appointments, setAppointments] = useState<Appointment[]>(MOCK_APPOINTMENTS);
-    const [doctors, setDoctors] = useState<Doctor[]>(MOCK_DOCTORS);
-    const [promotions, setPromotions] = useState<Promotion[]>(MOCK_PROMOTIONS);
-    const [settings, setSettings] = useState<AppSettings>(MOCK_SETTINGS);
-    const [patientRecords, setPatientRecords] = useState<Record<string, PatientRecord>>(MOCK_PATIENT_RECORDS);
+    
+    // Load state from localStorage with fallbacks
+    const [appointments, setAppointments] = useState<Appointment[]>(() => {
+        try {
+            const saved = localStorage.getItem('kiru_appointments');
+            return saved ? JSON.parse(saved) : MOCK_APPOINTMENTS;
+        } catch (e) {
+            console.error('Error reading appointments from localStorage', e);
+            return MOCK_APPOINTMENTS;
+        }
+    });
+    
+    const [doctors, setDoctors] = useState<Doctor[]>(() => {
+        try {
+            const saved = localStorage.getItem('kiru_doctors');
+            return saved ? JSON.parse(saved) : MOCK_DOCTORS;
+        } catch (e) {
+            console.error('Error reading doctors from localStorage', e);
+            return MOCK_DOCTORS;
+        }
+    });
+    
+    const [promotions, setPromotions] = useState<Promotion[]>(() => {
+        try {
+            const saved = localStorage.getItem('kiru_promotions');
+            return saved ? JSON.parse(saved) : MOCK_PROMOTIONS;
+        } catch (e) {
+            console.error('Error reading promotions from localStorage', e);
+            return MOCK_PROMOTIONS;
+        }
+    });
+    
+    const [settings, setSettings] = useState<AppSettings>(() => {
+        try {
+            const saved = localStorage.getItem('kiru_settings');
+            return saved ? JSON.parse(saved) : MOCK_SETTINGS;
+        } catch (e) {
+            console.error('Error reading settings from localStorage', e);
+            return MOCK_SETTINGS;
+        }
+    });
+    
+    const [patientRecords, setPatientRecords] = useState<Record<string, PatientRecord>>(() => {
+        try {
+            const saved = localStorage.getItem('kiru_patient_records');
+            return saved ? JSON.parse(saved) : MOCK_PATIENT_RECORDS;
+        } catch (e) {
+            console.error('Error reading patient records from localStorage', e);
+            return MOCK_PATIENT_RECORDS;
+        }
+    });
+
     const [selectedPatient, setSelectedPatient] = useState<Appointment | null>(null);
     const [selectedPatientRecord, setSelectedPatientRecord] = useState<PatientRecord | null>(null);
+
+    // Save states to localStorage when they change
+    React.useEffect(() => {
+        localStorage.setItem('kiru_appointments', JSON.stringify(appointments));
+    }, [appointments]);
+
+    React.useEffect(() => {
+        localStorage.setItem('kiru_doctors', JSON.stringify(doctors));
+    }, [doctors]);
+
+    React.useEffect(() => {
+        localStorage.setItem('kiru_promotions', JSON.stringify(promotions));
+    }, [promotions]);
+
+    React.useEffect(() => {
+        localStorage.setItem('kiru_settings', JSON.stringify(settings));
+    }, [settings]);
+
+    React.useEffect(() => {
+        localStorage.setItem('kiru_patient_records', JSON.stringify(patientRecords));
+    }, [patientRecords]);
 
     const handleLogin = (success: boolean) => {
         if (success) {
