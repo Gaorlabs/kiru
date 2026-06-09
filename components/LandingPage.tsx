@@ -68,32 +68,32 @@ const PromotionModal: React.FC<{
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-y-auto max-h-[90vh] md:max-h-[85vh] md:overflow-hidden"
         >
              <button 
                 onClick={onClose} 
-                className="absolute top-4 right-4 text-slate-500 hover:text-brand-900 transition-all z-10 bg-white rounded-full p-2.5 shadow-xl hover:bg-brand-50 hover:scale-110 border border-slate-200"
+                className="absolute top-4 right-4 text-white hover:text-red-200 transition-all z-30 bg-slate-900/90 hover:bg-slate-900 rounded-full p-2.5 sm:p-3 shadow-2xl hover:scale-110 border border-slate-700/50 flex items-center justify-center cursor-pointer"
                 aria-label="Cerrar promoción"
             >
-                <CloseIcon />
+                <CloseIcon className="w-5 h-5 sm:w-6 sm:h-6 stroke-[3]" />
             </button>
-            <div className="md:grid md:grid-cols-2 h-full">
-                <div className="hidden md:block bg-cover bg-center h-64 md:h-auto" style={{backgroundImage: `url('${promotion.imageUrl}')`}}>
+            <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+                <div className="w-full h-48 sm:h-64 md:h-full bg-cover bg-center min-h-[180px] md:min-h-[400px]" style={{backgroundImage: `url('${promotion.imageUrl}')`}}>
                 </div>
-                <div className="p-8 md:p-12 flex flex-col justify-center bg-brand-50 text-brand-900">
+                <div className="p-6 sm:p-8 md:p-10 flex flex-col justify-center bg-brand-50 text-brand-900">
                     <motion.div 
                         initial={{ rotate: -15, scale: 0.8 }}
                         animate={{ rotate: 0, scale: 1 }}
                         transition={{ delay: 0.2, type: "spring" }}
-                        className="w-14 h-14 mb-6 text-brand-500 bg-white p-3 rounded-2xl shadow-sm"
+                        className="w-12 h-12 md:w-14 md:h-14 mb-4 md:mb-6 text-brand-500 bg-white p-2.5 md:p-3 rounded-2xl shadow-sm self-start"
                     >
                         <GiftIcon />
                     </motion.div>
-                    <h2 className="text-3xl md:text-4xl font-extrabold mb-3 text-brand-800 leading-tight">{promotion.title}</h2>
-                    <p className="text-lg md:text-xl font-medium mb-8 text-brand-700/90" dangerouslySetInnerHTML={{ __html: promotion.subtitle.replace('GRATIS', '<span class="text-brand-600 font-black">GRATIS</span>') }} />
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 md:mb-3 text-brand-800 leading-tight">{promotion.title}</h2>
+                    <p className="text-base sm:text-lg md:text-xl font-medium mb-4 md:mb-6 text-brand-700/90" dangerouslySetInnerHTML={{ __html: promotion.subtitle.replace('GRATIS', '<span class="text-brand-600 font-black">GRATIS</span>') }} />
 
-                    <div className="text-left mb-8 bg-white/60 p-6 rounded-2xl border border-white">
-                        <ul className="space-y-4 text-brand-800 font-medium">
+                    <div className="text-left mb-5 md:mb-6 bg-white/60 p-4 md:p-6 rounded-2xl border border-white">
+                        <ul className="space-y-3 md:space-y-4 text-brand-800 font-medium text-sm md:text-base">
                            {promotion.details.split('\n').map((detail, index) => (
                                 <motion.li 
                                     initial={{ opacity: 0, x: -20 }}
@@ -102,14 +102,14 @@ const PromotionModal: React.FC<{
                                     key={index} 
                                     className="flex items-start"
                                 >
-                                    <span className="text-brand-500 mr-3 mt-0.5 w-5 h-5 flex-shrink-0"><CheckIcon /></span>
+                                    <span className="text-brand-500 mr-2.5 mt-0.5 w-4 h-4 md:w-5 md:h-5 flex-shrink-0"><CheckIcon /></span>
                                     <span>{detail}</span>
                                 </motion.li>
                            ))}
                         </ul>
                     </div>
 
-                    <p className="text-sm font-bold text-brand-600/80 mb-6 flex items-center gap-2">
+                    <p className="text-xs sm:text-sm font-bold text-brand-600/80 mb-4 md:mb-6 flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
                         ¡Cupos muy limitados!
                     </p>
@@ -121,7 +121,7 @@ const PromotionModal: React.FC<{
                             onBook();
                             onClose();
                         }} 
-                        className="bg-brand-600 text-white px-8 py-4 rounded-full hover:bg-brand-500 font-bold shadow-lg shadow-brand-600/20 transition-all duration-300 w-full text-lg"
+                        className="bg-brand-600 text-white px-6 py-3.5 md:py-4 rounded-full hover:bg-brand-500 font-bold shadow-lg shadow-brand-600/20 transition-all duration-300 w-full text-base md:text-lg cursor-pointer"
                     >
                         {promotion.ctaText}
                     </motion.button>
@@ -234,16 +234,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
   useEffect(() => {
     if (!activePromotion) return;
 
-    const promoSeenKey = `promoSeen_${activePromotion.id}`;
-    const hasSeenPromo = sessionStorage.getItem(promoSeenKey);
-    
-    if (!hasSeenPromo) {
-      const timer = setTimeout(() => {
-        setShowPromotion(true);
-        sessionStorage.setItem(promoSeenKey, 'true');
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => {
+      setShowPromotion(true);
+    }, 1500);
+    return () => clearTimeout(timer);
   }, [activePromotion]);
 
   return (
@@ -515,6 +509,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                 </span>
             </motion.a>
         </div>
+
+        {/* Floating Promotion Button */}
+        {activePromotion && (
+            <div className="fixed bottom-6 left-6 z-40 hidden sm:block">
+                <motion.button
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowPromotion(true)}
+                    className="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-5 rounded-full shadow-2xl flex items-center gap-2 cursor-pointer border border-brand-500/20"
+                >
+                    <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                    </span>
+                    <GiftIcon className="w-5 h-5" />
+                    <span className="text-xs uppercase tracking-wider">Ver Regalo 🎁</span>
+                </motion.button>
+            </div>
+        )}
 
         {showPromotion && activePromotion && <PromotionModal onClose={() => setShowPromotion(false)} onBook={() => setIsModalOpen(true)} promotion={activePromotion} />}
         {isModalOpen && <AppointmentForm onClose={() => setIsModalOpen(false)} onBookAppointment={onBookAppointment} />}

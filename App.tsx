@@ -21,7 +21,7 @@ const MOCK_APPOINTMENTS: Appointment[] = [
 ];
 
 const MOCK_PROMOTIONS: Promotion[] = [
-    { id: 'promo1', title: 'Limpieza Dental 2x1', subtitle: 'Paga una y la segunda es GRATIS', imageUrl: 'https://images.unsplash.com/photo-1629905675717-f6d3b3c0ca60?q=80&w=2070&auto=format&fit=crop', ctaText: 'Agendar Ahora', isActive: true, details: 'Válido para limpiezas profundas.\nAplica para dos personas en la misma visita.\nNo acumulable con otras promociones.' },
+    { id: 'promo1', title: 'Campaña de Limpieza Dental Profunda', subtitle: 'Paga una y la segunda es GRATIS', imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2070&auto=format&fit=crop', ctaText: 'Agendar Ahora', isActive: true, details: 'Profilaxis ultrasónica completa.\nEliminación de sarro y pulido dental.\nFluorización e instrucción de higiene.' },
     { id: 'promo2', title: 'Blanqueamiento Dental', subtitle: 'Luce una sonrisa más blanca y brillante.', imageUrl: 'https://images.unsplash.com/photo-1606923235213-a4e9b9a61a04?q=80&w=2070&auto=format&fit=crop', ctaText: 'Más Información', isActive: false, details: 'Tratamiento de blanqueamiento profesional en consultorio.' },
 ];
 
@@ -96,7 +96,22 @@ function App() {
     const [promotions, setPromotions] = useState<Promotion[]>(() => {
         try {
             const saved = localStorage.getItem('kiru_promotions');
-            return saved ? JSON.parse(saved) : MOCK_PROMOTIONS;
+            if (saved) {
+                const parsed = JSON.parse(saved) as Promotion[];
+                return parsed.map(p => {
+                    if (p.id === 'promo1') {
+                        return {
+                            ...p,
+                            title: 'Campaña de Limpieza Dental Profunda',
+                            imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2070&auto=format&fit=crop',
+                            isActive: true,
+                            details: 'Profilaxis ultrasónica completa.\nEliminación de sarro y pulido dental.\nFluorización e instrucción de higiene.'
+                        };
+                    }
+                    return p;
+                });
+            }
+            return MOCK_PROMOTIONS;
         } catch (e) {
             console.error('Error reading promotions from localStorage', e);
             return MOCK_PROMOTIONS;
