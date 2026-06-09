@@ -122,6 +122,101 @@ const PromotionModal: React.FC<{
     </div>
 );
 
+const happyClients = [
+  {
+    id: 1,
+    name: "Gabriela Mendoza",
+    treatment: "Diseño de Sonrisa",
+    imageUrl: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=400&auto=format&fit=crop"
+  },
+  {
+    id: 2,
+    name: "Carlos Villacorta",
+    treatment: "Blanqueamiento Láser",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop"
+  },
+  {
+    id: 3,
+    name: "Mariana Rojas",
+    treatment: "Ortodoncia Invisible",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop"
+  },
+  {
+    id: 4,
+    name: "Diego Alessandro",
+    treatment: "Implante de Titanio",
+    imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop"
+  },
+  {
+    id: 5,
+    name: "Vanessa Luján",
+    treatment: "Carillas de Porcelana",
+    imageUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=400&auto=format&fit=crop"
+  },
+  {
+    id: 6,
+    name: "Renzo Valdivia",
+    treatment: "Rehabilitación Oral",
+    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop"
+  }
+];
+
+// Duplicate list for a completely seamless loop on any screen resolution
+const duplicatedClients = [...happyClients, ...happyClients];
+
+const SmiliesSlider: React.FC = () => {
+  return (
+    <div className="bg-brand-950 py-8 overflow-hidden relative border-y border-brand-800">
+      {/* Ambient gradient fading on edges */}
+      <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-brand-950 via-brand-950/80 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-brand-950 via-brand-950/80 to-transparent z-10 pointer-events-none"></div>
+      
+      <div className="max-w-7xl mx-auto px-6 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-20">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-xs font-bold text-brand-300 uppercase tracking-widest">Nuestra Mayor Satisfacción</span>
+        </div>
+        <h3 className="text-sm font-bold text-white tracking-wider uppercase opacity-90">Kiru Dental — Historias de Éxito Reales</h3>
+      </div>
+
+      <div className="flex w-full overflow-hidden">
+        <motion.div 
+          className="flex gap-6 shrink-0"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{
+            ease: "linear",
+            duration: 25,
+            repeat: Infinity,
+          }}
+        >
+          {duplicatedClients.map((client, idx) => (
+            <div 
+              key={`${client.id}-${idx}`}
+              className="flex items-center gap-4 bg-brand-900/40 backdrop-blur-md border border-brand-800/40 rounded-full pl-3 pr-6 py-2 shrink-0 shadow-lg shadow-black/10 hover:border-brand-500/50 hover:bg-brand-900 transition-all duration-300 group cursor-pointer"
+            >
+              <div className="relative shrink-0">
+                <img 
+                  className="w-12 h-12 rounded-full object-cover border-2 border-brand-400 group-hover:border-emerald-400 transition-colors shadow-inner" 
+                  src={client.imageUrl} 
+                  alt={client.name} 
+                  referrerPolicy="no-referrer"
+                />
+                <span className="absolute bottom-0 right-0 bg-emerald-500 text-white rounded-full p-0.5 border border-brand-950">
+                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                </span>
+              </div>
+              <div className="text-left">
+                <h4 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors uppercase tracking-tight">{client.name}</h4>
+                <p className="text-[11px] text-brand-300 font-medium">{client.treatment}</p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, settings, onNavigateToLogin, activePromotion }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -247,6 +342,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
             </div>
         </section>
 
+        <SmiliesSlider />
+
         <section id="about" className="bg-white py-24">
             <div className="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
                 <motion.div 
@@ -254,10 +351,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.6 }}
-                    className="md:w-1/2 text-brand-500"
+                    className="md:w-1/2"
                 >
-                    <div className="max-w-md mx-auto">
-                       <TeamIcon />
+                    <div className="relative group overflow-hidden rounded-3xl border-4 border-slate-100 shadow-2xl">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300 z-10"></div>
+                        <img 
+                            className="w-full h-[400px] object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                            src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=1200&auto=format&fit=crop" 
+                            alt="Instalaciones de Kiru Dental" 
+                            referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute bottom-6 left-6 right-6 z-20 text-white">
+                            <span className="bg-brand-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">Tecnología de Vanguardia</span>
+                            <h4 className="text-xl font-bold font-sans">Nuestras Instalaciones</h4>
+                            <p className="text-white/80 text-sm">Ambientes modernos y esterilizados para tu total comodidad y tranquilidad.</p>
+                        </div>
                     </div>
                 </motion.div>
                 <motion.div 
