@@ -29,22 +29,31 @@ const FeatureCard: React.FC<{icon: React.ReactNode, title: string, description: 
     >
         <div className="absolute inset-0 bg-gradient-to-br from-brand-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <div className="w-16 h-16 mx-auto mb-6 text-brand-500 relative z-10 transform group-hover:scale-110 transition-transform duration-300">{icon}</div>
-        <h3 className="text-xl font-bold mb-3 text-brand-900 relative z-10">{title}</h3>
-        <p className="text-brand-700/80 leading-relaxed relative z-10">{description}</p>
+        <h3 className="text-lg font-bold mb-2 text-brand-900 relative z-10">{title}</h3>
+        <p className="text-brand-700/80 text-sm leading-relaxed relative z-10">{description}</p>
     </motion.div>
 );
 
 
-const ServiceCard: React.FC<{icon: React.ReactNode, title: string, description: string}> = ({icon, title, description}) => (
+const ServiceCard: React.FC<{imageUrl: string, title: string, description: string}> = ({imageUrl, title, description}) => (
     <motion.div 
         variants={itemVariants}
-        whileHover={{ scale: 1.05, translateY: -10 }}
-        className="bg-white p-8 rounded-2xl shadow-xl shadow-brand-900/5 border border-brand-100 transform text-center relative overflow-hidden group"
+        whileHover={{ scale: 1.03, translateY: -6 }}
+        className="bg-white rounded-2xl shadow-lg shadow-brand-900/5 border border-brand-100/80 overflow-hidden flex flex-col h-full group"
     >
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-100/50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <div className="w-16 h-16 mx-auto mb-6 text-brand-600 relative z-10 transform group-hover:rotate-6 transition-transform duration-300">{icon}</div>
-        <h3 className="text-xl font-bold mb-3 text-brand-900 relative z-10">{title}</h3>
-        <p className="text-brand-700/80 relative z-10">{description}</p>
+        <div className="h-44 w-full overflow-hidden relative">
+            <img 
+                src={imageUrl} 
+                alt={title} 
+                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
+                referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-350"></div>
+        </div>
+        <div className="p-5 flex flex-col flex-grow text-left">
+            <h3 className="text-[15px] font-bold mb-1 text-brand-900 uppercase tracking-tight">{title}</h3>
+            <p className="text-brand-700/85 text-xs leading-relaxed flex-grow">{description}</p>
+        </div>
     </motion.div>
 );
 
@@ -127,7 +136,7 @@ const happyClients = [
     id: 1,
     name: "Gabriela Mendoza",
     treatment: "Diseño de Sonrisa",
-    imageUrl: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=400&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop"
   },
   {
     id: 2,
@@ -139,7 +148,7 @@ const happyClients = [
     id: 3,
     name: "Mariana Rojas",
     treatment: "Ortodoncia Invisible",
-    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop"
   },
   {
     id: 4,
@@ -151,13 +160,13 @@ const happyClients = [
     id: 5,
     name: "Vanessa Luján",
     treatment: "Carillas de Porcelana",
-    imageUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=400&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop"
   },
   {
     id: 6,
     name: "Renzo Valdivia",
     treatment: "Rehabilitación Oral",
-    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop"
   }
 ];
 
@@ -245,19 +254,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="bg-white/95 backdrop-blur-sm rounded-full shadow-lg px-6 py-3 flex justify-between items-center"
+              className="bg-white/95 backdrop-blur-sm rounded-full shadow-md px-6 py-2.5 flex justify-between items-center"
             >
               <div className="flex items-center space-x-2">
-                <div className="w-9 h-9 text-brand-600"><DentalIcon /></div>
-                <h1 className="text-2xl font-bold text-brand-900">Kiru</h1>
+                <div className="w-8 h-8 text-brand-600"><DentalIcon /></div>
+                <h1 className="text-xl font-bold text-brand-900">Kiru</h1>
               </div>
               <div className="hidden md:flex items-center space-x-8">
-                <a href="#home" className="text-gray-600 hover:text-brand-600 transition-colors font-medium">Inicio</a>
-                <a href="#about" className="text-gray-600 hover:text-brand-600 transition-colors font-medium">Sobre Nosotros</a>
-                <a href="#services" className="text-gray-600 hover:text-brand-600 transition-colors font-medium">Servicios</a>
-                <a href="#contact" className="text-gray-600 hover:text-brand-600 transition-colors font-medium">Contacto</a>
+                <a href="#home" className="text-gray-600 hover:text-brand-600 transition-colors font-medium text-sm">Inicio</a>
+                <a href="#about" className="text-gray-600 hover:text-brand-600 transition-colors font-medium text-sm">Sobre Nosotros</a>
+                <a href="#services" className="text-gray-600 hover:text-brand-600 transition-colors font-medium text-sm">Servicios</a>
+                <a href="#contact" className="text-gray-600 hover:text-brand-600 transition-colors font-medium text-sm">Contacto</a>
               </div>
-              <button onClick={() => setIsModalOpen(true)} className="hidden md:block bg-brand-500 text-white px-5 py-2 rounded-full hover:bg-brand-600 font-semibold shadow-md transition-all transform hover:scale-105 hover:shadow-brand-500/30">
+              <button onClick={() => setIsModalOpen(true)} className="hidden md:block bg-brand-500 text-white px-4 py-1.5 text-sm rounded-full hover:bg-brand-600 font-semibold shadow-md transition-all transform hover:scale-105 hover:shadow-brand-500/30">
                 Agenda tu Cita
               </button>
             </motion.nav>
@@ -268,25 +277,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
         <section id="home" className="bg-brand-900 text-white overflow-hidden relative">
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-900/90 to-transparent"></div>
-            <div className="container mx-auto px-6 pt-32 pb-20 flex flex-col md:flex-row items-center relative z-10">
+            <div className="container mx-auto px-6 pt-28 pb-16 flex flex-col md:flex-row items-center relative z-10">
               <motion.div 
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="md:w-1/2 z-10 text-center md:text-left"
               >
-                <h2 className="text-4xl lg:text-6xl font-extrabold mb-4 leading-tight text-white tracking-tight">
+                <h2 className="text-3xl lg:text-5xl font-bold mb-3 leading-tight text-white tracking-tight">
                     Tu Sonrisa, <br/><span className="text-brand-300">Nuestra Pasión.</span>
                 </h2>
-                <p className="mb-8 text-brand-100 max-w-lg mx-auto md:mx-0 text-lg leading-relaxed">
+                <p className="mb-6 text-brand-100 max-w-lg mx-auto md:mx-0 text-base leading-relaxed">
                  Descubre una experiencia dental diferente. En Kiru, combinamos tecnología de punta con un trato cálido y personalizado para que te sientas como en casa.
                 </p>
-                <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
+                <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
                   <motion.button 
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsModalOpen(true)} 
-                    className="bg-brand-500 text-white px-10 py-4 text-lg rounded-full hover:bg-brand-400 font-semibold shadow-lg shadow-brand-500/30 transition-colors duration-300"
+                    className="bg-brand-500 text-white px-8 py-3 text-base rounded-full hover:bg-brand-400 font-semibold shadow-lg shadow-brand-500/30 transition-colors duration-300"
                   >
                     Agendar Cita Ahora
                   </motion.button>
@@ -294,7 +303,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     href="#about" 
-                    className="border-2 border-brand-300/30 text-brand-50 px-10 py-4 text-lg rounded-full hover:bg-white hover:text-brand-900 font-semibold transition-colors duration-300 text-center backdrop-blur-sm"
+                    className="border-2 border-brand-300/30 text-brand-50 px-8 py-3 text-base rounded-full hover:bg-white hover:text-brand-900 font-semibold transition-colors duration-300 text-center backdrop-blur-sm"
                   >
                     Saber Más
                   </motion.a>
@@ -304,15 +313,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                 initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 transition={{ duration: 1, delay: 0.4, type: "spring" }}
-                className="md:w-1/2 mt-16 md:mt-0 flex justify-center items-center z-10 relative"
+                className="md:w-1/2 mt-12 md:mt-0 flex justify-center items-center z-10 relative"
               >
                 <div className="absolute -inset-4 bg-gradient-to-r from-brand-400 to-brand-300 opacity-30 blur-2xl rounded-full"></div>
-                <img className="rounded-3xl shadow-2xl max-w-md w-full h-[500px] object-cover relative z-10 border-4 border-white/10" src={settings.heroImageUrl} alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
+                <img className="rounded-3xl shadow-2xl max-w-md w-full h-[400px] object-cover relative z-10 border-4 border-white/10" src={settings.heroImageUrl} alt="Dentista profesional atendiendo a un paciente con una sonrisa" />
               </motion.div>
             </div>
         </section>
         
-        <section id="features" className="py-24 bg-brand-50/50">
+        <section id="features" className="py-16 bg-brand-50/50">
             <div className="container mx-auto px-6">
                  <motion.div 
                     initial="hidden"
@@ -375,8 +384,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                     transition={{ duration: 0.6 }}
                     className="md:w-1/2 text-center md:text-left"
                 >
-                    <h2 className="text-3xl lg:text-4xl font-bold text-brand-900 mb-4">Bienvenido a la Familia Kiru</h2>
-                    <p className="text-brand-700/80 mb-6 leading-relaxed">
+                    <h2 className="text-2xl lg:text-3xl font-bold text-brand-900 mb-3">Bienvenido a la Familia Kiru</h2>
+                    <p className="text-brand-700/80 text-sm mb-5 leading-relaxed">
                         En Kiru Dental, representamos todo lo que la odontología moderna debería ser. Hemos mejorado la temida cita con el dentista y la hemos transformado en una experiencia relajante y de confianza. Nuestro equipo de profesionales está dedicado no solo a la salud de tu boca, sino también a tu comodidad y bienestar general.
                     </p>
                     <a href="#contact" className="text-brand-600 hover:text-brand-700 font-semibold transition-colors flex items-center justify-center md:justify-start gap-2">
@@ -394,8 +403,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                 viewport={{ once: true, margin: "-100px" }}
                 className="text-center mb-12"
              >
-                <h2 className="text-3xl lg:text-4xl font-bold text-brand-900">Nuestros Servicios Odontológicos</h2>
-                <p className="text-brand-700/80 mt-2 max-w-2xl mx-auto">Nuestro objetivo es tratar y prevenir enfermedades que afectan a dientes, encías y mandíbula, contribuyendo a una sonrisa saludable y a tu bienestar general.</p>
+                <h2 className="text-2xl lg:text-3xl font-bold text-brand-900">Nuestros Servicios Odontológicos</h2>
+                <p className="text-brand-700/80 text-sm mt-2 max-w-2xl mx-auto">Nuestro objetivo es tratar y prevenir enfermedades que afectan a dientes, encías y mandíbula, contribuyendo a una sonrisa saludable y a tu bienestar general.</p>
             </motion.div>
             <motion.div 
                 initial="hidden"
@@ -407,34 +416,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
             >
                 <ServiceCard 
-                    icon={<PreventionIcon />}
+                    imageUrl="https://images.unsplash.com/photo-1598256989800-fe5f95da9787?q=80&w=600&auto=format&fit=crop"
                     title="Prevención y Diagnóstico"
                     description="Limpiezas, exámenes de rutina y detección temprana de problemas para mantener tu salud bucal."
                 />
                 <ServiceCard 
-                    icon={<FillingIcon />}
+                    imageUrl="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=600&auto=format&fit=crop"
                     title="Restauraciones"
                     description="Reparación de dientes dañados mediante empastes (obturaciones) y coronas de alta calidad."
                 />
                 <ServiceCard 
-                    icon={<EndodonticsIcon />}
+                    imageUrl="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=600&auto=format&fit=crop"
                     title="Endodoncia"
                     description="Tratamientos de conducto para salvar dientes severamente dañados, aliviando el dolor y preservando la pieza."
                 />
                  <ServiceCard 
-                    icon={<OrthodonticsIcon />}
+                    imageUrl="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=600&auto=format&fit=crop"
                     title="Ortodoncia"
                     description="Corrección de la posición de los dientes y la mordida para una sonrisa funcional y estéticamente agradable."
                 />
                 <ServiceCard 
-                    icon={<OralSurgeryIcon />}
+                    imageUrl="https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=600&auto=format&fit=crop"
                     title="Cirugía Bucal"
                     description="Procedimientos quirúrgicos, incluyendo la extracción de muelas del juicio, realizados por expertos."
                 />
                  <ServiceCard 
-                    icon={<CosmeticDentistryIcon />}
+                    imageUrl="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=600&auto=format&fit=crop"
                     title="Estética Dental"
-                    description="Mejora la apariencia de tu sonrisa con blanqueamientos, carillas y otros tratamientos cosméticos."
+                    description="Mejora la apariencia de tu sonrisa con blanqueamientos, carillas y otros tratamientos cosméticos dentales."
                 />
             </motion.div>
           </div>
@@ -447,12 +456,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onBookAppointment, set
                      initial={{ opacity: 0, y: 20 }}
                      whileInView={{ opacity: 1, y: 0 }}
                      viewport={{ once: true }}
-                     className="text-3xl font-bold mb-4"
+                     className="text-2xl font-bold mb-3"
                  >
                      Contáctanos
                  </motion.h2>
-                 <p className="text-brand-100 mb-8 max-w-xl mx-auto">¿Listo para transformar tu sonrisa? Agenda una cita o contáctanos para más información.</p>
-                 <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8 text-brand-50">
+                 <p className="text-brand-100 text-sm mb-6 max-w-xl mx-auto">¿Listo para transformar tu sonrisa? Agenda una cita o contáctanos para más información.</p>
+                 <div className="flex flex-col md:flex-row justify-center items-center gap-6 mb-6 text-brand-50 text-sm">
                     <span>Email: <a href="mailto:info@kiru.com" className="hover:text-brand-300 transition-colors">info@kiru.com</a></span>
                     <span>Teléfono: <a href="tel:+5112345678" className="hover:text-brand-300 transition-colors">(+51) 123 456 78</a></span>
                     <span>Dirección: Av. Sonrisas 123, Lima, Perú</span>
